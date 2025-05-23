@@ -1,0 +1,46 @@
+let
+    Source = Excel.Workbook(File.Contents("Z:\Financial Management Coordination Branch\FY 2024\Component Binders\PD11\CWMD\Section 15 - Obligations and Analysis\CWMD Q3 FY24 Advanced Analysis v4 1 _FINAL.xlsx"), null, true),
+    #"4-Advance Analysis_Sheet" = Source{[Item="4-Advance Analysis",Kind="Sheet"]}[Data],
+    #"Removed Top Rows" = Table.Skip(#"4-Advance Analysis_Sheet",9),
+    #"Promoted Headers" = Table.PromoteHeaders(#"Removed Top Rows", [PromoteAllScalars=true]),
+    #"Transformed Date Columns" = Table.TransformColumns(#"Promoted Headers", {{"Date of Advance", each try Date.From(_) otherwise null}, {"Last Activity Date", each try Date.From(_) otherwise null},{"Anticipated Liquidation Date", each try Date.From(_) otherwise null}, {"Period of Performance End Date", each try Date.From(_) otherwise null}}),
+    #"Replaced Errors" = Table.ReplaceErrorValues(#"Transformed Date Columns", {{"Date of Advance", null}}),
+    #"Changed Type" = Table.TransformColumnTypes(#"Replaced Errors",{{"TAS", type text}, {"SGL", type text}, {"DHS Doc No", type text}, {"Indicate if advance is to WCF (Y/N)", type text}, {"Advance/Prepayment", Currency.Type}, {"Last Activity Date", type date}, {"Date of Advance", type date}, {"Age of Advance (days)", Int64.Type}, {"Anticipated Liquidation Date", type date}, {"Period of Performance End Date", type date}, {"Status", type text}, {"Advance/Prepayment_1", Currency.Type}, {"Comments", type text}, {"Vendor", type text}, {"Advance Type (e.g. Travel, Vendor Prepayment)", type text}, {" Trading Partner ID", type text}}),
+
+    // List of columns to remove
+    ColumnsToRemove = {"Column17", "Column18", "Column19", "Column20", "Column21", "Column22", "Column23", "Column24"},
+    // Get the list of existing columns
+    ExistingColumns = Table.ColumnNames(#"Changed Type"),
+
+    // Find the intersection of columns to remove and existing columns
+    ColumnsToRemoveFiltered = List.Intersect({ColumnsToRemove, ExistingColumns}),
+
+    // Remove the columns that exist
+    RemovedColumns = Table.RemoveColumns(#"Changed Type", ColumnsToRemoveFiltered),
+    #"Data Preparation To Obtain Accurate Population" = Table.SelectRows(RemovedColumns, each [TAS] <> null),
+    #"DO Concatenate" = Table.AddColumn(#"Data Preparation To Obtain Accurate Population", "DO Concatenate", each Text.Remove(Text.Combine({[TAS], [#"DHS Doc No"], Text.From([#"Advance/Prepayment"])}, ""), " ")),
+    #"PoP Expired?" = Table.AddColumn(#"DO Concatenate", "PoP Expired?", each if [Period of Performance End Date] = null then "Missing PoP Date" else if [Period of Performance End Date] >= #"Current Reporting Date" then "N" else "Y"),
+    #"Days Since PoP Expired" = Table.AddColumn(#"PoP Expired?", "Days Since PoP Expired", each if [#"PoP Expired?"] = "Y" then let Days = Duration.Days(#"Current Reporting Date" - [Period of Performance End Date]) in if Days > 720 then "The Period of Performance Expired " & Text.From(Days) & " Days ago" else null else null),
+    #"Invoiced Within Last 12 Months" = Table.AddColumn(#"Days Since PoP Expired", "Invoiced Within the Last 12 Months", each if [Last Activity Date] <> null then if [Last Activity Date] >= Date.AddDays(#"Current Reporting Date", -361) then true else false else "Last Invoice Date Missing"),
+    #"Active/Inactive Advance" = Table.AddColumn(#"Invoiced Within Last 12 Months", "Active/Inactive Advance", each if [Invoiced Within the Last 12 Months] = true then "Active Advance — Invoice Received in Last 12 Months" else if [Invoiced Within the Last 12 Months] = false then "Inactive Advance — No Invoice Activity Within Last 12 Months" else "No Invoice Activity Reported"),
+    #"Abnormal Balance" = Table.AddColumn(#"Active/Inactive Advance", "Abnormal Balance", each if [#"Advance/Prepayment_1"] = null then 
+    "Advance Balance Not Provided"
+else if Component = "WMD" then
+    if [#"Advance/Prepayment_1"] > 0 then 
+        "Y"
+    else if [#"Advance/Prepayment_1"] < 0 then 
+        "N"
+    else 
+        "Zero $ Balance Reported"
+else if Component <> "WMD" then
+    if [#"Advance/Prepayment_1"] < 0 then 
+        "Y"
+    else if [#"Advance/Prepayment_1"] > 0 then 
+        "N"
+    else 
+        "Zero $ Balance Reported"
+else 
+    ""),
+    #"Check Date of Advance" = Table.AddColumn(#"Abnormal Balance", "CY Advance?", each if [Date of Advance] = null then "Date of Advance Not Available" else if [Date of Advance] > #"Fiscal Year Start Date" then "Y" else "N")
+in
+    #"Check Date of Advance"

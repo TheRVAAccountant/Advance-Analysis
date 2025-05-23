@@ -1,0 +1,24 @@
+let
+    Source = Excel.Workbook(File.Contents("Z:\Financial Management Coordination Branch\FY 2024\Component Binders\PD11\CWMD\Section 15 - Obligations and Analysis\CWMD Q2 FY24 Advanced Analysis v2_ Final _ sw rev.xlsx"), null, true),
+    #"4-Advance Analysis_Sheet" = Source{[Item="4-Advance Analysis",Kind="Sheet"]}[Data],
+    #"Removed Top Rows" = Table.Skip(#"4-Advance Analysis_Sheet",9),
+    #"Promoted Headers" = Table.PromoteHeaders(#"Removed Top Rows", [PromoteAllScalars=true]),
+    #"Transformed Date Columns" = Table.TransformColumns(#"Promoted Headers", {{"Date of Advance", each try Date.From(_) otherwise null}, {"Last Activity Date", each try Date.From(_) otherwise null},{"Anticipated Liquidation Date", each try Date.From(_) otherwise null}, {"Period of Performance End Date", each try Date.From(_) otherwise null}}),
+    #"Replaced Errors" = Table.ReplaceErrorValues(#"Transformed Date Columns", {{"Date of Advance", null}}),
+    #"Changed Type" = Table.TransformColumnTypes(#"Replaced Errors",{{"TAS", type text}, {"SGL", type text}, {"DHS Doc No", type text}, {"Indicate if advance is to WCF (Y/N)", type text}, {"Advance/Prepayment", Currency.Type}, {"Last Activity Date", type date}, {"Date of Advance", type date}, {"Age of Advance (days)", Int64.Type}, {"Anticipated Liquidation Date", type date}, {"Period of Performance End Date", type date}, {"Status", type text}, {"Advance/Prepayment_1", Currency.Type}, {"Comments", type text}, {"Vendor", type text}, {"Advance Type (e.g. Travel, Vendor Prepayment)", type text}}),
+
+    // List of columns to remove
+    ColumnsToRemove = {"Column17", "Column18", "Column19", "Column20", "Column21", "Column22", "Column23", "Column24"},
+
+    // Get the list of existing columns
+    ExistingColumns = Table.ColumnNames(#"Changed Type"),
+
+    // Find the intersection of columns to remove and existing columns
+    ColumnsToRemoveFiltered = List.Intersect({ColumnsToRemove, ExistingColumns}),
+
+    // Remove the columns that exist
+    RemovedColumns = Table.RemoveColumns(#"Changed Type", ColumnsToRemoveFiltered),
+    #"DO Concatenate" = Table.AddColumn(RemovedColumns, "DO Concatenate", each Text.Remove(Text.Combine({[TAS], [#"DHS Doc No"], Text.From([#"Advance/Prepayment_1"])}, ""), " ")),
+    #"Filtered Rows" = Table.SelectRows(#"DO Concatenate", each ([TAS] <> null))
+in
+    #"Filtered Rows"

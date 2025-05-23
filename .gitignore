@@ -1,0 +1,6 @@
+# excel files
+*.xlsx
+*.docx
+
+CG/
+WMD/
