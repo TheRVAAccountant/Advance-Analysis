@@ -159,10 +159,18 @@ ehthumbs_vista.db
 /data/*.xlsx
 /data/*.xls
 /data/*.csv
-/logs/
+/logs/*.log
+/logs/*.txt
 *.log
 *~
 .advance_analysis_config.json
+
+# Input and output folders - include folders but not their contents
+/inputs/*
+!/inputs/.gitkeep
+!/inputs/README.md
+/outputs/*
+!/outputs/.gitkeep
 
 # Excel files (keeping original entries)
 *.xlsx

@@ -880,7 +880,21 @@ class InputGUI:
             string_var (StringVar): The StringVar to store the selected file path.
             title (str): The title of the file dialog.
         """
-        file_path = filedialog.askopenfilename(title=title, filetypes=[("Excel files", "*.xlsx")])
+        # Determine the initial directory based on the project structure
+        project_root = Path(__file__).parent.parent.parent.parent
+        inputs_dir = project_root / "inputs"
+        
+        # Create inputs directory if it doesn't exist
+        inputs_dir.mkdir(exist_ok=True)
+        
+        # Use inputs directory as initial directory if it exists
+        initial_dir = str(inputs_dir) if inputs_dir.exists() else None
+        
+        file_path = filedialog.askopenfilename(
+            title=title, 
+            initialdir=initial_dir,
+            filetypes=[("Excel files", "*.xlsx")]
+        )
         if file_path:
             string_var.set(file_path)
             logger.info(f"Selected file: {file_path}")
