@@ -1,0 +1,174 @@
+2025-05-27 17:21:31 - root - INFO - Logging initialized - Level: INFO, File: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\logs\advance_analysis_20250527_172131.log
+2025-05-27 17:21:31 - advance_analysis.main - INFO - Starting Advance Analysis Tool
+2025-05-27 17:21:31 - advance_analysis.main - INFO - Launching main GUI
+2025-05-27 17:21:32 - advance_analysis.gui.status_bar - INFO - Status: Ready
+2025-05-27 17:21:45 - advance_analysis.gui.file_selection_widget - INFO - Selected file: C:/Users/Jeron.Crooks/VSCode/Advance Analysis/src/inputs/WMD FY25 Q2 Advance Analysis 15 May 2025  Final.xlsx
+2025-05-27 17:23:56 - advance_analysis.gui.file_selection_widget - INFO - Selected file: C:/Users/Jeron.Crooks/VSCode/Advance Analysis/src/inputs/WMD FY25 Q2 Advance Analysis 15 May 2025  Final.xlsx
+2025-05-27 17:24:02 - advance_analysis.gui.file_selection_widget - INFO - Selected file: C:/Users/Jeron.Crooks/VSCode/Advance Analysis/src/inputs/WMD FY25 Q2 TrialBalance20250410_024311PM.xlsx
+2025-05-27 17:24:12 - advance_analysis.gui.file_selection_widget - INFO - Selected file: C:/Users/Jeron.Crooks/VSCode/Advance Analysis/src/inputs/WMD FY24 Q4 TrialBalance20241011_080140AM.xlsx
+2025-05-27 17:24:20 - advance_analysis.gui.status_bar - INFO - Status: Processing data...
+2025-05-27 17:24:20 - advance_analysis.gui.gui - INFO - Starting data processing for component: WMD, period: FY25 Q2
+2025-05-27 17:24:20 - advance_analysis.gui.gui - INFO - Loading Excel file: C:/Users/Jeron.Crooks/VSCode/Advance Analysis/src/inputs/WMD FY25 Q2 Advance Analysis 15 May 2025  Final.xlsx
+2025-05-27 17:24:20 - advance_analysis.modules.data_loader - INFO - Loading file: C:/Users/Jeron.Crooks/VSCode/Advance Analysis/src/inputs/WMD FY25 Q2 Advance Analysis 15 May 2025  Final.xlsx
+2025-05-27 17:24:20 - advance_analysis.modules.data_loader - INFO - Sheet names in file: ['1-Instructions', '2-Certification', '3-PY Q4 Ending Balance', '4-Advance Analysis', '5-FY18 Scorecard Metrics', '6-ADVANCE TO TIER Recon SUMMARY', 'Version Control', 'DO USE Only']
+2025-05-27 17:24:20 - advance_analysis.modules.data_loader - INFO - Searching for header row with term 'TAS' in column A
+2025-05-27 17:24:21 - advance_analysis.modules.data_loader - INFO - Found header row at index 9 (row 10 in Excel)
+2025-05-27 17:24:21 - advance_analysis.modules.data_loader - INFO - Headers found: ['TAS', 'SGL', 'DHS Doc No', 'Indicate if advance is to WCF (Y/N)', 'Advance/Prepayment', 'Date of Advance', 'Age of Advance (days)', 'Last Activity Date', 'Anticipated Liquidation Date', 'Period of Performance End Date']...
+2025-05-27 17:24:21 - advance_analysis.modules.data_loader - INFO - Total columns identified: 16
+2025-05-27 17:24:21 - advance_analysis.modules.data_loader - INFO - Using intelligent header detection: skiprows=9, usecols up to column 15
+2025-05-27 17:24:22 - advance_analysis.gui.gui - INFO - Excel file loaded successfully
+2025-05-27 17:24:22 - advance_analysis.gui.gui - INFO - Processing data
+2025-05-27 17:24:22 - advance_analysis.core.data_processing_simple - INFO - Processing data for WMD FY25 Q2
+2025-05-27 17:24:22 - advance_analysis.core.advance_analysis_processing - INFO - Initialized AdvanceAnalysisProcessor for WMD
+2025-05-27 17:24:22 - advance_analysis.core.advance_analysis_processing - INFO - Current Reporting Date: 03/31/2025
+2025-05-27 17:24:22 - advance_analysis.core.advance_analysis_processing - INFO - Fiscal Year Start Date: 10/01/2024
+2025-05-27 17:24:22 - advance_analysis.core.advance_analysis_processing - INFO - Starting advance data processing
+2025-05-27 17:24:22 - advance_analysis.core.advance_analysis_processing - INFO - Initial DataFrame shape: (8, 16)
+2025-05-27 17:24:22 - advance_analysis.core.advance_analysis_processing - INFO - Initial columns: ['TAS', 'SGL', 'DHS Doc No', 'Indicate if advance is to WCF (Y/N)', 'Advance/Prepayment', 'Date of Advance', 'Age of Advance (days)', 'Last Activity Date', 'Anticipated Liquidation Date', 'Period of Performance End Date', 'Status', 'Advance/Prepayment.1', 'Comments', 'Vendor', ' Trading Partner ID', 'Advance Type (e.g. Travel, Vendor Prepayment)']
+2025-05-27 17:24:22 - advance_analysis.core.advance_analysis_processing - INFO - Validating and cleaning data
+2025-05-27 17:24:22 - advance_analysis.core.advance_analysis_processing - INFO - All required columns present. Total columns: 16
+2025-05-27 17:24:22 - advance_analysis.core.advance_analysis_processing - INFO - Transforming date columns
+2025-05-27 17:24:22 - advance_analysis.core.advance_analysis_processing - WARNING - Date of Advance: 8 values could not be converted to dates
+2025-05-27 17:24:22 - advance_analysis.core.advance_analysis_processing - WARNING - Last Activity Date: 8 values could not be converted to dates
+2025-05-27 17:24:22 - advance_analysis.core.advance_analysis_processing - WARNING - Anticipated Liquidation Date: 8 values could not be converted to dates
+2025-05-27 17:24:22 - advance_analysis.core.advance_analysis_processing - WARNING - Period of Performance End Date: 8 values could not be converted to dates
+2025-05-27 17:24:22 - advance_analysis.core.advance_analysis_processing - INFO - Setting column types
+2025-05-27 17:24:22 - advance_analysis.core.advance_analysis_processing - INFO - Removing extra columns
+2025-05-27 17:24:22 - advance_analysis.core.advance_analysis_processing - INFO - No extra columns to remove
+2025-05-27 17:24:22 - advance_analysis.core.advance_analysis_processing - INFO - Filtering valid rows (non-null TAS)
+2025-05-27 17:24:22 - advance_analysis.core.advance_analysis_processing - INFO - Filtered out 0 rows with null TAS
+2025-05-27 17:24:22 - advance_analysis.core.advance_analysis_processing - INFO - Remaining rows: 8
+2025-05-27 17:24:22 - advance_analysis.core.advance_analysis_processing - INFO - Adding DO Concatenate column
+2025-05-27 17:24:22 - advance_analysis.core.advance_analysis_processing - INFO - Adding PoP Expired? column
+2025-05-27 17:24:22 - advance_analysis.core.advance_analysis_processing - INFO - PoP Expired statistics:
+PoP Expired?
+Missing PoP Date    8
+Name: count, dtype: int64
+2025-05-27 17:24:22 - advance_analysis.core.advance_analysis_processing - INFO - Adding Days Since PoP Expired column
+2025-05-27 17:24:22 - advance_analysis.core.advance_analysis_processing - INFO - Adding Invoiced Within the Last 12 Months column
+2025-05-27 17:24:22 - advance_analysis.core.advance_analysis_processing - INFO - Invoice activity statistics:
+Invoiced Within the Last 12 Months
+Last Invoice Date Missing    8
+Name: count, dtype: int64
+2025-05-27 17:24:22 - advance_analysis.core.advance_analysis_processing - INFO - Adding Active/Inactive Advance column
+2025-05-27 17:24:22 - advance_analysis.core.advance_analysis_processing - INFO - Active/Inactive advance statistics:
+Active/Inactive Advance
+No Invoice Activity Reported    8
+Name: count, dtype: int64
+2025-05-27 17:24:22 - advance_analysis.core.advance_analysis_processing - INFO - Adding Abnormal Balance column
+2025-05-27 17:24:22 - advance_analysis.core.advance_analysis_processing - INFO - Abnormal balance statistics:
+Abnormal Balance
+Advance Balance Not Provided    8
+Name: count, dtype: int64
+2025-05-27 17:24:22 - advance_analysis.core.data_processing_simple - ERROR - Error in advance analysis processing: "['Advance/Prepayment_1'] not in index"
+2025-05-27 17:24:22 - advance_analysis.core.data_processing_simple - INFO - Falling back to basic processing
+2025-05-27 17:24:22 - advance_analysis.gui.gui - INFO - Data processed successfully
+2025-05-27 17:24:22 - advance_analysis.gui.gui - INFO - Created output folder: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\outputs\WMD FY25 Q2 Advance Analysis 20250527_172422
+2025-05-27 17:24:22 - advance_analysis.modules.file_handler - INFO - File copied from C:/Users/Jeron.Crooks/VSCode/Advance Analysis/src/inputs/WMD FY25 Q2 Advance Analysis 15 May 2025  Final.xlsx to c:\Users\Jeron.Crooks\VSCode\Advance Analysis\outputs\WMD FY25 Q2 Advance Analysis 20250527_172422\WMD FY25 Q2 Advance Analysis - DO.xlsx
+2025-05-27 17:24:22 - advance_analysis.gui.gui - INFO - Input file copied and renamed: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\outputs\WMD FY25 Q2 Advance Analysis 20250527_172422\WMD FY25 Q2 Advance Analysis - DO.xlsx
+2025-05-27 17:24:22 - advance_analysis.gui.gui - INFO - Saving processed data to: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\outputs\WMD FY25 Q2 Advance Analysis 20250527_172422\WMD FY25 Q2 Advance Analysis Review.xlsx
+2025-05-27 17:24:22 - advance_analysis.gui.gui - INFO - Processed data saved successfully
+2025-05-27 17:24:22 - advance_analysis.gui.gui - INFO - Formatting Excel file
+2025-05-27 17:24:22 - advance_analysis.modules.excel_handler - INFO - Starting to format Excel file: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\outputs\WMD FY25 Q2 Advance Analysis 20250527_172422\WMD FY25 Q2 Advance Analysis Review.xlsx
+2025-05-27 17:24:23 - advance_analysis.modules.excel_handler - INFO - Excel file formatted successfully: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\outputs\WMD FY25 Q2 Advance Analysis 20250527_172422\WMD FY25 Q2 Advance Analysis Review.xlsx
+2025-05-27 17:24:23 - advance_analysis.gui.gui - INFO - Excel file formatted successfully
+2025-05-27 17:24:23 - advance_analysis.gui.gui - INFO - Processing Excel files using advanced method
+2025-05-27 17:24:23 - advance_analysis.modules.excel_handler - INFO - Starting Excel file processing for WMD
+2025-05-27 17:24:38 - advance_analysis.modules.excel_handler - INFO - Sheet names in input workbook:
+2025-05-27 17:24:38 - advance_analysis.modules.excel_handler - INFO -   - 1-Instructions
+2025-05-27 17:24:38 - advance_analysis.modules.excel_handler - INFO -   - 2-Certification
+2025-05-27 17:24:38 - advance_analysis.modules.excel_handler - INFO -   - 3-PY Q4 Ending Balance
+2025-05-27 17:24:38 - advance_analysis.modules.excel_handler - INFO -   - 4-Advance Analysis
+2025-05-27 17:24:39 - advance_analysis.modules.excel_handler - INFO -   - 5-FY18 Scorecard Metrics
+2025-05-27 17:24:39 - advance_analysis.modules.excel_handler - INFO -   - 6-ADVANCE TO TIER Recon SUMMARY
+2025-05-27 17:24:39 - advance_analysis.modules.excel_handler - INFO -   - Version Control
+2025-05-27 17:24:39 - advance_analysis.modules.excel_handler - INFO -   - DO USE Only
+2025-05-27 17:24:39 - advance_analysis.modules.excel_handler - WARNING - Sheet '6-ADVANCE TO TIER Recon Summary' not found with exact match. Trying case-insensitive search...
+2025-05-27 17:24:40 - advance_analysis.modules.excel_handler - INFO - Found similar sheet: '6-ADVANCE TO TIER Recon SUMMARY'. Using this instead.
+2025-05-27 17:24:40 - advance_analysis.modules.excel_handler - INFO - Copying 'DO Tab 4 Review' sheet
+2025-05-27 17:24:41 - advance_analysis.modules.excel_handler - INFO - Sheet 'DO Tab 4 Review' copied successfully at position 7
+2025-05-27 17:24:41 - advance_analysis.modules.excel_handler - INFO - Copying current year DHSTIER sheet
+2025-05-27 17:24:42 - advance_analysis.modules.excel_handler - INFO - Sheet 'WMD Total' copied successfully and renamed to 'DO CY TB' at position 8
+2025-05-27 17:24:42 - advance_analysis.modules.excel_handler - INFO - Copying prior year DHSTIER sheet
+2025-05-27 17:24:42 - advance_analysis.modules.excel_handler - INFO - Sheet 'WMD Total' copied successfully and renamed to 'DO PY TB' at position 9
+2025-05-27 17:24:42 - advance_analysis.modules.excel_handler - INFO - Creating pivot table in sheet: 3-PY Q4 Ending Balance
+2025-05-27 17:24:43 - advance_analysis.modules.excel_handler - INFO - TAS cell found at row 6, column 1
+2025-05-27 17:24:43 - advance_analysis.modules.excel_handler - INFO - Last populated column in header row: H
+2025-05-27 17:24:43 - advance_analysis.modules.excel_handler - INFO - Last populated row after header row: 14
+2025-05-27 17:24:43 - advance_analysis.modules.excel_handler - INFO - Pivot table range: $A$6:$H$14
+2025-05-27 17:24:44 - advance_analysis.modules.excel_handler - ERROR - Error creating pivot table: (-2147352567, 'Exception occurred.', (0, 'Microsoft Excel', 'PivotFields method of PivotTable class failed', 'xlmain11.chm', 0, -2146827284), None)
+Traceback (most recent call last):
+  File "c:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\advance_analysis\modules\excel_handler.py", line 487, in create_pivot_table
+    udo_field = pivot_table.PivotFields("UDO")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\JERON~1.CRO\AppData\Local\Temp\1\gen_py\3.12\00020813-0000-0000-C000-000000000046x0x1x9\PivotTable.py", line 203, in PivotFields
+    ret = self._oleobj_.InvokeTypes(718, LCID, 1, (9, 0), ((12, 17),),Index
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pywintypes.com_error: (-2147352567, 'Exception occurred.', (0, 'Microsoft Excel', 'PivotFields method of PivotTable class failed', 'xlmain11.chm', 0, -2146827284), None)
+2025-05-27 17:24:44 - advance_analysis.modules.excel_handler - ERROR - Error in create_pivot_table: (-2147352567, 'Exception occurred.', (0, 'Microsoft Excel', 'PivotFields method of PivotTable class failed', 'xlmain11.chm', 0, -2146827284), None)
+Traceback (most recent call last):
+  File "c:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\advance_analysis\modules\excel_handler.py", line 57, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\advance_analysis\modules\excel_handler.py", line 487, in create_pivot_table
+    udo_field = pivot_table.PivotFields("UDO")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\JERON~1.CRO\AppData\Local\Temp\1\gen_py\3.12\00020813-0000-0000-C000-000000000046x0x1x9\PivotTable.py", line 203, in PivotFields
+    ret = self._oleobj_.InvokeTypes(718, LCID, 1, (9, 0), ((12, 17),),Index
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pywintypes.com_error: (-2147352567, 'Exception occurred.', (0, 'Microsoft Excel', 'PivotFields method of PivotTable class failed', 'xlmain11.chm', 0, -2146827284), None)
+2025-05-27 17:24:44 - advance_analysis.modules.excel_handler - ERROR - Error in Excel file processing: (-2147352567, 'Exception occurred.', (0, 'Microsoft Excel', 'PivotFields method of PivotTable class failed', 'xlmain11.chm', 0, -2146827284), None)
+Traceback (most recent call last):
+  File "c:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\advance_analysis\modules\excel_handler.py", line 647, in process_excel_files
+    sum_cell_address = create_pivot_table(input_wb, password)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\advance_analysis\modules\excel_handler.py", line 57, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\advance_analysis\modules\excel_handler.py", line 487, in create_pivot_table
+    udo_field = pivot_table.PivotFields("UDO")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\JERON~1.CRO\AppData\Local\Temp\1\gen_py\3.12\00020813-0000-0000-C000-000000000046x0x1x9\PivotTable.py", line 203, in PivotFields
+    ret = self._oleobj_.InvokeTypes(718, LCID, 1, (9, 0), ((12, 17),),Index
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pywintypes.com_error: (-2147352567, 'Exception occurred.', (0, 'Microsoft Excel', 'PivotFields method of PivotTable class failed', 'xlmain11.chm', 0, -2146827284), None)
+2025-05-27 17:24:45 - advance_analysis.modules.excel_handler - ERROR - Error in process_excel_files: (-2147352567, 'Exception occurred.', (0, 'Microsoft Excel', 'PivotFields method of PivotTable class failed', 'xlmain11.chm', 0, -2146827284), None)
+Traceback (most recent call last):
+  File "c:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\advance_analysis\modules\excel_handler.py", line 57, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\advance_analysis\modules\excel_handler.py", line 647, in process_excel_files
+    sum_cell_address = create_pivot_table(input_wb, password)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\advance_analysis\modules\excel_handler.py", line 57, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\advance_analysis\modules\excel_handler.py", line 487, in create_pivot_table
+    udo_field = pivot_table.PivotFields("UDO")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\JERON~1.CRO\AppData\Local\Temp\1\gen_py\3.12\00020813-0000-0000-C000-000000000046x0x1x9\PivotTable.py", line 203, in PivotFields
+    ret = self._oleobj_.InvokeTypes(718, LCID, 1, (9, 0), ((12, 17),),Index
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pywintypes.com_error: (-2147352567, 'Exception occurred.', (0, 'Microsoft Excel', 'PivotFields method of PivotTable class failed', 'xlmain11.chm', 0, -2146827284), None)
+2025-05-27 17:24:45 - advance_analysis.gui.gui - ERROR - Error in Excel file processing: (-2147352567, 'Exception occurred.', (0, 'Microsoft Excel', 'PivotFields method of PivotTable class failed', 'xlmain11.chm', 0, -2146827284), None)
+Traceback (most recent call last):
+  File "c:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\advance_analysis\gui\gui.py", line 1188, in _process_data_thread
+    process_excel_files(
+  File "c:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\advance_analysis\modules\excel_handler.py", line 57, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\advance_analysis\modules\excel_handler.py", line 647, in process_excel_files
+    sum_cell_address = create_pivot_table(input_wb, password)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\advance_analysis\modules\excel_handler.py", line 57, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\advance_analysis\modules\excel_handler.py", line 487, in create_pivot_table
+    udo_field = pivot_table.PivotFields("UDO")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\JERON~1.CRO\AppData\Local\Temp\1\gen_py\3.12\00020813-0000-0000-C000-000000000046x0x1x9\PivotTable.py", line 203, in PivotFields
+    ret = self._oleobj_.InvokeTypes(718, LCID, 1, (9, 0), ((12, 17),),Index
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pywintypes.com_error: (-2147352567, 'Exception occurred.', (0, 'Microsoft Excel', 'PivotFields method of PivotTable class failed', 'xlmain11.chm', 0, -2146827284), None)
+2025-05-27 17:24:45 - advance_analysis.gui.gui - ERROR - Error occurred: Error in Excel file processing: (-2147352567, 'Exception occurred.', (0, 'Microsoft Excel', 'PivotFields method of PivotTable class failed', 'xlmain11.chm', 0, -2146827284), None)
+2025-05-27 17:25:01 - advance_analysis.main - INFO - Advance Analysis Tool shutting down
