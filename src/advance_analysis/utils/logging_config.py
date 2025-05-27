@@ -28,7 +28,7 @@ def setup_logging(
         log_dir: Directory for log files. Defaults to ~/Documents/Advance Analysis/logs
         log_to_file: Whether to log to file
         log_to_console: Whether to log to console
-        log_filename: Custom log filename. Defaults to advance_analysis_YYYYMMDD.log
+        log_filename: Custom log filename. Defaults to advance_analysis_YYYYMMDD_HHMMSS.log
     """
     # Set up log directory
     if log_dir is None:
@@ -39,7 +39,7 @@ def setup_logging(
     
     # Set up log filename
     if log_filename is None:
-        log_filename = f"advance_analysis_{datetime.now().strftime('%Y%m%d')}.log"
+        log_filename = f"advance_analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
     
     log_path = log_dir / log_filename
     

@@ -18,6 +18,7 @@ from tkinter.ttk import Progressbar, Notebook
 
 from ..utils.logging_config import get_logger
 from ..utils.theme_files import ensure_theme_files_exist, get_theme_dir
+from ..utils.recent_files import RecentFilesManager
 from ..modules.file_handler import (
     copy_and_rename_input_file, 
     ensure_file_accessibility
@@ -25,6 +26,9 @@ from ..modules.file_handler import (
 from ..modules.excel_handler import format_excel_file, process_excel_files
 from ..modules.data_loader import load_excel_file
 from ..core.data_processing_simple import process_data
+from .file_selection_widget import FileSelectionWidget
+from .status_bar import StatusBar
+from .about_dialog import AboutDialog, HelpDialog
 
 # Import cross-platform handler
 try:
@@ -470,6 +474,9 @@ class InputGUI:
         # Timer ID for cancellation checking
         self.cancel_check_timer_id = None
         
+        # Initialize recent files manager
+        self.recent_files_manager = RecentFilesManager()
+        
         # Store form data for tab switching
         self.form_data = {
             "component": StringVar(value="WMD"),
@@ -486,6 +493,9 @@ class InputGUI:
             master.iconbitmap(icon_path)
         else:
             logger.warning(f"Icon file not found: {icon_path}")
+        
+        # Create menu bar
+        self._create_menu_bar()
             
         # Create notebook for tabs
         self.notebook = ttk.Notebook(master)
@@ -507,8 +517,46 @@ class InputGUI:
         self.master.bind("<Control-Tab>", self._next_tab)
         self.master.bind("<Control-Shift-Tab>", self._prev_tab)
         
-        # Set up status bar at the bottom
-        self._create_status_bar()
+        # Create status bar at the bottom
+        self.status_bar = StatusBar(master)
+        self.status_bar.pack(side=tk.BOTTOM, fill=tk.X)
+    
+    def _create_menu_bar(self) -> None:
+        """Create the application menu bar."""
+        menubar = tk.Menu(self.master)
+        self.master.config(menu=menubar)
+        
+        # File menu
+        file_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="File", menu=file_menu)
+        file_menu.add_command(label="Process Data", command=self.process_data, accelerator="F5")
+        file_menu.add_separator()
+        file_menu.add_command(label="Clear Recent Files", command=self._clear_all_recent_files)
+        file_menu.add_separator()
+        file_menu.add_command(label="Exit", command=self.master.quit)
+        
+        # View menu
+        view_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="View", menu=view_menu)
+        view_menu.add_command(label="Data Processing", command=lambda: self.notebook.select(0))
+        view_menu.add_command(label="Settings", command=lambda: self.notebook.select(1))
+        
+        # Tools menu
+        tools_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="Tools", menu=tools_menu)
+        tools_menu.add_command(label="Open Outputs Folder", command=self._open_outputs_folder)
+        tools_menu.add_command(label="Open Logs Folder", command=self._open_logs_folder)
+        
+        # Help menu
+        help_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="Help", menu=help_menu)
+        help_menu.add_command(label="Help", command=self._show_help, accelerator="F1")
+        help_menu.add_command(label="Keyboard Shortcuts", command=self._show_shortcuts)
+        help_menu.add_separator()
+        help_menu.add_command(label="About", command=self._show_about)
+        
+        # Bind F1 for help
+        self.master.bind("<F1>", lambda e: self._show_help())
 
     def _create_main_tab(self) -> None:
         """Create the main data processing tab with input fields."""
@@ -593,62 +641,59 @@ class InputGUI:
         row = 0
         
         # Advance Analysis file path entry
-        ttk.Label(files_frame, text="Advance Analysis:").grid(row=row, column=0, sticky="w", padx=5, pady=8)
-        file_path_frame = ttk.Frame(files_frame)
-        file_path_frame.grid(row=row, column=1, columnspan=2, sticky="ew", padx=5, pady=8)
-        
-        self.file_entry = ttk.Entry(file_path_frame, textvariable=self.form_data["file_path"])
-        self.file_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
-        
-        self.browse_button = ttk.Button(
-            file_path_frame, 
-            text="Browse", 
-            command=lambda: self.browse_file(self.form_data["file_path"], "Select the Current Period's Advance Analysis File")
+        self.advance_file_widget = FileSelectionWidget(
+            files_frame,
+            label_text="Advance Analysis:",
+            file_type="advance_analysis",
+            recent_files_manager=self.recent_files_manager,
+            browse_title="Select the Current Period's Advance Analysis File",
+            file_types=[("Excel files", "*.xlsx")]
         )
-        self.browse_button.pack(side=tk.LEFT, padx=(5, 0))
+        self.advance_file_widget.grid(row=row, column=0, columnspan=3, sticky="ew", padx=5, pady=8)
+        
+        # Bind to form data
+        self.advance_file_widget.file_path = self.form_data["file_path"]
         
         # Add tooltip
-        ToolTip(self.file_entry, "Path to the Advance Analysis Excel file")
+        ToolTip(self.advance_file_widget.entry, "Path to the Advance Analysis Excel file")
         
         row += 1
         
         # Current Period DHSTIER Trial Balance file path entry
-        ttk.Label(files_frame, text="Current DHSTIER:").grid(row=row, column=0, sticky="w", padx=5, pady=8)
-        current_dhstier_frame = ttk.Frame(files_frame)
-        current_dhstier_frame.grid(row=row, column=1, columnspan=2, sticky="ew", padx=5, pady=8)
-        
-        self.current_dhstier_entry = ttk.Entry(current_dhstier_frame, textvariable=self.form_data["current_dhstier_path"])
-        self.current_dhstier_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
-        
-        self.current_dhstier_button = ttk.Button(
-            current_dhstier_frame, 
-            text="Browse", 
-            command=lambda: self.browse_file(self.form_data["current_dhstier_path"], "Select the Current Period DHSTIER Trial Balance")
+        self.current_dhstier_widget = FileSelectionWidget(
+            files_frame,
+            label_text="Current DHSTIER:",
+            file_type="current_dhstier",
+            recent_files_manager=self.recent_files_manager,
+            browse_title="Select the Current Period DHSTIER Trial Balance",
+            file_types=[("Excel files", "*.xlsx")]
         )
-        self.current_dhstier_button.pack(side=tk.LEFT, padx=(5, 0))
+        self.current_dhstier_widget.grid(row=row, column=0, columnspan=3, sticky="ew", padx=5, pady=8)
+        
+        # Bind to form data
+        self.current_dhstier_widget.file_path = self.form_data["current_dhstier_path"]
         
         # Add tooltip
-        ToolTip(self.current_dhstier_entry, "Path to the Current Period DHSTIER Trial Balance Excel file")
+        ToolTip(self.current_dhstier_widget.entry, "Path to the Current Period DHSTIER Trial Balance Excel file")
         
         row += 1
         
         # Prior Year End DHSTIER Trial Balance file path entry
-        ttk.Label(files_frame, text="Prior Year DHSTIER:").grid(row=row, column=0, sticky="w", padx=5, pady=8)
-        prior_dhstier_frame = ttk.Frame(files_frame)
-        prior_dhstier_frame.grid(row=row, column=1, columnspan=2, sticky="ew", padx=5, pady=8)
-        
-        self.prior_dhstier_entry = ttk.Entry(prior_dhstier_frame, textvariable=self.form_data["prior_dhstier_path"])
-        self.prior_dhstier_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
-        
-        self.prior_dhstier_button = ttk.Button(
-            prior_dhstier_frame, 
-            text="Browse", 
-            command=lambda: self.browse_file(self.form_data["prior_dhstier_path"], "Select the Prior Year End DHSTIER Trial Balance")
+        self.prior_dhstier_widget = FileSelectionWidget(
+            files_frame,
+            label_text="Prior Year DHSTIER:",
+            file_type="prior_dhstier",
+            recent_files_manager=self.recent_files_manager,
+            browse_title="Select the Prior Year End DHSTIER Trial Balance",
+            file_types=[("Excel files", "*.xlsx")]
         )
-        self.prior_dhstier_button.pack(side=tk.LEFT, padx=(5, 0))
+        self.prior_dhstier_widget.grid(row=row, column=0, columnspan=3, sticky="ew", padx=5, pady=8)
+        
+        # Bind to form data
+        self.prior_dhstier_widget.file_path = self.form_data["prior_dhstier_path"]
         
         # Add tooltip
-        ToolTip(self.prior_dhstier_entry, "Path to the Prior Year End DHSTIER Trial Balance Excel file")
+        ToolTip(self.prior_dhstier_widget.entry, "Path to the Prior Year End DHSTIER Trial Balance Excel file")
         
         row += 1
         
@@ -927,6 +972,11 @@ class InputGUI:
         self.cancel_button.config(state="normal")
         self.status_label.config(text="Processing started. Press ESC or Cancel button to abort.")
         
+        # Update status bar
+        self.status_bar.set_status("Processing data...", "info")
+        self.status_bar.set_file_count(0, 3)  # Expecting 3 files
+        self.status_bar.set_progress_mode(True)
+        
         # Start progress bar
         self.progress.start()
         
@@ -1158,6 +1208,10 @@ class InputGUI:
             # Check final cancellation before showing success
             self._check_cancellation("before showing results")
             
+            # Update status bar
+            self.master.after(0, self.status_bar.set_status, "Processing completed successfully!", "success")
+            self.master.after(0, self.status_bar.set_file_count, 3, 3)
+            
             # Show success message and open files
             self.master.after(0, self._show_success_message, processed_output_file_path, renamed_input_path, time_message)
 
@@ -1220,6 +1274,7 @@ class InputGUI:
         self.cancel_processing = False
         self.is_processing = False
         self.master.configure(cursor="")  # Reset cursor
+        self.status_bar.set_progress_mode(False)
 
     def _show_cancelled_message(self, created_files: List[str], created_folders: List[str]) -> None:
         """
@@ -1330,6 +1385,69 @@ class InputGUI:
             minutes = int(execution_time // 60)
             seconds = execution_time % 60
             return f"Execution time: {minutes} minutes and {seconds:.2f} seconds"
+    
+    def _clear_all_recent_files(self) -> None:
+        """Clear all recent files."""
+        result = messagebox.askyesno(
+            "Clear Recent Files",
+            "Are you sure you want to clear all recent files?"
+        )
+        if result:
+            self.recent_files_manager.clear_recent_files()
+            messagebox.showinfo("Success", "Recent files cleared successfully.")
+    
+    def _open_outputs_folder(self) -> None:
+        """Open the outputs folder in the file explorer."""
+        project_root = Path(__file__).parent.parent.parent.parent
+        outputs_dir = project_root / "outputs"
+        outputs_dir.mkdir(exist_ok=True)
+        
+        try:
+            if os.name == 'nt':  # Windows
+                os.startfile(outputs_dir)
+            elif os.name == 'posix':  # macOS and Linux
+                os.system(f'open "{outputs_dir}"')
+            logger.info(f"Opened outputs folder: {outputs_dir}")
+        except Exception as e:
+            logger.error(f"Error opening outputs folder: {e}")
+            messagebox.showerror("Error", f"Could not open outputs folder: {e}")
+    
+    def _open_logs_folder(self) -> None:
+        """Open the logs folder in the file explorer."""
+        project_root = Path(__file__).parent.parent.parent.parent
+        logs_dir = project_root / "logs"
+        logs_dir.mkdir(exist_ok=True)
+        
+        try:
+            if os.name == 'nt':  # Windows
+                os.startfile(logs_dir)
+            elif os.name == 'posix':  # macOS and Linux
+                os.system(f'open "{logs_dir}"')
+            logger.info(f"Opened logs folder: {logs_dir}")
+        except Exception as e:
+            logger.error(f"Error opening logs folder: {e}")
+            messagebox.showerror("Error", f"Could not open logs folder: {e}")
+    
+    def _show_help(self) -> None:
+        """Show the help dialog."""
+        HelpDialog(self.master)
+    
+    def _show_shortcuts(self) -> None:
+        """Show keyboard shortcuts in a dialog."""
+        shortcuts_text = """Keyboard Shortcuts:
+
+F5 - Process Data
+ESC - Cancel Processing
+Ctrl+Tab - Next Tab
+Ctrl+Shift+Tab - Previous Tab
+F1 - Show Help
+Alt+F4 - Exit Application"""
+        
+        messagebox.showinfo("Keyboard Shortcuts", shortcuts_text)
+    
+    def _show_about(self) -> None:
+        """Show the about dialog."""
+        AboutDialog(self.master)
 
 
 class UserCancellationError(Exception):

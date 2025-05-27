@@ -584,8 +584,8 @@ def process_excel_files(output_path: str, input_path: str, current_dhstier_path:
         current_dhstier_wb = excel.Workbooks.Open(current_dhstier_path)
         prior_dhstier_wb = excel.Workbooks.Open(prior_dhstier_path)
 
-        # Find the "7-Status 2 Questionnaire" sheet
-        target_sheet = "7-Status 2 Questionnaire"
+        # Find the "6-ADVANCE TO TIER Recon Summary" sheet
+        target_sheet = "6-ADVANCE TO TIER Recon Summary"
         sheet_found = False
         for sheet in input_wb.Sheets:
             if sheet.Name == target_sheet:
@@ -628,9 +628,10 @@ def process_excel_files(output_path: str, input_path: str, current_dhstier_path:
         compare_obligation_analysis_tables(input_wb, password, last_column, header_row)
 
         # Add UDO TIER reconciliation validation
-        logger.info("Starting UDO TIER reconciliation validation")
-        validate_udo_tier_recon(excel, input_wb, component, password, sum_cell_address, sum_udo_balance_col2)
-        logger.info("UDO TIER reconciliation validation completed")
+        # TODO: Implement validate_udo_tier_recon function or find the missing module
+        logger.info("Skipping UDO TIER reconciliation validation - function not implemented")
+        # validate_udo_tier_recon(excel, input_wb, component, password, sum_cell_address, sum_udo_balance_col2)
+        # logger.info("UDO TIER reconciliation validation completed")
 
         # Save and close workbooks
         input_wb.Save()

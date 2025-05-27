@@ -262,6 +262,49 @@ def load_comparative_file(base_path: str, component: str, comparative_reporting_
         raise
 
 
+def load_advance_comparative_file(file_path: str, component: str, sheet_name: str = "4-Advance Analysis") -> pd.DataFrame:
+    """
+    Loads comparative advance data and applies Power Query transformations from PY 4-Advance Analysis.
+    
+    Args:
+        file_path: Path to the comparative advance Excel file
+        component: Component name (e.g., "WMD", "CBP")
+        sheet_name: Name of the sheet to load (default: "4-Advance Analysis")
+        
+    Returns:
+        Processed DataFrame with DO Concatenate and filtered rows
+        
+    Raises:
+        FileNotFoundError: If the file doesn't exist
+        Exception: For other loading errors
+    """
+    from ..core.comparative_analysis_processing import process_comparative_analysis
+    
+    logger.info(f"Loading advance comparative file: {file_path}")
+    
+    try:
+        # Load Excel file with appropriate settings
+        df = pd.read_excel(
+            file_path,
+            sheet_name=sheet_name,
+            skiprows=9,  # Skip top 9 rows as per Power Query
+            engine='openpyxl'
+        )
+        
+        logger.info(f"Loaded comparative data. Shape: {df.shape}")
+        
+        # Apply the comparative analysis processing
+        df = process_comparative_analysis(df, component)
+        
+        logger.info(f"Comparative analysis processing complete. Final shape: {df.shape}")
+        
+        return df
+        
+    except Exception as e:
+        logger.error(f"Error loading advance comparative file: {e}", exc_info=True)
+        raise
+
+
 def load_trial_balance(file_path: str) -> pd.DataFrame:
     """
     Load trial balance data from an Excel file.

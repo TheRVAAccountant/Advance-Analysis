@@ -5,10 +5,10 @@ This directory contains application log files generated during runtime.
 ## Log File Format
 
 Log files are named with the following pattern:
-- `advance_analysis_YYYYMMDD.log`
+- `advance_analysis_YYYYMMDD_HHMMSS.log`
 
 For example:
-- `advance_analysis_20250527.log`
+- `advance_analysis_20250527_143052.log` (created on May 27, 2025 at 14:30:52)
 
 ## Log Levels
 
@@ -25,13 +25,16 @@ You can view logs using any text editor or terminal commands:
 
 ```bash
 # View the latest log
-tail -f advance_analysis_*.log
+tail -f $(ls -t advance_analysis_*.log | head -1)
 
-# Search for errors
+# Search for errors in all logs
 grep ERROR advance_analysis_*.log
 
-# View today's log
-cat advance_analysis_$(date +%Y%m%d).log
+# View logs from today
+ls advance_analysis_$(date +%Y%m%d)_*.log
+
+# View the most recent log file
+cat $(ls -t advance_analysis_*.log | head -1)
 ```
 
 ## Note
