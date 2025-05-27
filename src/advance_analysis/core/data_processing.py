@@ -16,21 +16,22 @@ import pandas as pd
 import numpy as np
 
 from ..utils.logging_config import get_logger
-from ..utils.data_utils import (
-    identify_keyword_columns, fill_other_unique_identifier,
-    create_current_do_concatenate, check_null_or_blank_columns,
-    check_keywords, remove_nulls_and_blanks
-)
-from ..modules.data_loader import load_comparative_file
-from ..core.status_validation import (
-    do_status_1_validation, do_status_2_validation,
-    do_status_3_validation, do_status_4_validation
-)
-from ..core.data_transformation import (
-    obligation_reporting_validation, get_de_obligation_date_provided,
-    de_obligation_rollforward_test, dcaa_audit_test,
-    obligations_requiring_explanations, check_prior_status_agrees
-)
+# Temporarily comment out missing imports
+# from ..utils.data_utils import (
+#     identify_keyword_columns, fill_other_unique_identifier,
+#     create_current_do_concatenate, check_null_or_blank_columns,
+#     check_keywords, remove_nulls_and_blanks
+# )
+# from ..modules.data_loader import load_comparative_file
+# from ..core.status_validation import (
+#     do_status_1_validation, do_status_2_validation,
+#     do_status_3_validation, do_status_4_validation
+# )
+# from ..core.data_transformation import (
+#     obligation_reporting_validation, get_de_obligation_date_provided,
+#     de_obligation_rollforward_test, dcaa_audit_test,
+#     obligations_requiring_explanations, check_prior_status_agrees
+# )
 
 logger = get_logger(__name__)
 

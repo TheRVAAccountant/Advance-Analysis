@@ -24,7 +24,7 @@ from ..modules.file_handler import (
 )
 from ..modules.excel_handler import format_excel_file, process_excel_files
 from ..modules.data_loader import load_excel_file
-from ..core.data_processing import process_data
+from ..core.data_processing_simple import process_data
 
 # Import cross-platform handler
 try:
