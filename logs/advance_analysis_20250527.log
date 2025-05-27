@@ -68,3 +68,56 @@
 2025-05-27 14:58:35 - advance_analysis.main - INFO - Starting Advance Analysis Tool
 2025-05-27 14:58:35 - advance_analysis.main - INFO - Launching main GUI
 2025-05-27 14:59:05 - advance_analysis.main - INFO - Advance Analysis Tool shutting down
+2025-05-27 15:35:24 - root - INFO - Logging initialized - Level: INFO, File: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\logs\advance_analysis_20250527.log
+2025-05-27 15:35:25 - numexpr.utils - INFO - NumExpr defaulting to 8 threads.
+2025-05-27 15:35:28 - root - INFO - Logging initialized - Level: INFO, File: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\logs\advance_analysis_20250527.log
+2025-05-27 15:35:28 - __main__ - INFO - Starting Advance Analysis Tool
+2025-05-27 15:35:28 - __main__ - INFO - Launching main GUI
+2025-05-27 15:35:32 - __main__ - INFO - Advance Analysis Tool shutting down
+2025-05-27 15:35:38 - root - INFO - Logging initialized - Level: INFO, File: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\logs\advance_analysis_20250527.log
+2025-05-27 15:35:39 - numexpr.utils - INFO - NumExpr defaulting to 8 threads.
+2025-05-27 15:35:41 - root - INFO - Logging initialized - Level: INFO, File: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\logs\advance_analysis_20250527.log
+2025-05-27 15:35:41 - advance_analysis.main - INFO - Starting Advance Analysis Tool
+2025-05-27 15:35:41 - advance_analysis.main - INFO - Launching main GUI
+2025-05-27 15:35:55 - advance_analysis.gui.gui - INFO - Selected file: C:/Users/Jeron.Crooks/VSCode/Advance Analysis/inputs/WMD FY25 Q2 Advance Analysis 15 May 2025  Final.xlsx
+2025-05-27 15:36:23 - advance_analysis.gui.gui - INFO - Selected file: C:/Users/Jeron.Crooks/VSCode/Advance Analysis/inputs/WMD FY25 Q2 TrialBalance20250410_024311PM.xlsx
+2025-05-27 15:36:30 - advance_analysis.gui.gui - INFO - Selected file: C:/Users/Jeron.Crooks/VSCode/Advance Analysis/inputs/WMD FY24 Q4 TrialBalance20241011_080140AM.xlsx
+2025-05-27 15:36:35 - advance_analysis.gui.gui - INFO - Starting data processing for component: WMD, period: FY25 Q2
+2025-05-27 15:36:35 - advance_analysis.gui.gui - INFO - Loading Excel file: C:/Users/Jeron.Crooks/VSCode/Advance Analysis/inputs/WMD FY25 Q2 Advance Analysis 15 May 2025  Final.xlsx
+2025-05-27 15:36:37 - advance_analysis.gui.gui - INFO - Excel file loaded successfully
+2025-05-27 15:36:37 - advance_analysis.gui.gui - INFO - Processing data
+2025-05-27 15:36:37 - advance_analysis.core.data_processing_simple - INFO - Processing data for WMD FY25 Q2
+2025-05-27 15:36:37 - advance_analysis.core.data_processing_simple - INFO - Using simplified data processing
+2025-05-27 15:36:37 - advance_analysis.gui.gui - INFO - Data processed successfully
+2025-05-27 15:36:37 - advance_analysis.gui.gui - INFO - Created output folder: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\outputs\WMD FY25 Q2 Advance Analysis 20250527_153637
+2025-05-27 15:36:37 - advance_analysis.modules.file_handler - INFO - File copied from C:/Users/Jeron.Crooks/VSCode/Advance Analysis/inputs/WMD FY25 Q2 Advance Analysis 15 May 2025  Final.xlsx to c:\Users\Jeron.Crooks\VSCode\Advance Analysis\outputs\WMD FY25 Q2 Advance Analysis 20250527_153637\WMD FY25 Q2 Advance Analysis - DO.xlsx
+2025-05-27 15:36:37 - advance_analysis.gui.gui - INFO - Input file copied and renamed: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\outputs\WMD FY25 Q2 Advance Analysis 20250527_153637\WMD FY25 Q2 Advance Analysis - DO.xlsx
+2025-05-27 15:36:37 - advance_analysis.gui.gui - INFO - Saving processed data to: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\outputs\WMD FY25 Q2 Advance Analysis 20250527_153637\WMD FY25 Q2 Advance Analysis Review.xlsx
+2025-05-27 15:36:37 - advance_analysis.gui.gui - INFO - Processed data saved successfully
+2025-05-27 15:36:37 - advance_analysis.gui.gui - INFO - Formatting Excel file
+2025-05-27 15:36:37 - advance_analysis.modules.excel_handler - INFO - Starting to format Excel file: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\outputs\WMD FY25 Q2 Advance Analysis 20250527_153637\WMD FY25 Q2 Advance Analysis Review.xlsx
+2025-05-27 15:36:37 - advance_analysis.modules.excel_handler - INFO - Excel file formatted successfully: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\outputs\WMD FY25 Q2 Advance Analysis 20250527_153637\WMD FY25 Q2 Advance Analysis Review.xlsx
+2025-05-27 15:36:37 - advance_analysis.gui.gui - INFO - Excel file formatted successfully
+2025-05-27 15:36:37 - advance_analysis.gui.gui - INFO - Processing Excel files using advanced method
+2025-05-27 15:36:37 - advance_analysis.modules.excel_handler - INFO - Starting Excel file processing for WMD
+2025-05-27 15:36:57 - advance_analysis.modules.excel_handler - ERROR - Value error in Excel processing: Sheet '7-Status 2 Questionnaire' not found in the input workbook
+2025-05-27 15:36:58 - advance_analysis.modules.excel_handler - ERROR - Error in process_excel_files: Sheet '7-Status 2 Questionnaire' not found in the input workbook
+Traceback (most recent call last):
+  File "c:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\advance_analysis\modules\excel_handler.py", line 57, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\advance_analysis\modules\excel_handler.py", line 596, in process_excel_files
+    raise ValueError(f"Sheet '{target_sheet}' not found in the input workbook")
+ValueError: Sheet '7-Status 2 Questionnaire' not found in the input workbook
+2025-05-27 15:36:58 - advance_analysis.gui.gui - ERROR - Error in Excel file processing: Sheet '7-Status 2 Questionnaire' not found in the input workbook
+Traceback (most recent call last):
+  File "c:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\advance_analysis\gui\gui.py", line 1138, in _process_data_thread
+    process_excel_files(
+  File "c:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\advance_analysis\modules\excel_handler.py", line 57, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\advance_analysis\modules\excel_handler.py", line 596, in process_excel_files
+    raise ValueError(f"Sheet '{target_sheet}' not found in the input workbook")
+ValueError: Sheet '7-Status 2 Questionnaire' not found in the input workbook
+2025-05-27 15:36:58 - advance_analysis.gui.gui - ERROR - Error occurred: Error in Excel file processing: Sheet '7-Status 2 Questionnaire' not found in the input workbook
+2025-05-27 15:37:17 - advance_analysis.main - INFO - Advance Analysis Tool shutting down
