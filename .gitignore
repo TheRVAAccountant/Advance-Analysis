@@ -54,7 +54,7 @@ cover/
 *.pot
 
 # Django stuff:
-*.log
+# *.log  # Commented out - we want to track log files
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
@@ -159,11 +159,11 @@ ehthumbs_vista.db
 /data/*.xlsx
 /data/*.xls
 /data/*.csv
-# Log files but not the logs directory
-/logs/*
-!/logs/.gitkeep
-!/logs/README.md
-*.log
+# Track logs directory and all its contents including .log files
+# /logs/*  # Commented out - we want to track everything in logs
+# !/logs/.gitkeep
+# !/logs/README.md
+# *.log  # Commented out - we want to track log files
 *~
 .advance_analysis_config.json
 

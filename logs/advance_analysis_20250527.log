@@ -1,0 +1,70 @@
+2025-05-27 12:44:00 - root - INFO - Logging initialized - Level: INFO, File: c:\Users\jeroncrooks\CascadeProjects\Advance-Analysis\logs\advance_analysis_20250527.log
+2025-05-27 12:56:20 - root - INFO - Logging initialized - Level: INFO, File: c:\Users\jeroncrooks\CascadeProjects\Advance-Analysis\logs\advance_analysis_20250527.log
+2025-05-27 12:56:22 - root - INFO - Logging initialized - Level: INFO, File: c:\Users\jeroncrooks\CascadeProjects\Advance-Analysis\logs\advance_analysis_20250527.log
+2025-05-27 12:56:22 - __main__ - INFO - Starting Advance Analysis Tool
+2025-05-27 12:56:22 - __main__ - INFO - Launching main GUI
+2025-05-27 12:56:22 - src.advance_analysis.gui.gui - WARNING - Icon file not found: c:\Users\jeroncrooks\CascadeProjects\Advance-Analysis\src\advance_analysis\gui\..\..\..\bag_cash_currency_dollar_money_icon.ico
+2025-05-27 12:56:40 - src.advance_analysis.gui.gui - INFO - Applying theme: Forest Dark
+2025-05-27 12:56:40 - src.advance_analysis.gui.gui - WARNING - Could not apply theme Forest Dark: can't find package ttk::theme::forest-dark
+2025-05-27 12:56:45 - src.advance_analysis.gui.gui - INFO - Applying theme: Sun Valley Dark
+2025-05-27 12:56:45 - src.advance_analysis.gui.gui - WARNING - Could not apply theme Sun Valley Dark: can't find package ttk::theme::sun-valley-dark
+2025-05-27 12:56:51 - __main__ - INFO - Advance Analysis Tool shutting down
+2025-05-27 12:59:58 - root - INFO - Logging initialized - Level: INFO, File: c:\Users\jeroncrooks\CascadeProjects\Advance-Analysis\logs\advance_analysis_20250527.log
+2025-05-27 12:59:58 - root - INFO - Logging initialized - Level: INFO, File: c:\Users\jeroncrooks\CascadeProjects\Advance-Analysis\logs\advance_analysis_20250527.log
+2025-05-27 12:59:58 - __main__ - INFO - Starting Advance Analysis Tool
+2025-05-27 12:59:58 - __main__ - INFO - Launching main GUI
+2025-05-27 13:00:05 - src.advance_analysis.gui.gui - INFO - Applying theme: Azure
+2025-05-27 13:00:05 - src.advance_analysis.gui.gui - WARNING - Theme azure not available after loading. Using default.
+2025-05-27 13:00:15 - src.advance_analysis.gui.gui - INFO - Applying theme: Sun Valley Dark
+2025-05-27 13:00:15 - src.advance_analysis.gui.gui - WARNING - Theme sun-valley-dark not available after loading. Using default.
+2025-05-27 13:00:24 - src.advance_analysis.gui.gui - INFO - Applying theme: Sun Valley Light
+2025-05-27 13:00:24 - src.advance_analysis.gui.gui - WARNING - Theme sun-valley-light not available after loading. Using default.
+2025-05-27 13:00:34 - __main__ - INFO - Advance Analysis Tool shutting down
+2025-05-27 13:00:36 - root - INFO - Logging initialized - Level: INFO, File: c:\Users\jeroncrooks\CascadeProjects\Advance-Analysis\logs\advance_analysis_20250527.log
+2025-05-27 13:00:36 - root - INFO - Logging initialized - Level: INFO, File: c:\Users\jeroncrooks\CascadeProjects\Advance-Analysis\logs\advance_analysis_20250527.log
+2025-05-27 13:00:36 - __main__ - INFO - Starting Advance Analysis Tool
+2025-05-27 13:00:36 - __main__ - INFO - Launching main GUI
+2025-05-27 13:10:10 - __main__ - INFO - Advance Analysis Tool shutting down
+2025-05-27 13:17:46 - root - INFO - Logging initialized - Level: INFO, File: c:\Users\jeroncrooks\CascadeProjects\Advance-Analysis\logs\advance_analysis_20250527.log
+2025-05-27 13:17:47 - root - INFO - Logging initialized - Level: INFO, File: c:\Users\jeroncrooks\CascadeProjects\Advance-Analysis\logs\advance_analysis_20250527.log
+2025-05-27 13:17:47 - __main__ - INFO - Starting Advance Analysis Tool
+2025-05-27 13:17:47 - __main__ - INFO - Launching main GUI
+2025-05-27 13:17:52 - src.advance_analysis.gui.gui - INFO - Applying theme: Clam
+2025-05-27 13:17:59 - src.advance_analysis.gui.gui - INFO - Applying theme: Windows (Native)
+2025-05-27 13:18:43 - __main__ - INFO - Advance Analysis Tool shutting down
+2025-05-27 13:21:19 - root - INFO - Logging initialized - Level: INFO, File: c:\Users\jeroncrooks\CascadeProjects\Advance-Analysis\logs\advance_analysis_20250527.log
+2025-05-27 13:21:20 - root - INFO - Logging initialized - Level: INFO, File: c:\Users\jeroncrooks\CascadeProjects\Advance-Analysis\logs\advance_analysis_20250527.log
+2025-05-27 13:21:20 - __main__ - INFO - Starting Advance Analysis Tool
+2025-05-27 13:21:20 - __main__ - INFO - Launching main GUI
+2025-05-27 13:21:20 - src.advance_analysis.gui.gui - INFO - Applying theme: Windows (Native)
+2025-05-27 13:22:00 - __main__ - INFO - Advance Analysis Tool shutting down
+2025-05-27 13:37:58 - root - INFO - Logging initialized - Level: INFO, File: c:\Users\jeroncrooks\CascadeProjects\Advance-Analysis\logs\advance_analysis_20250527.log
+2025-05-27 13:37:59 - root - INFO - Logging initialized - Level: INFO, File: c:\Users\jeroncrooks\CascadeProjects\Advance-Analysis\logs\advance_analysis_20250527.log
+2025-05-27 13:37:59 - __main__ - INFO - Starting Advance Analysis Tool
+2025-05-27 13:37:59 - __main__ - INFO - Launching main GUI
+2025-05-27 13:37:59 - src.advance_analysis.gui.gui - INFO - Applying theme: Windows (Native)
+2025-05-27 13:55:30 - __main__ - INFO - Advance Analysis Tool shutting down
+2025-05-27 13:59:52 - root - INFO - Logging initialized - Level: INFO, File: /Users/jeroncrooks/CascadeProjects/Advance-Analysis/logs/advance_analysis_20250527.log
+2025-05-27 13:59:52 - src.advance_analysis.modules.excel_handler - WARNING - Windows COM modules not available - Excel COM automation features will be disabled
+2025-05-27 13:59:53 - root - INFO - Logging initialized - Level: INFO, File: /Users/jeroncrooks/CascadeProjects/Advance-Analysis/logs/advance_analysis_20250527.log
+2025-05-27 13:59:53 - __main__ - INFO - Starting Advance Analysis Tool
+2025-05-27 13:59:53 - __main__ - INFO - Launching main GUI
+2025-05-27 13:59:59 - src.advance_analysis.gui.gui - INFO - Applying theme: Classic
+2025-05-27 14:00:03 - src.advance_analysis.gui.gui - INFO - Applying theme: Default
+2025-05-27 14:00:10 - src.advance_analysis.gui.gui - INFO - Applying theme: Clam
+2025-05-27 14:00:14 - src.advance_analysis.gui.gui - INFO - Applying theme: Default
+2025-05-27 14:00:19 - __main__ - INFO - Advance Analysis Tool shutting down
+2025-05-27 14:00:22 - root - INFO - Logging initialized - Level: INFO, File: /Users/jeroncrooks/CascadeProjects/Advance-Analysis/logs/advance_analysis_20250527.log
+2025-05-27 14:00:23 - src.advance_analysis.modules.excel_handler - WARNING - Windows COM modules not available - Excel COM automation features will be disabled
+2025-05-27 14:00:23 - root - INFO - Logging initialized - Level: INFO, File: /Users/jeroncrooks/CascadeProjects/Advance-Analysis/logs/advance_analysis_20250527.log
+2025-05-27 14:00:23 - __main__ - INFO - Starting Advance Analysis Tool
+2025-05-27 14:00:23 - __main__ - INFO - Launching main GUI
+2025-05-27 14:00:42 - __main__ - INFO - Advance Analysis Tool shutting down
+2025-05-27 14:51:29 - root - INFO - Logging initialized - Level: INFO, File: /Users/jeroncrooks/CascadeProjects/Advance-Analysis/logs/advance_analysis_20250527.log
+2025-05-27 14:51:29 - src.advance_analysis.modules.excel_handler - WARNING - Windows COM modules not available - Excel COM automation features will be disabled
+2025-05-27 14:58:35 - root - INFO - Logging initialized - Level: INFO, File: /Users/jeroncrooks/CascadeProjects/Advance-Analysis/logs/advance_analysis_20250527.log
+2025-05-27 14:58:35 - advance_analysis.modules.excel_handler - WARNING - Windows COM modules not available - Excel COM automation features will be disabled
+2025-05-27 14:58:35 - root - INFO - Logging initialized - Level: INFO, File: /Users/jeroncrooks/CascadeProjects/Advance-Analysis/logs/advance_analysis_20250527.log
+2025-05-27 14:58:35 - advance_analysis.main - INFO - Starting Advance Analysis Tool
+2025-05-27 14:58:35 - advance_analysis.main - INFO - Launching main GUI
+2025-05-27 14:59:05 - advance_analysis.main - INFO - Advance Analysis Tool shutting down

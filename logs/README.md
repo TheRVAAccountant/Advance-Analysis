@@ -36,4 +36,4 @@ cat advance_analysis_$(date +%Y%m%d).log
 
 ## Note
 
-Log files in this directory are NOT tracked by git (only this README and .gitkeep are tracked). This ensures that potentially sensitive operational data in logs remains local to each installation.
+Log files in this directory ARE tracked by git. This allows for debugging and analysis of application behavior across different environments. Please ensure that no sensitive information (passwords, personal data, etc.) is logged in production environments.
