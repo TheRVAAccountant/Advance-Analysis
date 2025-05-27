@@ -326,19 +326,35 @@ def create_tickmark_legend_and_compare_values(wb, password: str) -> None:
         
         logger.info("Tickmark legend created successfully")
 
-        # Find "PY Q4 Ending Balance" in Column A of the Certification sheet
-        py_q4_cell = cert_sheet.Columns(1).Find("PY Q4 Ending Balance", LookAt=win32com.client.constants.xlWhole)
-        if not py_q4_cell:
-            logger.error("PY Q4 Ending Balance not found in Certification sheet")
+        # Find "Advances" in Column B of the Certification sheet
+        logger.info("Searching for 'Advances' in Column B of Certification sheet")
+        advances_cell = None
+        
+        # Search column B (column index 2) for "Advances"
+        for row in range(1, 100):  # Search first 100 rows
+            cell_value = cert_sheet.Cells(row, 2).Value
+            if cell_value and "Advances" in str(cell_value):
+                advances_cell = cert_sheet.Cells(row, 2)
+                logger.info(f"Found 'Advances' in cell B{row}: '{cell_value}'")
+                break
+        
+        if not advances_cell:
+            logger.error("'Advances' not found in Column B of Certification sheet")
             return
 
-        logger.info(f"'PY Q4 Ending Balance' found in cell {py_q4_cell.Address}")
-
-        cert_value_cell = cert_sheet.Cells(py_q4_cell.Row + 1, py_q4_cell.Column + 1)
+        # The value is in the row immediately below the "Advances" cell
+        cert_value_cell = cert_sheet.Cells(advances_cell.Row + 1, advances_cell.Column)
+        logger.info(f"Using value from cell {cert_value_cell.Address} (row below 'Advances')")
         cert_value = cert_value_cell.Value
         formatted_cert_value = format_currency(cert_value)
         
         logger.info(f"Certification value found in cell {cert_value_cell.Address}: {formatted_cert_value}")
+        
+        # Log surrounding cells for debugging
+        logger.debug(f"Cell above (B{advances_cell.Row}): {advances_cell.Value}")
+        logger.debug(f"Cell value (B{cert_value_cell.Row}): {cert_value}")
+        if cert_value_cell.Row < 100:
+            logger.debug(f"Cell below (B{cert_value_cell.Row + 1}): {cert_sheet.Cells(cert_value_cell.Row + 1, 2).Value}")
 
         # Find the PY Q4 Ending Balance sheet
         py_q4_sheet = None
@@ -724,14 +740,35 @@ def process_excel_files(output_path: str, input_path: str, current_dhstier_path:
             advanced_copy_sheet(prior_dhstier_wb, input_wb, prior_sheet_name, "DO PY TB", insert_after=target_sheet)
         else:
             logger.warning("Skipping prior year DHSTIER sheet copy due to missing target sheet")
+        
+        # Save after copying all sheets
+        try:
+            input_wb.Save()
+            logger.info("Saved workbook after copying sheets")
+        except Exception as e:
+            logger.warning(f"Could not save after copying sheets: {str(e)}")
 
         # Create pivot table and get sum_cell_address
         sum_cell_address = create_pivot_table(input_wb, password)
         logger.info(f"Sum cell address: {sum_cell_address}")
+        
+        # Save after pivot table creation
+        try:
+            input_wb.Save()
+            logger.info("Saved workbook after pivot table creation")
+        except Exception as e:
+            logger.warning(f"Could not save after pivot table creation: {str(e)}")
 
         # Create tickmark legend and compare values
         logger.info("Creating tickmark legend and comparing values")
         create_tickmark_legend_and_compare_values(input_wb, password)
+        
+        # Save after tickmark creation
+        try:
+            input_wb.Save()
+            logger.info("Saved workbook after tickmark creation")
+        except Exception as e:
+            logger.warning(f"Could not save after tickmark creation: {str(e)}")
 
         # Modify the Obligation Analysis sheet and get last_column, header_row, and sum_udo_balance_col2 for table comparison
         logger.info("Modifying Obligation Analysis sheet")
@@ -762,13 +799,29 @@ def process_excel_files(output_path: str, input_path: str, current_dhstier_path:
         logger.error(f"Error in Excel file processing: {str(e)}", exc_info=True)
         raise
     finally:
+        # Save the input workbook if it was modified
+        if input_wb:
+            try:
+                logger.info("Saving input workbook before closing...")
+                input_wb.Save()
+                logger.info("Input workbook saved successfully")
+            except Exception as save_error:
+                logger.error(f"Error saving input workbook: {str(save_error)}")
+        
         # Close workbooks
-        for wb in [output_wb, current_dhstier_wb, prior_dhstier_wb, input_wb]:
+        for wb in [output_wb, current_dhstier_wb, prior_dhstier_wb]:
             if wb:
                 try:
                     wb.Close(SaveChanges=False)
                 except:
                     pass
+        
+        # Close input workbook (already saved above)
+        if input_wb:
+            try:
+                input_wb.Close(SaveChanges=False)
+            except:
+                pass
 
         # Quit Excel
         if excel:

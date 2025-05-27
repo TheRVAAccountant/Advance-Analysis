@@ -12,6 +12,7 @@ import pandas as pd
 import numpy as np
 
 from ..utils.logging_config import get_logger
+from .status_validations import StatusValidations
 
 logger = get_logger(__name__)
 
@@ -32,6 +33,9 @@ class DOAdvanceAnalysisProcessor:
         self.fiscal_year_start_date = pd.Timestamp(fiscal_year_start_date)
         self.fiscal_year_end_date = pd.Timestamp(fiscal_year_end_date)
         
+        # Initialize StatusValidations instance
+        self.status_validations = StatusValidations(logger)
+        
         # Define columns to check for null/blank validation
         self.columns_to_check = [
             "TAS", "SGL", "DHS Doc No", "Indicate if advance is to WCF (Y/N)", 
@@ -42,8 +46,8 @@ class DOAdvanceAnalysisProcessor:
         ]
         
         logger.info(f"Initialized DOAdvanceAnalysisProcessor for {component}")
-        logger.info(f"Fiscal Year Start Date: {self.fiscal_year_start_date}")
-        logger.info(f"Fiscal Year End Date: {self.fiscal_year_end_date}")
+        logger.info(f"Fiscal Year Start Date: {self.fiscal_year_start_date.strftime('%m/%d/%Y')}")
+        logger.info(f"Fiscal Year End Date: {self.fiscal_year_end_date.strftime('%m/%d/%Y')}")
     
     def merge_and_process_data(self, cy_df: pd.DataFrame, py_df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -64,33 +68,34 @@ class DOAdvanceAnalysisProcessor:
         df = self._merge_dataframes(cy_df, py_df)
         
         # Step 2: Add Advances Requiring Explanations column
-        df = self._add_advances_requiring_explanations(df)
+        df = self.status_validations.add_advances_requiring_explanations(df)
         
         # Step 3: Add Null or Blank Columns check
-        df = self._add_null_check_column(df)
+        df = self.status_validations.add_null_or_blank_columns(df)
         
         # Step 4: Add Advance Date After Expiration of PoP
-        df = self._add_advance_date_after_pop(df)
+        df = self.status_validations.add_advance_date_after_pop_expiration(df)
         
         # Step 5: Add Status Changed column
-        df = self._add_status_changed(df)
+        df = self._add_status_changed(df)  # Keep this one for now - needs PY column name mapping
         
         # Step 6: Add Anticipated Liquidation Date Test
-        df = self._add_anticipated_liquidation_date_test(df)
+        df = self.status_validations.add_anticipated_liquidation_date_test(df, self.fiscal_year_start_date, self.fiscal_year_end_date)
         
         # Step 7: Add Anticipated Liquidation Date Delayed
-        df = self._add_anticipated_liquidation_date_delayed(df)
+        df = self._add_anticipated_liquidation_date_delayed(df)  # Keep this one for now - needs PY column name mapping
         
         # Step 8: Add Valid Status 1
-        df = self._add_valid_status_1(df)
+        df = self.status_validations.add_valid_status_1(df)
         
         # Step 9: Add Valid Status 2
-        df = self._add_valid_status_2(df)
+        df = self.status_validations.add_valid_status_2(df)
         
         # Step 10: Add DO Status 1 Validation
-        df = self._add_do_status_1_validation(df)
+        df = self.status_validations.add_do_status_1_validation(df)
         
         # Step 11: Add DO Status 2 Validation
+        # Keep our custom implementation for now as StatusValidations might not have DO Status 2
         df = self._add_do_status_2_validation(df)
         
         # Step 12: Add DO Comment column
@@ -107,11 +112,11 @@ class DOAdvanceAnalysisProcessor:
         
         # Rename PY columns to avoid conflicts
         py_columns_to_rename = {
-            'Date of Advance': 'PY 4-Advance Analysis.Date of Advance',
-            'Last Activity Date': 'PY 4-Advance Analysis.Last Activity Date',
-            'Anticipated Liquidation Date': 'PY 4-Advance Analysis.Anticipated Liquidation Date',
-            'Status': 'PY 4-Advance Analysis.Status',
-            'Advance/Prepayment_1': 'PY 4-Advance Analysis.Advance/Prepayment_1'
+            'Date of Advance': 'Date of Advance_comp',
+            'Last Activity Date': 'Last Activity Date_comp',
+            'Anticipated Liquidation Date': 'Anticipated Liquidation Date_comp',
+            'Status': 'Status_comp',
+            'Advance/Prepayment_1': 'Advance/Prepayment_1_comp'
         }
         
         # Only rename columns that exist
@@ -130,116 +135,43 @@ class DOAdvanceAnalysisProcessor:
         logger.info(f"Merged DataFrame shape: {df.shape}")
         
         # Log sample of merged data
-        logger.debug("Sample of merged data:")
-        logger.debug(f"\n{df[['DO Concatenate', 'Status', 'PY 4-Advance Analysis.Status']].head()}")
+        logger.info("Sample of merged data (first 5 rows):")
+        merge_sample_cols = ['DO Concatenate', 'Status', 'Advance/Prepayment']
+        if 'Status_comp' in df.columns:
+            merge_sample_cols.append('Status_comp')
+        if 'Advance/Prepayment_1_comp' in df.columns:
+            merge_sample_cols.append('Advance/Prepayment_1_comp')
+        
+        # Create sample DataFrame with only available columns
+        available_cols = [col for col in merge_sample_cols if col in df.columns]
+        sample_df = df[available_cols].head()
+        logger.info(f"\n{sample_df.to_string()}")
+        
+        # Log merge statistics
+        if 'Status_comp' in df.columns:
+            matched_count = df['Status_comp'].notna().sum()
+            logger.info(f"Merge statistics: {matched_count} rows matched with PY data out of {len(df)} total rows")
+            logger.info(f"Match rate: {matched_count/len(df)*100:.1f}%")
         
         return df
     
-    def _add_advances_requiring_explanations(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Add Advances Requiring Explanations column."""
-        logger.info("Adding Advances Requiring Explanations column")
-        
-        def check_advance_explanations(row):
-            status = row.get('Status', '')
-            active_inactive = row.get('Active/Inactive Advance', '')
-            pop_expired = row.get('PoP Expired?', '')
-            abnormal_balance = row.get('Abnormal Balance', '')
-            
-            if status in ['1', '2']:
-                if (active_inactive == "Active Advance — Invoice Received in Last 12 Months" 
-                    and pop_expired == "N" 
-                    and abnormal_balance == "N"):
-                    return "No Explanation Required"
-                elif active_inactive != "Active Advance — Invoice Received in Last 12 Months":
-                    return "Explanation Required"
-                elif pop_expired != "N":
-                    return "Explanation Required"
-                elif abnormal_balance == "Y":
-                    return "Explanation Required"
-            
-            return None
-        
-        df['Advances Requiring Explanations?'] = df.apply(check_advance_explanations, axis=1)
-        
-        # Log statistics
-        exp_stats = df['Advances Requiring Explanations?'].value_counts()
-        logger.info(f"Advances Requiring Explanations statistics:\n{exp_stats}")
-        
-        return df
     
-    def _add_null_check_column(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Add Null or Blank Columns check."""
-        logger.info("Adding Null or Blank Columns check")
-        
-        def check_null_blank_columns(row):
-            null_or_blank_cols = []
-            
-            for col in self.columns_to_check:
-                if col in row:
-                    value = row[col]
-                    # Check if value is null, NaN, or blank string
-                    if pd.isna(value) or (isinstance(value, str) and value.strip() == ''):
-                        null_or_blank_cols.append(col)
-            
-            # Additional check for Anticipated Liquidation Date if Status = "2"
-            if row.get('Status') == '2' and 'Anticipated Liquidation Date' in row:
-                if pd.isna(row['Anticipated Liquidation Date']):
-                    if 'Anticipated Liquidation Date' not in null_or_blank_cols:
-                        null_or_blank_cols.append('Anticipated Liquidation Date')
-            
-            return ', '.join(null_or_blank_cols)
-        
-        df['Null or Blank Columns'] = df.apply(check_null_blank_columns, axis=1)
-        
-        # Log sample of null/blank columns
-        null_sample = df[df['Null or Blank Columns'] != '']['Null or Blank Columns'].head()
-        if not null_sample.empty:
-            logger.debug(f"Sample of null/blank columns:\n{null_sample}")
-        
-        return df
     
-    def _add_advance_date_after_pop(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Add Advance Date After Expiration of PoP column."""
-        logger.info("Adding Advance Date After Expiration of PoP column")
-        
-        def check_advance_after_pop(row):
-            null_blank_cols = row.get('Null or Blank Columns', '')
-            pop_expired = row.get('PoP Expired?', '')
-            
-            if 'Date of Advance' in null_blank_cols:
-                return "Date of Advance Not Provided"
-            elif pop_expired == "Missing PoP Date":
-                return pop_expired
-            elif pd.notna(row.get('Date of Advance')) and pd.notna(row.get('Period of Performance End Date')):
-                if row['Date of Advance'] > row['Period of Performance End Date']:
-                    return "Y"
-                else:
-                    return "N"
-            else:
-                return "N"
-        
-        df['Advance Date After Expiration of PoP'] = df.apply(check_advance_after_pop, axis=1)
-        
-        # Log statistics
-        pop_stats = df['Advance Date After Expiration of PoP'].value_counts()
-        logger.info(f"Advance Date After Expiration of PoP statistics:\n{pop_stats}")
-        
-        return df
     
     def _add_status_changed(self, df: pd.DataFrame) -> pd.DataFrame:
         """Add Status Changed column."""
         logger.info("Adding Status Changed column")
         
-        def check_status_changed(row):
-            py_status = row.get('PY 4-Advance Analysis.Status')
-            current_status = row.get('Status', '')
-            
-            if pd.notna(py_status) and py_status != current_status:
-                return f"Advance Status Changed from Status {py_status} to Status {current_status}"
-            else:
-                return "N"
+        # Temporarily rename column for StatusValidations compatibility
+        if 'Status_comp' in df.columns:
+            df['PY_Status'] = df['Status_comp']
         
-        df['Status Changed?'] = df.apply(check_status_changed, axis=1)
+        # Call StatusValidations method
+        df = self.status_validations.add_status_changed(df)
+        
+        # Clean up temporary column
+        if 'PY_Status' in df.columns:
+            df.drop('PY_Status', axis=1, inplace=True)
         
         # Log statistics
         status_change_stats = df['Status Changed?'].value_counts()
@@ -247,55 +179,25 @@ class DOAdvanceAnalysisProcessor:
         
         return df
     
-    def _add_anticipated_liquidation_date_test(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Add Anticipated Liquidation Date Test column."""
-        logger.info("Adding Anticipated Liquidation Date Test column")
-        
-        def test_anticipated_liquidation_date(row):
-            status = row.get('Status', '')
-            null_blank_cols = row.get('Null or Blank Columns', '')
-            anticipated_date = row.get('Anticipated Liquidation Date')
-            
-            if status == '2' and 'Anticipated Liquidation Date' not in null_blank_cols:
-                if pd.notna(anticipated_date):
-                    if self.fiscal_year_start_date > anticipated_date:
-                        return f"Anticipated Liquidation Date ({anticipated_date.strftime('%Y-%m-%d')}) is in the Prior Year"
-                    elif self.fiscal_year_end_date < anticipated_date:
-                        return f"Anticipated Liquidation Date ({anticipated_date.strftime('%Y-%m-%d')}) Exceeds Year-End"
-                    else:
-                        return "OK"
-            elif status == '1' and pd.notna(anticipated_date):
-                return f"Anticipated Liquidation Date ({anticipated_date.strftime('%Y-%m-%d')}) Provided For Status 1 Advance"
-            
-            return "OK"
-        
-        df['Anticipated Liquidation Date Test'] = df.apply(test_anticipated_liquidation_date, axis=1)
-        
-        # Log statistics
-        test_stats = df['Anticipated Liquidation Date Test'].value_counts()
-        logger.info(f"Anticipated Liquidation Date Test statistics:\n{test_stats}")
-        
-        return df
     
     def _add_anticipated_liquidation_date_delayed(self, df: pd.DataFrame) -> pd.DataFrame:
         """Add Anticipated Liquidation Date Delayed column."""
         logger.info("Adding Anticipated Liquidation Date Delayed column")
         
-        def calculate_liquidation_delay(row):
-            status = row.get('Status', '')
-            py_status = row.get('PY 4-Advance Analysis.Status')
-            null_blank_cols = row.get('Null or Blank Columns', '')
-            current_date = row.get('Anticipated Liquidation Date')
-            py_date = row.get('PY 4-Advance Analysis.Anticipated Liquidation Date')
-            
-            if (status == '2' and py_status == '2' 
-                and 'Anticipated Liquidation Date' not in null_blank_cols
-                and pd.notna(current_date) and pd.notna(py_date)):
-                return (current_date - py_date).days
-            
-            return None
+        # Temporarily rename columns for StatusValidations compatibility
+        if 'Status_comp' in df.columns:
+            df['PY_Status'] = df['Status_comp']
+        if 'Anticipated Liquidation Date_comp' in df.columns:
+            df['PY_Anticipated Liquidation Date'] = df['Anticipated Liquidation Date_comp']
         
-        df['Anticipated Liquidation Date Delayed?'] = df.apply(calculate_liquidation_delay, axis=1)
+        # Call StatusValidations method
+        df = self.status_validations.add_anticipated_liquidation_date_delayed(df)
+        
+        # Clean up temporary columns
+        temp_cols = ['PY_Status', 'PY_Anticipated Liquidation Date']
+        for col in temp_cols:
+            if col in df.columns:
+                df.drop(col, axis=1, inplace=True)
         
         # Log sample of delays
         delays = df[df['Anticipated Liquidation Date Delayed?'].notna()]['Anticipated Liquidation Date Delayed?']

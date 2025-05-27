@@ -60,6 +60,9 @@ class ComparativeAnalysisProcessor:
         # Step 6: Filter rows with non-null TAS
         df = self._filter_valid_rows(df)
         
+        # Step 7: Rename columns to avoid conflicts with current year data
+        df = self._rename_columns_for_merge(df)
+        
         logger.info(f"Processing complete. Final DataFrame shape: {df.shape}")
         logger.info(f"Final columns: {df.columns.tolist()}")
         
@@ -218,6 +221,54 @@ class ComparativeAnalysisProcessor:
         
         logger.info(f"Filtered out {initial_count - final_count} rows with null TAS")
         logger.info(f"Remaining rows: {final_count}")
+        
+        return df
+    
+    def _rename_columns_for_merge(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Rename columns that might conflict with current year data by adding _comp suffix."""
+        logger.info("Renaming columns to avoid conflicts with current year data")
+        
+        # List of columns that should be renamed to avoid conflicts
+        columns_to_rename = [
+            'Date of Advance',
+            'Last Activity Date',
+            'Anticipated Liquidation Date',
+            'Period of Performance End Date',
+            'Status',
+            'Age of Advance (days)',
+            'Comments',
+            'Vendor',
+            'Advance Type (e.g. Travel, Vendor Prepayment)',
+            'Active/Inactive Advance',
+            'PoP Expired?',
+            'Days Since PoP Expired',
+            'Abnormal Balance',
+            'CY Advance?',
+            'Advances Requiring Explanations?',
+            'Null or Blank Columns',
+            'Advance Date After Expiration of PoP',
+            'Status Changed?',
+            'Anticipated Liquidation Date Test',
+            'Anticipated Liquidation Date Delayed?',
+            'Valid Status 1',
+            'Valid Status 2',
+            'DO Status 1 Validation',
+            'DO Status 2 Validations',
+            'DO Comment'
+        ]
+        
+        # Build rename dictionary for columns that exist
+        rename_dict = {}
+        for col in columns_to_rename:
+            if col in df.columns:
+                rename_dict[col] = f"{col}_comp"
+        
+        if rename_dict:
+            logger.info(f"Renaming {len(rename_dict)} columns with _comp suffix")
+            df = df.rename(columns=rename_dict)
+            logger.debug(f"Renamed columns: {list(rename_dict.keys())}")
+        else:
+            logger.info("No columns to rename")
         
         return df
 
