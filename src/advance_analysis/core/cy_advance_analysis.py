@@ -5,7 +5,7 @@ from typing import Union
 import logging
 import tkinter as tk
 from datetime import datetime
-from status_validations import StatusValidations
+from .status_validations import StatusValidations
 
 class CYAdvanceAnalysis:
     def __init__(self, logger):
