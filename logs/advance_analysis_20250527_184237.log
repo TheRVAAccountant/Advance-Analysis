@@ -1,0 +1,11 @@
+2025-05-27 18:42:37 - root - INFO - Logging initialized - Level: INFO, File: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\logs\advance_analysis_20250527_184237.log
+2025-05-27 18:42:37 - advance_analysis.main - INFO - Starting Advance Analysis Tool
+2025-05-27 18:42:37 - advance_analysis.main - INFO - Launching main GUI
+2025-05-27 18:42:38 - advance_analysis.gui.file_selection_widget - INFO - Added to recent files (advance_analysis): C:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\inputs\WMD FY25 Q2 Advance Analysis 27 May 2025  Final.xlsx
+2025-05-27 18:42:38 - advance_analysis.gui.gui - INFO - Loaded recent advance analysis file: C:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\inputs\WMD FY25 Q2 Advance Analysis 27 May 2025  Final.xlsx
+2025-05-27 18:42:38 - advance_analysis.gui.file_selection_widget - INFO - Added to recent files (current_dhstier): C:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\inputs\WMD FY25 Q2 TrialBalance20250410_024311PM.xlsx
+2025-05-27 18:42:38 - advance_analysis.gui.gui - INFO - Loaded recent current DHSTIER file: C:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\inputs\WMD FY25 Q2 TrialBalance20250410_024311PM.xlsx
+2025-05-27 18:42:38 - advance_analysis.gui.file_selection_widget - INFO - Added to recent files (prior_dhstier): C:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\inputs\WMD FY24 Q4 TrialBalance20241011_080140AM.xlsx
+2025-05-27 18:42:38 - advance_analysis.gui.gui - INFO - Loaded recent prior DHSTIER file: C:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\inputs\WMD FY24 Q4 TrialBalance20241011_080140AM.xlsx
+2025-05-27 18:42:38 - advance_analysis.gui.status_bar - INFO - Status: Ready
+2025-05-27 18:42:45 - advance_analysis.main - INFO - Advance Analysis Tool shutting down
