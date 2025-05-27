@@ -1,0 +1,2 @@
+2025-05-27 16:55:13 - root - INFO - Logging initialized - Level: INFO, File: /Users/jeroncrooks/CascadeProjects/Advance-Analysis/logs/advance_analysis_20250527_165513.log
+2025-05-27 16:55:14 - src.advance_analysis.modules.excel_handler - WARNING - Windows COM modules not available - Excel COM automation features will be disabled

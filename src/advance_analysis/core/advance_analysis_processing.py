@@ -32,8 +32,8 @@ class AdvanceAnalysisProcessor:
         self.current_reporting_date = pd.Timestamp(current_reporting_date)
         self.fiscal_year_start_date = pd.Timestamp(fiscal_year_start_date)
         logger.info(f"Initialized AdvanceAnalysisProcessor for {component}")
-        logger.info(f"Current Reporting Date: {self.current_reporting_date}")
-        logger.info(f"Fiscal Year Start Date: {self.fiscal_year_start_date}")
+        logger.info(f"Current Reporting Date: {self.current_reporting_date.strftime('%m/%d/%Y')}")
+        logger.info(f"Fiscal Year Start Date: {self.fiscal_year_start_date.strftime('%m/%d/%Y')}")
     
     def process_advance_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """

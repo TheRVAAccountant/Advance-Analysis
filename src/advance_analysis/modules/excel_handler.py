@@ -583,33 +583,65 @@ def process_excel_files(output_path: str, input_path: str, current_dhstier_path:
         input_wb = excel.Workbooks.Open(input_path)
         current_dhstier_wb = excel.Workbooks.Open(current_dhstier_path)
         prior_dhstier_wb = excel.Workbooks.Open(prior_dhstier_path)
+        
+        # Log all sheet names in the input workbook for debugging
+        logger.info("Sheet names in input workbook:")
+        for sheet in input_wb.Sheets:
+            logger.info(f"  - {sheet.Name}")
 
         # Find the "6-ADVANCE TO TIER Recon Summary" sheet
         target_sheet = "6-ADVANCE TO TIER Recon Summary"
         sheet_found = False
+        
+        # First try exact match
         for sheet in input_wb.Sheets:
             if sheet.Name == target_sheet:
                 sheet_found = True
                 break
+        
+        # If not found, try case-insensitive search and partial match
+        if not sheet_found:
+            logger.warning(f"Sheet '{target_sheet}' not found with exact match. Trying case-insensitive search...")
+            for sheet in input_wb.Sheets:
+                if "advance" in sheet.Name.lower() and "tier" in sheet.Name.lower() and "recon" in sheet.Name.lower():
+                    logger.info(f"Found similar sheet: '{sheet.Name}'. Using this instead.")
+                    target_sheet = sheet.Name
+                    sheet_found = True
+                    break
                 
         if not sheet_found:
-            raise ValueError(f"Sheet '{target_sheet}' not found in the input workbook")
+            logger.error(f"Sheet '{target_sheet}' not found in the input workbook")
+            logger.error("Available sheets are:")
+            for sheet in input_wb.Sheets:
+                logger.error(f"  - {sheet.Name}")
+            # Continue processing without this sheet rather than failing
+            logger.warning("Continuing without the ADVANCE TO TIER Recon Summary sheet")
+            target_sheet = None
 
         # Copy "DO Tab 4 Review" sheet
-        logger.info("Copying 'DO Tab 4 Review' sheet")
-        advanced_copy_sheet(output_wb, input_wb, "DO Tab 4 Review", insert_after=target_sheet)
-        target_sheet = "DO Tab 4 Review"  # Update target_sheet for next insertion
+        if target_sheet:
+            logger.info("Copying 'DO Tab 4 Review' sheet")
+            advanced_copy_sheet(output_wb, input_wb, "DO Tab 4 Review", insert_after=target_sheet)
+            target_sheet = "DO Tab 4 Review"  # Update target_sheet for next insertion
+        else:
+            logger.warning("Skipping 'DO Tab 4 Review' sheet copy due to missing target sheet")
 
         # Copy and rename current year DHSTIER sheet
-        logger.info("Copying current year DHSTIER sheet")
-        current_sheet_name = find_sheet_name(current_dhstier_wb, component)
-        advanced_copy_sheet(current_dhstier_wb, input_wb, current_sheet_name, "DO CY TB", insert_after=target_sheet)
-        target_sheet = "DO CY TB"  # Update target_sheet for next insertion
+        if target_sheet:
+            logger.info("Copying current year DHSTIER sheet")
+            current_sheet_name = find_sheet_name(current_dhstier_wb, component)
+            advanced_copy_sheet(current_dhstier_wb, input_wb, current_sheet_name, "DO CY TB", insert_after=target_sheet)
+            target_sheet = "DO CY TB"  # Update target_sheet for next insertion
+        else:
+            logger.warning("Skipping current year DHSTIER sheet copy due to missing target sheet")
 
         # Copy and rename prior year DHSTIER sheet
-        logger.info("Copying prior year DHSTIER sheet")
-        prior_sheet_name = find_sheet_name(prior_dhstier_wb, component)
-        advanced_copy_sheet(prior_dhstier_wb, input_wb, prior_sheet_name, "DO PY TB", insert_after=target_sheet)
+        if target_sheet:
+            logger.info("Copying prior year DHSTIER sheet")
+            prior_sheet_name = find_sheet_name(prior_dhstier_wb, component)
+            advanced_copy_sheet(prior_dhstier_wb, input_wb, prior_sheet_name, "DO PY TB", insert_after=target_sheet)
+        else:
+            logger.warning("Skipping prior year DHSTIER sheet copy due to missing target sheet")
 
         # Create pivot table and get sum_cell_address
         sum_cell_address = create_pivot_table(input_wb, password)

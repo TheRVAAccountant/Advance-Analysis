@@ -93,6 +93,57 @@ def create_comparative_do_concatenate(row: pd.Series, component: str, keyword_co
 logger = logging.getLogger(__name__)
 
 
+def find_header_row_in_dataframe(file_path: str, sheet_name: str, search_term: str = "TAS", max_rows: int = 50) -> tuple[int, int]:
+    """
+    Find the header row by searching for a specific term in column A.
+    Also identifies the last populated column.
+    
+    Args:
+        file_path: Path to the Excel file
+        sheet_name: Name of the sheet to search
+        search_term: Term to search for in column A (default: "TAS")
+        max_rows: Maximum number of rows to search
+        
+    Returns:
+        Tuple of (header_row_index, last_column_index)
+        
+    Raises:
+        ValueError: If header row is not found
+    """
+    logger.info(f"Searching for header row with term '{search_term}' in column A")
+    
+    # Read the first max_rows without skipping any
+    df_raw = pd.read_excel(
+        file_path,
+        sheet_name=sheet_name,
+        nrows=max_rows,
+        header=None,
+        engine='openpyxl'
+    )
+    
+    # Search for the term in the first column
+    for idx, value in enumerate(df_raw.iloc[:, 0]):
+        if pd.notna(value) and search_term in str(value):
+            logger.info(f"Found header row at index {idx} (row {idx + 1} in Excel)")
+            
+            # Get the header row
+            header_row = df_raw.iloc[idx]
+            
+            # Find last populated column
+            last_col_idx = header_row.last_valid_index()
+            if last_col_idx is None:
+                last_col_idx = len(header_row) - 1
+            
+            # Log the headers found
+            headers = [str(val) if pd.notna(val) else '' for val in header_row[:last_col_idx + 1]]
+            logger.info(f"Headers found: {headers[:10]}{'...' if len(headers) > 10 else ''}")
+            logger.info(f"Total columns identified: {last_col_idx + 1}")
+            
+            return idx, last_col_idx
+    
+    raise ValueError(f"Header row with '{search_term}' in column A not found in first {max_rows} rows")
+
+
 def parse_date(value: Any) -> pd.Timestamp:
     """
     Parses a given value into a datetime object, detecting timestamps and logging the result.
@@ -111,9 +162,6 @@ def parse_date(value: Any) -> pd.Timestamp:
             logger.warning(f"Invalid date encountered: {value}")
             return pd.NaT  # Return NaT if parsing fails
 
-        # Check if the parsed date contains a timestamp (non-midnight time)
-        has_time = parsed.time() != datetime.min.time()
-        
         # Return the parsed value without modifying the timestamp
         return parsed
     except Exception as e:
@@ -121,13 +169,14 @@ def parse_date(value: Any) -> pd.Timestamp:
         return pd.NaT
 
 
-def load_excel_file(file_path: str, sheet_name: str) -> pd.DataFrame:
+def load_excel_file(file_path: str, sheet_name: str, use_intelligent_header_detection: bool = True) -> pd.DataFrame:
     """
     Loads data from an Excel file and processes date columns to ensure consistent date handling.
 
     Args:
         file_path (str): The path to the Excel file.
         sheet_name (str): The name of the sheet to load.
+        use_intelligent_header_detection (bool): Whether to use intelligent header detection.
 
     Returns:
         pd.DataFrame: A DataFrame with correctly parsed dates.
@@ -137,11 +186,30 @@ def load_excel_file(file_path: str, sheet_name: str) -> pd.DataFrame:
         Exception: If there's an error loading the file.
     """
     try:
+        # First, log all sheet names in the file
+        logger.info(f"Loading file: {file_path}")
+        xl_file = pd.ExcelFile(file_path, engine='openpyxl')
+        logger.info(f"Sheet names in file: {xl_file.sheet_names}")
+        
+        skiprows = 10  # Default
+        usecols = None  # Default to all columns
+        
+        if use_intelligent_header_detection:
+            try:
+                header_row, last_col = find_header_row_in_dataframe(file_path, sheet_name)
+                skiprows = header_row
+                usecols = list(range(last_col + 1))  # Use only columns up to last populated
+                logger.info(f"Using intelligent header detection: skiprows={skiprows}, usecols up to column {last_col}")
+            except Exception as e:
+                logger.warning(f"Intelligent header detection failed: {e}. Falling back to default skiprows=10")
+                skiprows = 10
+        
         # Load the Excel sheet into a DataFrame
         df = pd.read_excel(
             file_path,
             sheet_name=sheet_name,
-            skiprows=10,
+            skiprows=skiprows,
+            usecols=usecols,
             engine='openpyxl',
             dtype={
                 'Current Quarter Status': str,
@@ -262,7 +330,7 @@ def load_comparative_file(base_path: str, component: str, comparative_reporting_
         raise
 
 
-def load_advance_comparative_file(file_path: str, component: str, sheet_name: str = "4-Advance Analysis") -> pd.DataFrame:
+def load_advance_comparative_file(file_path: str, component: str, sheet_name: str = "4-Advance Analysis", use_intelligent_header_detection: bool = True) -> pd.DataFrame:
     """
     Loads comparative advance data and applies Power Query transformations from PY 4-Advance Analysis.
     
@@ -270,6 +338,7 @@ def load_advance_comparative_file(file_path: str, component: str, sheet_name: st
         file_path: Path to the comparative advance Excel file
         component: Component name (e.g., "WMD", "CBP")
         sheet_name: Name of the sheet to load (default: "4-Advance Analysis")
+        use_intelligent_header_detection (bool): Whether to use intelligent header detection.
         
     Returns:
         Processed DataFrame with DO Concatenate and filtered rows
@@ -283,11 +352,29 @@ def load_advance_comparative_file(file_path: str, component: str, sheet_name: st
     logger.info(f"Loading advance comparative file: {file_path}")
     
     try:
+        # First, log all sheet names in the file
+        xl_file = pd.ExcelFile(file_path, engine='openpyxl')
+        logger.info(f"Sheet names in file: {xl_file.sheet_names}")
+        
+        skiprows = 9  # Default
+        usecols = None  # Default to all columns
+        
+        if use_intelligent_header_detection:
+            try:
+                header_row, last_col = find_header_row_in_dataframe(file_path, sheet_name)
+                skiprows = header_row
+                usecols = list(range(last_col + 1))
+                logger.info(f"Using intelligent header detection: skiprows={skiprows}, usecols up to column {last_col}")
+            except Exception as e:
+                logger.warning(f"Intelligent header detection failed: {e}. Falling back to default skiprows=9")
+                skiprows = 9
+        
         # Load Excel file with appropriate settings
         df = pd.read_excel(
             file_path,
             sheet_name=sheet_name,
-            skiprows=9,  # Skip top 9 rows as per Power Query
+            skiprows=skiprows,
+            usecols=usecols,
             engine='openpyxl'
         )
         
