@@ -130,9 +130,22 @@ class FileSelectionWidget(ttk.Frame):
         if os.path.exists(file_path):
             self.file_path.set(file_path)
             logger.info(f"Selected recent file: {file_path}")
+            # Force update of the entry widget
+            self.entry.update_idletasks()
         else:
             logger.warning(f"Recent file no longer exists: {file_path}")
-            # Could show an error message here
+            # Show error message to user
+            from tkinter import messagebox
+            messagebox.showwarning(
+                "File Not Found", 
+                f"The selected file no longer exists:\n{file_path}"
+            )
+            # Remove from recent files
+            self.recent_files_manager.recent_files[self.file_type] = [
+                f for f in self.recent_files_manager.recent_files[self.file_type]
+                if f.get("path") != file_path
+            ]
+            self.recent_files_manager._save_recent_files()
     
     def _clear_recent_files(self):
         """Clear recent files for this file type."""
@@ -163,17 +176,29 @@ class FileSelectionWidget(ttk.Frame):
         if file_path:
             self.file_path.set(file_path)
             logger.info(f"Selected file: {file_path}")
+            # Force update of the entry widget
+            self.entry.update_idletasks()
     
     def _on_path_changed(self, *args):
         """Handle file path change."""
-        file_path = self.file_path.get()
-        if file_path and os.path.exists(file_path):
-            # Add to recent files
-            self.recent_files_manager.add_file(self.file_type, file_path)
-            
-            # Call callback if provided
-            if self.on_file_selected:
-                self.on_file_selected(file_path)
+        try:
+            file_path = self.file_path.get()
+            if file_path:
+                # Log the path change for debugging
+                logger.debug(f"Path changed for {self.file_type}: {file_path}")
+                
+                if os.path.exists(file_path):
+                    # Add to recent files
+                    self.recent_files_manager.add_file(self.file_type, file_path)
+                    logger.info(f"Added to recent files ({self.file_type}): {file_path}")
+                    
+                    # Call callback if provided
+                    if self.on_file_selected:
+                        self.on_file_selected(file_path)
+                else:
+                    logger.warning(f"Path does not exist: {file_path}")
+        except Exception as e:
+            logger.error(f"Error in _on_path_changed: {e}", exc_info=True)
     
     def get_file_path(self) -> str:
         """Get the selected file path."""

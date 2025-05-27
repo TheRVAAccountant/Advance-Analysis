@@ -513,6 +513,9 @@ class InputGUI:
         self._create_main_tab()
         self._create_settings_tab()
         
+        # Load recent files for each widget
+        self._load_most_recent_files()
+        
         # Add keyboard shortcut for tab switching
         self.master.bind("<Control-Tab>", self._next_tab)
         self.master.bind("<Control-Shift-Tab>", self._prev_tab)
@@ -651,8 +654,19 @@ class InputGUI:
         )
         self.advance_file_widget.grid(row=row, column=0, columnspan=3, sticky="ew", padx=5, pady=8)
         
-        # Bind to form data
-        self.advance_file_widget.file_path = self.form_data["file_path"]
+        # Create bidirectional binding between widget and form data
+        def sync_advance_path(*args):
+            path = self.advance_file_widget.get_file_path()
+            if path != self.form_data["file_path"].get():
+                self.form_data["file_path"].set(path)
+        
+        def sync_advance_widget(*args):
+            path = self.form_data["file_path"].get()
+            if path != self.advance_file_widget.get_file_path():
+                self.advance_file_widget.set_file_path(path)
+        
+        self.advance_file_widget.file_path.trace('w', sync_advance_path)
+        self.form_data["file_path"].trace('w', sync_advance_widget)
         
         # Add tooltip
         ToolTip(self.advance_file_widget.entry, "Path to the Advance Analysis Excel file")
@@ -670,8 +684,19 @@ class InputGUI:
         )
         self.current_dhstier_widget.grid(row=row, column=0, columnspan=3, sticky="ew", padx=5, pady=8)
         
-        # Bind to form data
-        self.current_dhstier_widget.file_path = self.form_data["current_dhstier_path"]
+        # Create bidirectional binding between widget and form data
+        def sync_current_path(*args):
+            path = self.current_dhstier_widget.get_file_path()
+            if path != self.form_data["current_dhstier_path"].get():
+                self.form_data["current_dhstier_path"].set(path)
+        
+        def sync_current_widget(*args):
+            path = self.form_data["current_dhstier_path"].get()
+            if path != self.current_dhstier_widget.get_file_path():
+                self.current_dhstier_widget.set_file_path(path)
+        
+        self.current_dhstier_widget.file_path.trace('w', sync_current_path)
+        self.form_data["current_dhstier_path"].trace('w', sync_current_widget)
         
         # Add tooltip
         ToolTip(self.current_dhstier_widget.entry, "Path to the Current Period DHSTIER Trial Balance Excel file")
@@ -689,8 +714,19 @@ class InputGUI:
         )
         self.prior_dhstier_widget.grid(row=row, column=0, columnspan=3, sticky="ew", padx=5, pady=8)
         
-        # Bind to form data
-        self.prior_dhstier_widget.file_path = self.form_data["prior_dhstier_path"]
+        # Create bidirectional binding between widget and form data
+        def sync_prior_path(*args):
+            path = self.prior_dhstier_widget.get_file_path()
+            if path != self.form_data["prior_dhstier_path"].get():
+                self.form_data["prior_dhstier_path"].set(path)
+        
+        def sync_prior_widget(*args):
+            path = self.form_data["prior_dhstier_path"].get()
+            if path != self.prior_dhstier_widget.get_file_path():
+                self.prior_dhstier_widget.set_file_path(path)
+        
+        self.prior_dhstier_widget.file_path.trace('w', sync_prior_path)
+        self.form_data["prior_dhstier_path"].trace('w', sync_prior_widget)
         
         # Add tooltip
         ToolTip(self.prior_dhstier_widget.entry, "Path to the Prior Year End DHSTIER Trial Balance Excel file")
@@ -1448,6 +1484,36 @@ Alt+F4 - Exit Application"""
     def _show_about(self) -> None:
         """Show the about dialog."""
         AboutDialog(self.master)
+    
+    def _load_most_recent_files(self) -> None:
+        """Load the most recent file for each file selection widget if available."""
+        try:
+            # Load most recent advance analysis file
+            recent_advance_files = self.recent_files_manager.get_recent_files("advance_analysis")
+            if recent_advance_files:
+                most_recent = recent_advance_files[0]["path"]
+                if os.path.exists(most_recent):
+                    self.advance_file_widget.set_file_path(most_recent)
+                    logger.info(f"Loaded recent advance analysis file: {most_recent}")
+            
+            # Load most recent current DHSTIER file
+            recent_current_files = self.recent_files_manager.get_recent_files("current_dhstier")
+            if recent_current_files:
+                most_recent = recent_current_files[0]["path"]
+                if os.path.exists(most_recent):
+                    self.current_dhstier_widget.set_file_path(most_recent)
+                    logger.info(f"Loaded recent current DHSTIER file: {most_recent}")
+            
+            # Load most recent prior DHSTIER file
+            recent_prior_files = self.recent_files_manager.get_recent_files("prior_dhstier")
+            if recent_prior_files:
+                most_recent = recent_prior_files[0]["path"]
+                if os.path.exists(most_recent):
+                    self.prior_dhstier_widget.set_file_path(most_recent)
+                    logger.info(f"Loaded recent prior DHSTIER file: {most_recent}")
+                    
+        except Exception as e:
+            logger.warning(f"Error loading recent files: {e}")
 
 
 class UserCancellationError(Exception):

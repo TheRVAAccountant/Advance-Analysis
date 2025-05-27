@@ -469,47 +469,129 @@ def create_pivot_table(wb, password: str) -> str:
         last_column = target_sheet.Cells(header_row, target_sheet.Columns.Count).End(win32com.client.constants.xlToLeft).Column
         logger.info(f"Last populated column in header row: {get_column_letter(last_column)}")
         
-        # Find the last row (excluding the UDO column)
+        # Log all header row values for debugging
+        logger.info("Header row values in '3-PY Q4 Ending Balance' sheet:")
+        header_values = []
+        for col in range(1, last_column + 1):
+            cell_value = target_sheet.Cells(header_row, col).Value
+            col_letter = get_column_letter(col)
+            header_values.append(f"{col_letter}: {cell_value}")
+            logger.info(f"  Column {col_letter} (index {col}): {cell_value}")
+        logger.info(f"Total columns with headers: {len(header_values)}")
+        
+        # Find the last row
         last_row = max(target_sheet.Cells(target_sheet.Rows.Count, col).End(win32com.client.constants.xlUp).Row 
-                       for col in range(1, last_column + 1) 
-                       if target_sheet.Cells(header_row, col).Value != "UDO")
+                       for col in range(1, last_column + 1))
         logger.info(f"Last populated row after header row: {last_row}")
         
         # Define the data range
         data_range = target_sheet.Range(target_sheet.Cells(header_row, 1), target_sheet.Cells(last_row, last_column))
         logger.info(f"Pivot table range: {data_range.Address}")
         
-        # Create pivot table
-        pivot_cache = wb.PivotCaches().Create(SourceType=win32com.client.constants.xlDatabase, SourceData=data_range)
-        pivot_table = pivot_cache.CreatePivotTable(TableDestination=target_sheet.Cells(header_row, 9), TableName="PYQ4BalancePivot")
+        # Check if Advance/Prepayment column exists in the header row
+        advance_col_index = None
+        logger.info("Searching for Advance/Prepayment column...")
+        for col in range(1, last_column + 1):
+            cell_value = target_sheet.Cells(header_row, col).Value
+            if cell_value:
+                # Check for exact match and variations
+                cell_str = str(cell_value).strip()
+                # Check for Advance/Prepayment in various formats
+                if "advance" in cell_str.lower() and "prepayment" in cell_str.lower():
+                    advance_col_index = col
+                    logger.info(f"Found Advance/Prepayment column at index {col} (column {get_column_letter(col)}): '{cell_value}'")
+                    break
         
-        # Add UDO field to values
-        udo_field = pivot_table.PivotFields("UDO")
+        if not advance_col_index:
+            logger.warning("Advance/Prepayment column not found in header row. Looking for alternative balance columns...")
+            # Find columns that might contain balance data
+            balance_keywords = ['balance', 'amount', 'prepayment', 'advance']
+            balance_col = None
+            for col in range(1, last_column + 1):
+                cell_value = str(target_sheet.Cells(header_row, col).Value or '').lower()
+                if any(keyword in cell_value for keyword in balance_keywords):
+                    balance_col = col
+                    logger.info(f"Using column {get_column_letter(col)} ({target_sheet.Cells(header_row, col).Value}) for sum calculation")
+                    break
+            
+            if balance_col:
+                advance_col_index = balance_col
+            else:
+                logger.error("Could not find any Advance/Prepayment or balance column to sum")
+                raise ValueError("No Advance/Prepayment or balance column found for calculation")
         
-        # Attempt to set the Function property, with fallback options
+        # Get the column name for the pivot table
+        advance_col_name = target_sheet.Cells(header_row, advance_col_index).Value
+        logger.info(f"Using column '{advance_col_name}' for pivot table")
+        
+        # Try to create pivot table
         try:
-            udo_field.Orientation = win32com.client.constants.xlDataField
-            udo_field.Function = win32com.client.constants.xlSum
-        except Exception as e:
-            logger.warning(f"Error setting UDO field properties: {str(e)}")
+            logger.info("Creating pivot table...")
+            logger.info(f"Pivot table data range: {data_range.Address}")
+            logger.info(f"Pivot table destination: Cell I{header_row} (column 9)")
+            
+            # Create pivot cache
+            pivot_cache = wb.PivotCaches().Create(SourceType=win32com.client.constants.xlDatabase, SourceData=data_range)
+            logger.info("Pivot cache created successfully")
+            
+            # Create pivot table
+            pivot_table = pivot_cache.CreatePivotTable(TableDestination=target_sheet.Cells(header_row, 9), TableName="PYQ4BalancePivot")
+            logger.info("Pivot table created successfully")
+            
+            # Add Advance/Prepayment field to values
+            logger.info(f"Adding '{advance_col_name}' field to pivot table values...")
+            
+            # List all available pivot fields for debugging
+            logger.info("Available pivot fields:")
             try:
-                # Alternative method: Add the field and then set properties
-                pivot_table.AddDataField(udo_field, "Sum of UDO", win32com.client.constants.xlSum)
-            except Exception as e2:
-                logger.error(f"Failed to add UDO field using alternative method: {str(e2)}")
-                # If both methods fail, create a custom calculation
-                target_sheet.Cells(header_row, 9).Formula = f"=SUM({data_range.Address})"
-        
-        # Format the UDO sum cell
-        sum_cell = target_sheet.Cells(header_row + 1, 9)
-        sum_cell.NumberFormat = "$#,##0.00_);[Red]($#,##0.00)"
+                for i in range(1, pivot_table.PivotFields().Count + 1):
+                    field_name = pivot_table.PivotFields(i).Name
+                    logger.info(f"  Field {i}: {field_name}")
+            except Exception as list_error:
+                logger.warning(f"Could not list pivot fields: {str(list_error)}")
+            
+            # Try to get the field
+            advance_field = pivot_table.PivotFields(advance_col_name)
+            
+            # Attempt to set the Function property, with fallback options
+            try:
+                advance_field.Orientation = win32com.client.constants.xlDataField
+                advance_field.Function = win32com.client.constants.xlSum
+                logger.info("Successfully set pivot field orientation and function")
+            except Exception as e:
+                logger.warning(f"Error setting field properties directly: {str(e)}")
+                try:
+                    # Alternative method: Add the field and then set properties
+                    pivot_table.AddDataField(advance_field, f"Sum of {advance_col_name}", win32com.client.constants.xlSum)
+                    logger.info("Successfully added data field using AddDataField method")
+                except Exception as e2:
+                    logger.error(f"Failed to add field using alternative method: {str(e2)}")
+                    raise
+            
+            # Format the sum cell
+            sum_cell = target_sheet.Cells(header_row + 1, 9)
+            sum_cell.NumberFormat = "$#,##0.00_);[Red]($#,##0.00)"
+            logger.info(f"Pivot table created successfully with sum in cell {sum_cell.Address}")
+            
+        except Exception as pivot_error:
+            logger.warning(f"Failed to create pivot table: {str(pivot_error)}. Falling back to manual SUM formula.")
+            # Fallback: Create a SUM formula for the Advance/Prepayment column
+            sum_cell = target_sheet.Cells(header_row + 1, 9)
+            col_letter = get_column_letter(advance_col_index)
+            sum_cell.Formula = f"=SUM({col_letter}{header_row + 1}:{col_letter}{last_row})"
+            sum_cell.NumberFormat = "$#,##0.00_);[Red]($#,##0.00)"
+            target_sheet.Cells(header_row, 9).Value = "Total Advance/Prepayment"
+            target_sheet.Cells(header_row, 9).Font.Bold = True
+            logger.info(f"Created manual sum formula for Advance/Prepayment in cell {sum_cell.Address}")
         
         # Auto-fit column I
         target_sheet.Columns("I").AutoFit()
-             
-        logger.info("Pivot table or summary calculation created successfully")
         
         # Return the sum_cell address
+        if 'sum_cell' not in locals():
+            sum_cell = target_sheet.Cells(header_row + 1, 9)
+             
+        logger.info("Pivot table or summary calculation created successfully")
         sum_cell_address = sum_cell.Address
         logger.info(f"Sum cell address: {sum_cell_address}")
         return sum_cell_address
@@ -654,6 +736,7 @@ def process_excel_files(output_path: str, input_path: str, current_dhstier_path:
         # Modify the Obligation Analysis sheet and get last_column, header_row, and sum_udo_balance_col2 for table comparison
         logger.info("Modifying Obligation Analysis sheet")
         last_column, header_row, sum_udo_balance_col2 = modify_obligation_analysis_sheet(input_wb, password, component)
+        # Note: sum_udo_balance_col2 is reserved for future use in validate_udo_tier_recon function
         
         # Compare Obligation Analysis tables and add tickmarks
         logger.info("Comparing Obligation Analysis tables and adding tickmarks")
@@ -865,6 +948,15 @@ def modify_obligation_analysis_sheet(wb, password: str, component: str) -> Tuple
         # Find the last column
         last_column = target_sheet.Cells(header_row, target_sheet.Columns.Count).End(win32com.client.constants.xlToLeft).Column
         logger.info(f"Last populated column in header row: {get_column_letter(last_column)}")
+        
+        # Log all header row values for debugging
+        logger.info(f"Header row values in '{target_sheet.Name}' sheet:")
+        for col in range(1, min(last_column + 1, 20)):  # Log first 20 columns to avoid too much output
+            cell_value = target_sheet.Cells(header_row, col).Value
+            col_letter = get_column_letter(col)
+            logger.info(f"  Column {col_letter} (index {col}): {cell_value}")
+        if last_column > 20:
+            logger.info(f"  ... and {last_column - 20} more columns")
 
         # Find the header row in DO Tab 4 Review sheet
         do_tab_header_row = find_header_row(do_tab_4_review_sheet)

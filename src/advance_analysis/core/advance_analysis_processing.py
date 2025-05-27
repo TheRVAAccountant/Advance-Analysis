@@ -124,17 +124,43 @@ class AdvanceAnalysisProcessor:
             if col in df.columns:
                 logger.debug(f"Converting {col} to datetime")
                 # Sample before conversion
-                logger.debug(f"Sample {col} before conversion: {df[col].head()}")
+                logger.debug(f"Sample {col} before conversion:")
+                logger.debug(f"  Values: {df[col].head().tolist()}")
+                logger.debug(f"  Types: {df[col].head().apply(type).tolist()}")
                 
-                df[col] = pd.to_datetime(df[col], errors='coerce')
+                # Try multiple date formats
+                date_formats = ['%m/%d/%Y', '%Y-%m-%d', '%d/%m/%Y', '%m-%d-%Y', '%d-%m-%Y']
+                converted = False
+                
+                for fmt in date_formats:
+                    try:
+                        df[col] = pd.to_datetime(df[col], format=fmt, errors='coerce')
+                        non_null_count = df[col].notna().sum()
+                        if non_null_count > 0:
+                            logger.debug(f"Successfully converted {non_null_count} values using format: {fmt}")
+                            converted = True
+                            break
+                    except Exception as e:
+                        continue
+                
+                if not converted:
+                    # Fall back to automatic parsing
+                    df[col] = pd.to_datetime(df[col], errors='coerce', dayfirst=False)
                 
                 # Log conversion results
                 null_count = df[col].isna().sum()
+                total_count = len(df[col])
                 if null_count > 0:
-                    logger.warning(f"{col}: {null_count} values could not be converted to dates")
+                    logger.warning(f"{col}: {null_count} out of {total_count} values could not be converted to dates")
+                    # Log sample of failed conversions
+                    failed_samples = df[df[col].isna()][col].head(3)
+                    if not failed_samples.empty:
+                        logger.debug(f"  Failed conversion samples: {failed_samples.tolist()}")
+                else:
+                    logger.info(f"{col}: All {total_count} values successfully converted to dates")
                 
                 # Sample after conversion
-                logger.debug(f"Sample {col} after conversion: {df[col].head()}")
+                logger.debug(f"Sample {col} after conversion: {df[col].head().tolist()}")
             else:
                 logger.warning(f"Date column '{col}' not found in DataFrame")
         
@@ -152,7 +178,7 @@ class AdvanceAnalysisProcessor:
             'Advance/Prepayment': 'float64',
             'Age of Advance (days)': 'Int64',  # Nullable integer
             'Status': 'str',
-            'Advance/Prepayment_1': 'float64',
+            'Advance/Prepayment.1': 'float64',  # Changed from _1 to .1
             'Comments': 'str',
             'Vendor': 'str',
             'Advance Type (e.g. Travel, Vendor Prepayment)': 'str',
@@ -310,7 +336,7 @@ class AdvanceAnalysisProcessor:
         logger.info("Adding Abnormal Balance column")
         
         def check_abnormal_balance(row):
-            balance = row.get('Advance/Prepayment_1')
+            balance = row.get('Advance/Prepayment.1')  # Changed from _1 to .1
             
             if pd.isna(balance):
                 return "Advance Balance Not Provided"
@@ -337,7 +363,7 @@ class AdvanceAnalysisProcessor:
         logger.info(f"Abnormal balance statistics:\n{abnormal_stats}")
         
         # Log sample of abnormal balances
-        abnormal_sample = df[df['Abnormal Balance'] == 'Y'][['DO Concatenate', 'Advance/Prepayment_1', 'Abnormal Balance']].head()
+        abnormal_sample = df[df['Abnormal Balance'] == 'Y'][['DO Concatenate', 'Advance/Prepayment.1', 'Abnormal Balance']].head()  # Changed from _1 to .1
         if not abnormal_sample.empty:
             logger.debug(f"Sample abnormal balances:\n{abnormal_sample}")
         
