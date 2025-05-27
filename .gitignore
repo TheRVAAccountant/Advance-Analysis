@@ -159,8 +159,10 @@ ehthumbs_vista.db
 /data/*.xlsx
 /data/*.xls
 /data/*.csv
-/logs/*.log
-/logs/*.txt
+# Log files but not the logs directory
+/logs/*
+!/logs/.gitkeep
+!/logs/README.md
 *.log
 *~
 .advance_analysis_config.json
