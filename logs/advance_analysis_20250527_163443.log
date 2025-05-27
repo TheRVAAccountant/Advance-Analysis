@@ -1,0 +1,60 @@
+2025-05-27 16:34:43 - root - INFO - Logging initialized - Level: INFO, File: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\logs\advance_analysis_20250527_163443.log
+2025-05-27 16:34:44 - advance_analysis.main - INFO - Starting Advance Analysis Tool
+2025-05-27 16:34:44 - advance_analysis.main - INFO - Launching main GUI
+2025-05-27 16:34:46 - advance_analysis.gui.status_bar - INFO - Status: Ready
+2025-05-27 16:37:29 - advance_analysis.gui.file_selection_widget - INFO - Selected file: C:/Users/Jeron.Crooks/VSCode/Advance Analysis/inputs/WMD FY25 Q2 Advance Analysis 15 May 2025  Final.xlsx
+2025-05-27 16:37:45 - advance_analysis.gui.file_selection_widget - INFO - Selected file: C:/Users/Jeron.Crooks/VSCode/Advance Analysis/inputs/WMD FY25 Q2 Advance Analysis 15 May 2025  Final.xlsx
+2025-05-27 16:40:03 - advance_analysis.gui.file_selection_widget - INFO - Selected file: C:/Users/Jeron.Crooks/VSCode/Advance Analysis/src/inputs/WMD FY25 Q2 Advance Analysis 15 May 2025  Final.xlsx
+2025-05-27 16:40:18 - advance_analysis.gui.file_selection_widget - INFO - Selected file: C:/Users/Jeron.Crooks/VSCode/Advance Analysis/src/inputs/WMD FY25 Q2 TrialBalance20250410_024311PM.xlsx
+2025-05-27 16:40:24 - advance_analysis.gui.file_selection_widget - INFO - Selected file: C:/Users/Jeron.Crooks/VSCode/Advance Analysis/src/inputs/WMD FY24 Q4 TrialBalance20241011_080140AM.xlsx
+2025-05-27 16:41:17 - advance_analysis.gui.file_selection_widget - INFO - Selected file: C:/Users/Jeron.Crooks/VSCode/Advance Analysis/inputs/WMD FY25 Q2 Advance Analysis 15 May 2025  Final.xlsx
+2025-05-27 16:41:34 - advance_analysis.gui.file_selection_widget - INFO - Selected file: C:/Users/Jeron.Crooks/VSCode/Advance Analysis/src/inputs/WMD FY24 Q4 TrialBalance20241011_080140AM.xlsx
+2025-05-27 16:41:44 - advance_analysis.gui.status_bar - INFO - Status: Processing data...
+2025-05-27 16:41:44 - advance_analysis.gui.gui - INFO - Starting data processing for component: WMD, period: FY25 Q2
+2025-05-27 16:41:44 - advance_analysis.gui.gui - INFO - Loading Excel file: C:/Users/Jeron.Crooks/VSCode/Advance Analysis/inputs/WMD FY25 Q2 Advance Analysis 15 May 2025  Final.xlsx
+2025-05-27 16:41:46 - advance_analysis.gui.gui - INFO - Excel file loaded successfully
+2025-05-27 16:41:46 - advance_analysis.gui.gui - INFO - Processing data
+2025-05-27 16:41:46 - advance_analysis.core.data_processing_simple - INFO - Processing data for WMD FY25 Q2
+2025-05-27 16:41:46 - advance_analysis.core.advance_analysis_processing - INFO - Initialized AdvanceAnalysisProcessor for WMD
+2025-05-27 16:41:46 - advance_analysis.core.advance_analysis_processing - INFO - Current Reporting Date: 2025-03-31 00:00:00
+2025-05-27 16:41:46 - advance_analysis.core.advance_analysis_processing - INFO - Fiscal Year Start Date: 2024-10-01 00:00:00
+2025-05-27 16:41:46 - advance_analysis.core.advance_analysis_processing - INFO - Starting advance data processing
+2025-05-27 16:41:46 - advance_analysis.core.advance_analysis_processing - INFO - Initial DataFrame shape: (7, 16)
+2025-05-27 16:41:46 - advance_analysis.core.advance_analysis_processing - INFO - Initial columns: [7000861, 4802, '70RWMD20K00000006', 'N', -242.18, 'Unnamed: 5', 'Unnamed: 6', 'Unnamed: 7', 'Unnamed: 8', 'Unnamed: 9', 1, '-242.18.1', 'Advance will remain open until final billing from NIST', 'NIST - NAT INST OF STANDARDS & TECHNOLOGY', 1306, 'Vendor IAA Prepayment']
+2025-05-27 16:41:46 - advance_analysis.core.advance_analysis_processing - INFO - Validating and cleaning data
+2025-05-27 16:41:46 - advance_analysis.core.advance_analysis_processing - ERROR - Missing required columns: ['TAS', 'DHS Doc No', 'Advance/Prepayment']
+2025-05-27 16:41:46 - advance_analysis.core.data_processing_simple - ERROR - Error in advance analysis processing: Missing required columns: ['TAS', 'DHS Doc No', 'Advance/Prepayment']
+2025-05-27 16:41:46 - advance_analysis.core.data_processing_simple - INFO - Falling back to basic processing
+2025-05-27 16:41:46 - advance_analysis.gui.gui - INFO - Data processed successfully
+2025-05-27 16:41:46 - advance_analysis.gui.gui - INFO - Created output folder: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\outputs\WMD FY25 Q2 Advance Analysis 20250527_164146
+2025-05-27 16:41:46 - advance_analysis.modules.file_handler - INFO - File copied from C:/Users/Jeron.Crooks/VSCode/Advance Analysis/inputs/WMD FY25 Q2 Advance Analysis 15 May 2025  Final.xlsx to c:\Users\Jeron.Crooks\VSCode\Advance Analysis\outputs\WMD FY25 Q2 Advance Analysis 20250527_164146\WMD FY25 Q2 Advance Analysis - DO.xlsx
+2025-05-27 16:41:46 - advance_analysis.gui.gui - INFO - Input file copied and renamed: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\outputs\WMD FY25 Q2 Advance Analysis 20250527_164146\WMD FY25 Q2 Advance Analysis - DO.xlsx
+2025-05-27 16:41:46 - advance_analysis.gui.gui - INFO - Saving processed data to: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\outputs\WMD FY25 Q2 Advance Analysis 20250527_164146\WMD FY25 Q2 Advance Analysis Review.xlsx
+2025-05-27 16:41:46 - advance_analysis.gui.gui - INFO - Processed data saved successfully
+2025-05-27 16:41:46 - advance_analysis.gui.gui - INFO - Formatting Excel file
+2025-05-27 16:41:46 - advance_analysis.modules.excel_handler - INFO - Starting to format Excel file: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\outputs\WMD FY25 Q2 Advance Analysis 20250527_164146\WMD FY25 Q2 Advance Analysis Review.xlsx
+2025-05-27 16:41:46 - advance_analysis.modules.excel_handler - INFO - Excel file formatted successfully: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\outputs\WMD FY25 Q2 Advance Analysis 20250527_164146\WMD FY25 Q2 Advance Analysis Review.xlsx
+2025-05-27 16:41:46 - advance_analysis.gui.gui - INFO - Excel file formatted successfully
+2025-05-27 16:41:46 - advance_analysis.gui.gui - INFO - Processing Excel files using advanced method
+2025-05-27 16:41:46 - advance_analysis.modules.excel_handler - INFO - Starting Excel file processing for WMD
+2025-05-27 16:42:10 - advance_analysis.modules.excel_handler - ERROR - Value error in Excel processing: Sheet '6-ADVANCE TO TIER Recon Summary' not found in the input workbook
+2025-05-27 16:42:11 - advance_analysis.modules.excel_handler - ERROR - Error in process_excel_files: Sheet '6-ADVANCE TO TIER Recon Summary' not found in the input workbook
+Traceback (most recent call last):
+  File "c:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\advance_analysis\modules\excel_handler.py", line 57, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\advance_analysis\modules\excel_handler.py", line 596, in process_excel_files
+    raise ValueError(f"Sheet '{target_sheet}' not found in the input workbook")
+ValueError: Sheet '6-ADVANCE TO TIER Recon Summary' not found in the input workbook
+2025-05-27 16:42:11 - advance_analysis.gui.gui - ERROR - Error in Excel file processing: Sheet '6-ADVANCE TO TIER Recon Summary' not found in the input workbook
+Traceback (most recent call last):
+  File "c:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\advance_analysis\gui\gui.py", line 1188, in _process_data_thread
+    process_excel_files(
+  File "c:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\advance_analysis\modules\excel_handler.py", line 57, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\advance_analysis\modules\excel_handler.py", line 596, in process_excel_files
+    raise ValueError(f"Sheet '{target_sheet}' not found in the input workbook")
+ValueError: Sheet '6-ADVANCE TO TIER Recon Summary' not found in the input workbook
+2025-05-27 16:42:11 - advance_analysis.gui.gui - ERROR - Error occurred: Error in Excel file processing: Sheet '6-ADVANCE TO TIER Recon Summary' not found in the input workbook
+2025-05-27 16:42:29 - advance_analysis.main - INFO - Advance Analysis Tool shutting down
