@@ -95,8 +95,7 @@ class DOAdvanceAnalysisProcessor:
         df = self.status_validations.add_do_status_1_validation(df)
         
         # Step 11: Add DO Status 2 Validation
-        # Keep our custom implementation for now as StatusValidations might not have DO Status 2
-        df = self._add_do_status_2_validation(df)
+        df = self.status_validations.add_do_status_2_validations(df)
         
         # Step 12: Add DO Comment column
         df = self._add_do_comment(df)
@@ -334,43 +333,6 @@ class DOAdvanceAnalysisProcessor:
         
         return df
     
-    def _add_do_status_2_validation(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Add DO Status 2 Validation column with complex business rules."""
-        logger.info("Adding DO Status 2 Validation column")
-        
-        # This is a simplified version - the full implementation would include
-        # all the complex conditional logic from the Power Query
-        def validate_status_2(row):
-            status = row.get('Status', '')
-            
-            if status == '1':
-                return "Not Status 2"
-            elif status != '2':
-                return None
-            
-            # Implement the complex validation logic here
-            # This is a placeholder that shows the structure
-            valid_status = row.get('Valid Status 2', '')
-            cy_advance = row.get('CY Advance?', '')
-            
-            if valid_status == 'N' and cy_advance == 'Y':
-                return f"Follow-up Required — Status {status} — Current Year Advance — Advance Should Not Be Included in Population"
-            elif valid_status == "Valid – Status 2":
-                abnormal_balance = row.get('Abnormal Balance', '')
-                active_inactive = row.get('Active/Inactive Advance', '')
-                pop_expired = row.get('PoP Expired?', '')
-                return f"Status {status} — Anticipated Liquidation Date is Reasonable — {active_inactive}; Period of Performance Expired?: {pop_expired}"
-            else:
-                # Additional complex validation logic would go here
-                return f"Status {status} — Validation Required"
-        
-        df['DO Status 2 Validations'] = df.apply(validate_status_2, axis=1)
-        
-        # Log sample validations
-        logger.debug("Sample DO Status 2 validations:")
-        logger.debug(f"\n{df[df['Status'] == '2']['DO Status 2 Validations'].head()}")
-        
-        return df
     
     def _add_do_comment(self, df: pd.DataFrame) -> pd.DataFrame:
         """Add DO Comment column."""

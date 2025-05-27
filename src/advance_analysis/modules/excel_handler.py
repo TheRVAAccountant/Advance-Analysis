@@ -637,7 +637,89 @@ def get_column_letter(column_number: int) -> str:
 
 
 @safe_excel_operation
-def process_excel_files(output_path: str, input_path: str, current_dhstier_path: str, prior_dhstier_path: str, component: str, password: str) -> None:
+def populate_do_tab_4_review_sheet(excel, input_wb, dataframe_path: str) -> None:
+    """
+    Populate the DO Tab 4 Review sheet with processed data.
+    
+    Args:
+        excel: Excel application object
+        input_wb: Input workbook object
+        dataframe_path: Path to the Excel file containing processed dataframe
+    """
+    logger.info("Populating DO Tab 4 Review sheet with processed data")
+    
+    try:
+        # Check if DO Tab 4 Review sheet exists
+        sheet_exists = False
+        for sheet in input_wb.Sheets:
+            if sheet.Name == "DO Tab 4 Review":
+                sheet_exists = True
+                break
+        
+        if not sheet_exists:
+            logger.error("DO Tab 4 Review sheet not found in workbook")
+            return
+        
+        # Load the processed data
+        if not os.path.exists(dataframe_path):
+            logger.error(f"Processed data file not found: {dataframe_path}")
+            return
+        
+        # Open the dataframe workbook
+        df_wb = excel.Workbooks.Open(dataframe_path)
+        df_sheet = df_wb.Sheets(1)
+        
+        # Get the DO Tab 4 Review sheet
+        target_sheet = input_wb.Sheets("DO Tab 4 Review")
+        
+        # Clear existing data (keep headers)
+        target_sheet.UsedRange.ClearContents()
+        
+        # Copy all data including headers
+        df_sheet.UsedRange.Copy()
+        target_sheet.Range("A1").PasteSpecial(-4163)  # xlPasteValues
+        
+        # Apply date formatting
+        date_columns = [
+            'Date of Advance', 'Last Activity Date', 'Anticipated Liquidation Date',
+            'Period of Performance End Date', 'Date of Advance_comp', 
+            'Last Activity Date_comp', 'Anticipated Liquidation Date_comp',
+            'Period of Performance End Date_comp'
+        ]
+        
+        # Find date columns and apply formatting
+        header_row = 1
+        for col in range(1, target_sheet.UsedRange.Columns.Count + 1):
+            header_value = target_sheet.Cells(header_row, col).Value
+            if header_value in date_columns:
+                # Apply date format to entire column
+                col_letter = get_column_letter(col)
+                last_row = target_sheet.UsedRange.Rows.Count
+                date_range = target_sheet.Range(f"{col_letter}2:{col_letter}{last_row}")
+                date_range.NumberFormat = "*m/dd/yyyy"
+        
+        # Close the dataframe workbook without saving
+        df_wb.Close(SaveChanges=False)
+        
+        logger.info("DO Tab 4 Review sheet populated successfully")
+        
+        # Log sample of populated data
+        logger.info("Sample of DO Tab 4 Review data (first 5 rows):")
+        for row in range(1, min(6, target_sheet.UsedRange.Rows.Count + 1)):
+            row_data = []
+            for col in range(1, min(10, target_sheet.UsedRange.Columns.Count + 1)):
+                value = target_sheet.Cells(row, col).Value
+                if value is not None:
+                    row_data.append(str(value)[:20])  # Limit string length for logging
+            logger.info(f"Row {row}: {' | '.join(row_data)}")
+        
+    except Exception as e:
+        logger.error(f"Error populating DO Tab 4 Review sheet: {str(e)}")
+        raise
+
+
+@safe_excel_operation
+def process_excel_files(output_path: str, input_path: str, current_dhstier_path: str, prior_dhstier_path: str, component: str, password: str, dataframe_path: str = None) -> None:
     """
     Process Excel files by copying sheets, creating pivot table, modifying sheets, and ensuring file accessibility.
     
@@ -740,6 +822,12 @@ def process_excel_files(output_path: str, input_path: str, current_dhstier_path:
             advanced_copy_sheet(prior_dhstier_wb, input_wb, prior_sheet_name, "DO PY TB", insert_after=target_sheet)
         else:
             logger.warning("Skipping prior year DHSTIER sheet copy due to missing target sheet")
+        
+        # Populate DO Tab 4 Review sheet with processed data if available
+        if dataframe_path and os.path.exists(dataframe_path):
+            populate_do_tab_4_review_sheet(excel, input_wb, dataframe_path)
+        else:
+            logger.warning("No processed dataframe provided or file not found, skipping DO Tab 4 Review population")
         
         # Save after copying all sheets
         try:

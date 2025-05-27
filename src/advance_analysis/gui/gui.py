@@ -26,6 +26,7 @@ from ..modules.file_handler import (
 from ..modules.excel_handler import format_excel_file, process_excel_files
 from ..modules.data_loader import load_excel_file
 from ..core.data_processing_simple import process_data
+from ..core.data_processing_complete import process_complete_advance_analysis
 from .file_selection_widget import FileSelectionWidget
 from .status_bar import StatusBar
 from .about_dialog import AboutDialog, HelpDialog
@@ -1113,21 +1114,44 @@ class InputGUI:
             # Update status
             self.master.after(0, self.status_label.config, {"text": "Processing data..."})
 
-            # Process the data with cancellation check
+            # Process the data with complete analysis (CY, PY, and merged)
             try:
-                logger.info("Processing data")
+                logger.info("Processing data with complete analysis")
                 
                 # Check for cancellation frequently during long operations
                 self._check_cancellation("before data processing")
                 
-                # Process data in chunks if possible or add cancellation checks
-                processed_df = self._process_data_with_cancellation_checks(df, component, cy_fy_qtr)
+                # Create temporary output folder for processing files
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                project_root = Path(__file__).parent.parent.parent.parent
+                temp_output_folder = project_root / "outputs" / f"temp_{timestamp}"
+                temp_output_folder.mkdir(parents=True, exist_ok=True)
                 
-                logger.info("Data processed successfully")
+                # Process complete advance analysis
+                cy_df, py_df, merged_df = process_complete_advance_analysis(
+                    advance_file_path=file_path,
+                    current_dhstier_path=current_dhstier_path, 
+                    prior_dhstier_path=prior_dhstier_path,
+                    component=component,
+                    cy_fy_qtr=cy_fy_qtr,
+                    output_folder=str(temp_output_folder)
+                )
+                
+                # Use the CY dataframe for the basic output (backward compatibility)
+                processed_df = cy_df
+                
+                # Store the path to the merged dataframe for DO Tab 4 Review
+                self.do_tab_4_review_path = str(temp_output_folder / "DO_Tab_4_Review_Data.xlsx")
+                
+                logger.info("Complete data processing successful")
+                logger.info(f"DO Tab 4 Review data saved to: {self.do_tab_4_review_path}")
+                
             except Exception as e:
-                logger.error(f"Error in _process_data_thread: {str(e)}", exc_info=True)
-                self.master.after(0, self._show_error_message, f"An error occurred: {str(e)}")
-                return
+                logger.error(f"Error in complete data processing: {str(e)}", exc_info=True)
+                logger.info("Falling back to simple processing")
+                # Fall back to simple processing
+                processed_df = self._process_data_with_cancellation_checks(df, component, cy_fy_qtr)
+                self.do_tab_4_review_path = None
 
             # Update status
             self.master.after(0, self.status_label.config, {"text": "Creating output files..."})
@@ -1221,13 +1245,16 @@ class InputGUI:
                     logger.info("Excel files processed successfully using cross-platform method")
                 else:
                     logger.info("Processing Excel files using advanced method")
+                    # Pass the DO Tab 4 Review data path if available
+                    dataframe_path = getattr(self, 'do_tab_4_review_path', None)
                     process_excel_files(
                         processed_output_file_path, 
                         renamed_input_path, 
                         current_dhstier_path, 
                         prior_dhstier_path, 
                         component, 
-                        password
+                        password,
+                        dataframe_path
                     )
                     logger.info("Excel files processed successfully using advanced method")
             except Exception as e:
@@ -1289,12 +1316,12 @@ class InputGUI:
             cy_fy_qtr: Current fiscal year and quarter
             
         Returns:
-            Processed DataFrame
+            Tuple of (cy_df, py_df, merged_df) where merged_df is used for display
             
         Raises:
             UserCancellationError: If cancellation is detected during processing
         """
-        # Call the existing process_data function but check for cancellation periodically
+        # Use simple processing for now - will be replaced with complete processing
         self._check_cancellation("at start of data processing")
         result = process_data(df, component, cy_fy_qtr)
         self._check_cancellation("after data processing")
