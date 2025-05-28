@@ -1,0 +1,33 @@
+Row Labels	1	3	4	Grand Total
+ Missing one or more fields.			 234 	 234 
+ No Invoice Activity Reported.			 421 	 421 
+Comment is Missing.	 1 			 1 
+Comment notes unresolved issues and does not explain the cause of the abnormal balance.	 1 			 1 
+Comment notes unresolved issues. Is this the correct status?	 5 			 5 
+Comments do not address the cause of the abnormal balance.	 1,370 			 1,370 
+Comments do not address the cause of the abnormal balance. Missing one or more fields.	 789 	 2,097 	 26 	 2,912 
+Comments do not address the cause of the abnormal balance. No Invoice Activity Reported.		 34,318 		 34,318 
+Comments state unresolved issues with obligation. Please advise how CG determines these are valid Status 1 obligations.	 203 			 203 
+Missing one or more fields.	 471 	 13,586 	 950 	 15,007 
+Missing one or more fields. De-obligation Date is in the PY.		 743 	 815 	 1,558 
+Missing one or more fields. De-obligation Date is in the PY. Comments do not address the cause of the abnormal balance.		 74 	 7 	 81 
+Missing one or more fields. De-obligation Date is in the PY. Obligation Date is after the Expiration of the Period of Performance. Comments do not address the cause of the abnormal balance.		 36 		 36 
+Missing one or more fields. De-obligation Date not Provided.			 738 	 738 
+Missing one or more fields. Obligation Date is after Expiration of PoP. Comments do not address the cause of the abnormal balance.	 5 			 5 
+Missing one or more fields. Obligation Date is after Expiration of the Period of Performance End Date. Comments do not address the cause of the abnormal balance.	 257 			 257 
+No Invoice Activity Reported.	 31,029 	 4,166 		 35,195 
+No Invoice Activity Reported. Comments state requires additional research. Please advise on how CG determines this obligation should be Status 1.	 7 			 7 
+No Invoice Activity Reported. Comments state that Period of Performance is Active, however, Period of Performance is Expired.	 31 			 31 
+No Invoice Activity Reported. De-obligation Date is in the PY.		 121 	 325 	 446 
+No Invoice Activity Reported. De-obligation Date not Provided.			 609 	 609 
+No Invoice Activity Reported. Missing one or more fields. Comments state that Period of Performance is Active, however, Period of Performance is Expired.	 1 			 1 
+Obligation Date is after Expiration of Period of Performance.	 250 			 250 
+Obligation Date is after Expiration of PoP. Comments do not address the cause of the abnormal balance.	 3 			 3 
+Valid Status 1	 33,649 			 33,649 
+Comments state these require additional research. Please advise how CG determines these obligations are valid Status 1 obligations	 16 			 16 
+No Invoice Activity Reported. Comments state unresolved issues with obligation. Please advise how CG determines these are valid Status 1 obligations.	 1 			 1 
+Comments do not address the cause of the abnormal balance. Missing one or more fields. Comments mention research is required.		 8 		 8 
+De-obligation Date is in the PY. Comments do not address the cause of the abnormal balance. Missing one or more fields.		 1 		 1 
+No Invoice Activity Reported. Obligation Date is after Expiration of Period of Performance.	 2,201 			 2,201 
+No Invoice Activity Reported. Missing one or more fields. Obligation Date is after Expiration of Period of Performance..	 2 			 2 
+Grand Total	 70,292 	 55,150 	 4,125 	 129,567 
