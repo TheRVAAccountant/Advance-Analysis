@@ -45,6 +45,28 @@ def copy_and_rename_input_file(input_path: str, component_name: str, cy_fy_qtr: 
         shutil.copy(input_path, new_input_path)
         logger.info(f"File copied from {input_path} to {new_input_path}")
         
+        # Ensure file copy is complete and synchronized
+        try:
+            # Force file system sync
+            with open(new_input_path, 'rb+') as f:
+                f.flush()
+                os.fsync(f.fileno())
+            logger.debug("File system sync completed for copied file")
+            
+            # Verify file size matches
+            source_size = os.path.getsize(input_path)
+            dest_size = os.path.getsize(new_input_path)
+            if source_size != dest_size:
+                logger.warning(f"File size mismatch: source={source_size}, dest={dest_size}")
+            else:
+                logger.debug(f"File copy verified: {dest_size} bytes")
+                
+            # Small delay to ensure file system operations complete
+            time.sleep(0.5)
+            
+        except Exception as e:
+            logger.warning(f"Could not verify file copy: {e}")
+        
         return new_input_path
         
     except FileNotFoundError as e:

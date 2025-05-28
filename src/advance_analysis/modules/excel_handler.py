@@ -154,6 +154,106 @@ def open_workbook_robust(excel: Any, file_path: str, max_retries: int = 3, read_
                 raise Exception(f"Failed to open workbook after {max_retries} attempts: {file_path} - {e}")
 
 
+def open_workbook_robust_v2(excel: Any, file_path: str, max_retries: int = 3, read_only: bool = False) -> Any:
+    """
+    Enhanced workbook opening with multiple strategies.
+    
+    Args:
+        excel: Excel COM application object
+        file_path: Path to the workbook
+        max_retries: Maximum number of open attempts
+        read_only: Whether to open in read-only mode
+        
+    Returns:
+        Workbook COM object
+        
+    Raises:
+        Exception: If workbook cannot be opened after all retries
+    """
+    import time
+    
+    # First ensure file is completely ready
+    if not ensure_file_ready_after_copy(file_path, file_path):
+        logger.warning(f"File not stabilized, attempting anyway: {file_path}")
+    
+    for attempt in range(max_retries):
+        wb = None
+        try:
+            logger.info(f"Opening workbook {file_path} (attempt {attempt + 1}/{max_retries})")
+            
+            # Clear any existing references
+            excel.CutCopyMode = False
+            
+            # Strategy 1: Open with minimal parameters
+            try:
+                logger.debug("Strategy 1: Minimal parameters")
+                wb = excel.Workbooks.Open(file_path)
+                if validate_workbook_robust(wb, file_path):
+                    logger.info(f"Workbook opened successfully with strategy 1: {file_path}")
+                    return wb
+                else:
+                    logger.debug("Strategy 1 validation failed")
+                    if wb:
+                        wb.Close(SaveChanges=False)
+                        wb = None
+            except Exception as e:
+                logger.debug(f"Strategy 1 failed: {e}")
+                if wb:
+                    try:
+                        wb.Close(SaveChanges=False)
+                    except:
+                        pass
+                    wb = None
+            
+            # Strategy 2: Open with full parameters
+            try:
+                logger.debug("Strategy 2: Full parameters")
+                wb = excel.Workbooks.Open(
+                    file_path,
+                    UpdateLinks=0,
+                    ReadOnly=read_only,
+                    IgnoreReadOnlyRecommended=True,
+                    Notify=False,
+                    AddToMru=False,
+                    CorruptLoad=2  # xlRepairFile
+                )
+                if validate_workbook_robust(wb, file_path):
+                    logger.info(f"Workbook opened successfully with strategy 2: {file_path}")
+                    return wb
+                else:
+                    logger.debug("Strategy 2 validation failed")
+                    if wb:
+                        wb.Close(SaveChanges=False)
+                        wb = None
+            except Exception as e:
+                logger.debug(f"Strategy 2 failed: {e}")
+                if wb:
+                    try:
+                        wb.Close(SaveChanges=False)
+                    except:
+                        pass
+                    wb = None
+            
+            # Strategy 3: Force Excel to refresh and retry
+            if attempt < max_retries - 1:
+                logger.debug("Strategy 3: Excel refresh")
+                excel.ScreenUpdating = True
+                excel.ScreenUpdating = False
+                # Force Excel to process pending events
+                try:
+                    excel.Calculate()
+                except:
+                    pass
+                time.sleep(2 * (attempt + 1))
+                
+        except Exception as e:
+            logger.warning(f"All strategies failed (attempt {attempt + 1}): {e}")
+            if attempt < max_retries - 1:
+                time.sleep(2 * (attempt + 1))
+            else:
+                raise Exception(f"Failed to open workbook after {max_retries} attempts with all strategies: {file_path}")
+
+
 def release_file_locks(file_path: str) -> None:
     """
     Ensure file is released from any locks before COM operations.
@@ -1005,6 +1105,187 @@ def ensure_com_connected(excel) -> bool:
         return False
 
 
+def validate_workbook_robust(wb: Any, file_path: str, max_wait: float = 5.0) -> bool:
+    """
+    Robustly validate workbook with retry for lazy initialization.
+    
+    Args:
+        wb: Workbook COM object
+        file_path: Path to the workbook file
+        max_wait: Maximum time to wait for validation
+        
+    Returns:
+        True if workbook is valid, False otherwise
+    """
+    import time
+    start_time = time.time()
+    
+    while time.time() - start_time < max_wait:
+        try:
+            # Try multiple validation approaches
+            if wb is None:
+                return False
+                
+            # Try to access Name property first (lightweight)
+            try:
+                name = wb.Name
+                logger.debug(f"Workbook name accessible: {name}")
+            except:
+                logger.debug("Workbook name not accessible")
+                time.sleep(0.5)
+                continue
+            
+            # Try to count sheets with error handling
+            try:
+                sheet_count = wb.Sheets.Count
+                if sheet_count > 0:
+                    logger.debug(f"Workbook validated: {sheet_count} sheets")
+                    return True
+            except Exception as e:
+                logger.debug(f"Sheet count failed: {e}")
+                
+            # Alternative: Try to access first sheet
+            try:
+                first_sheet = wb.Sheets(1)
+                if first_sheet:
+                    logger.debug("Workbook validated via first sheet access")
+                    return True
+            except:
+                pass
+                
+            time.sleep(0.5)
+            
+        except Exception as e:
+            logger.debug(f"Validation attempt failed: {e}")
+            time.sleep(0.5)
+    
+    return False
+
+
+def ensure_file_ready_after_write(file_path: str, expected_size: Optional[int] = None, max_wait: float = 10.0) -> bool:
+    """
+    Ensure file is ready after write operation (copy or save).
+    
+    Args:
+        file_path: Path to the file to check
+        expected_size: Expected file size if known
+        max_wait: Maximum time to wait
+        
+    Returns:
+        True if file is ready, False otherwise
+    """
+    import time
+    import os
+    
+    if not os.path.exists(file_path):
+        return False
+    
+    # First, ensure basic file accessibility
+    if not wait_for_file_ready(file_path, max_wait=max_wait/2):
+        logger.warning(f"File not accessible: {file_path}")
+        return False
+    
+    # If we know the expected size, wait for it
+    if expected_size is not None:
+        start_time = time.time()
+        while time.time() - start_time < max_wait/2:
+            try:
+                current_size = os.path.getsize(file_path)
+                if current_size == expected_size:
+                    logger.debug(f"File size matches expected: {current_size} bytes")
+                    return True
+            except:
+                pass
+            time.sleep(0.5)
+    
+    # Otherwise, use the general ready check
+    return ensure_file_ready_after_copy(file_path, file_path, max_wait=max_wait/2)
+
+
+def ensure_file_ready_after_copy(source_path: str, dest_path: str, max_wait: float = 10.0) -> bool:
+    """
+    Ensure file is ready after copy operation with size stability check.
+    
+    Args:
+        source_path: Source file path (for reference)
+        dest_path: Destination file path to check
+        max_wait: Maximum time to wait
+        
+    Returns:
+        True if file is ready, False otherwise
+    """
+    import time
+    import os
+    
+    if not os.path.exists(dest_path):
+        return False
+    
+    # Wait for file size to stabilize
+    last_size = -1
+    stable_count = 0
+    check_interval = 0.5
+    
+    start_time = time.time()
+    while time.time() - start_time < max_wait:
+        try:
+            current_size = os.path.getsize(dest_path)
+            
+            if current_size == last_size:
+                stable_count += 1
+                if stable_count >= 3:  # Size stable for 3 checks
+                    logger.debug(f"File size stable at {current_size} bytes")
+                    # Additional check - can we open it?
+                    with open(dest_path, 'rb') as f:
+                        f.read(1)
+                    return True
+            else:
+                stable_count = 0
+                last_size = current_size
+                
+        except Exception as e:
+            logger.debug(f"File not ready: {e}")
+            stable_count = 0
+            
+        time.sleep(check_interval)
+    
+    return False
+
+
+def prepare_file_for_com_access(file_path: str) -> None:
+    """
+    Prepare file for COM access by ensuring it's fully written and released.
+    
+    Args:
+        file_path: Path to the file to prepare
+        
+    Raises:
+        FileNotFoundError: If file doesn't exist
+    """
+    import os
+    import time
+    
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"File not found: {file_path}")
+    
+    logger.debug(f"Preparing file for COM access: {file_path}")
+    
+    # Force file system cache flush
+    try:
+        with open(file_path, 'rb+') as f:
+            f.flush()
+            os.fsync(f.fileno())
+        logger.debug("File system cache flushed")
+    except Exception as e:
+        logger.debug(f"Could not flush file cache: {e}")
+    
+    # Small delay for file system
+    time.sleep(0.5)
+    
+    # Verify file is accessible
+    if not wait_for_file_ready(file_path, max_wait=5.0):
+        logger.warning(f"File may not be fully ready: {file_path}")
+
+
 @safe_excel_operation
 def populate_do_tab_4_review_sheet(excel, input_wb, dataframe_path: str) -> None:
     """
@@ -1039,19 +1320,23 @@ def populate_do_tab_4_review_sheet(excel, input_wb, dataframe_path: str) -> None
         
         logger.info(f"Opening dataframe from: {dataframe_path}")
         
-        # Use robust method to open the dataframe workbook
+        # Use enhanced robust method to open the dataframe workbook
         df_wb = None
         
         try:
-            # Ensure file is ready
-            release_file_locks(dataframe_path)
+            # Prepare file for COM access
+            prepare_file_for_com_access(dataframe_path)
             
-            # Open with robust method
-            df_wb = open_workbook_robust(excel, dataframe_path, max_retries=5, read_only=True)
-            logger.info("Successfully opened dataframe workbook with robust method")
+            # Small delay to ensure file system sync
+            import time
+            time.sleep(0.5)
+            
+            # Open with enhanced robust method
+            df_wb = open_workbook_robust_v2(excel, dataframe_path, max_retries=5, read_only=True)
+            logger.info("Successfully opened dataframe workbook with enhanced robust method")
             
         except Exception as e:
-            logger.error(f"Failed to open dataframe file with robust method: {e}")
+            logger.error(f"Failed to open dataframe file with enhanced robust method: {e}")
             # Fall back to pandas method
             logger.info("Falling back to pandas method...")
             import pandas as pd
@@ -1185,18 +1470,37 @@ def process_excel_files(output_path: str, input_path: str, current_dhstier_path:
         for file_path in [output_path, input_path, current_dhstier_path, prior_dhstier_path]:
             if not os.path.exists(file_path):
                 raise FileNotFoundError(f"File not found: {file_path}")
-            # Release any potential locks
-            release_file_locks(file_path)
+        
+        # Prepare all files for COM access
+        logger.info("Preparing files for COM access...")
+        for file_path in [output_path, input_path, current_dhstier_path, prior_dhstier_path]:
+            prepare_file_for_com_access(file_path)
+        
+        # Add delay between file operations to ensure file system sync
+        import time
+        time.sleep(1)
 
         # Initialize Excel COM with validation
         excel = initialize_excel_com(max_retries=3)
         
-        # Open workbooks with robust error handling
-        logger.info("Opening workbooks...")
-        output_wb = open_workbook_robust(excel, output_path, max_retries=3)
-        input_wb = open_workbook_robust(excel, input_path, max_retries=3)
-        current_dhstier_wb = open_workbook_robust(excel, current_dhstier_path, max_retries=3)
-        prior_dhstier_wb = open_workbook_robust(excel, prior_dhstier_path, max_retries=3)
+        # Open workbooks with enhanced robust strategy
+        logger.info("Opening workbooks with enhanced strategy...")
+        output_wb = open_workbook_robust_v2(excel, output_path, max_retries=3)
+        
+        # Add small delay before opening next workbook
+        time.sleep(0.5)
+        
+        input_wb = open_workbook_robust_v2(excel, input_path, max_retries=3)
+        
+        # Add small delay before opening next workbook
+        time.sleep(0.5)
+        
+        current_dhstier_wb = open_workbook_robust_v2(excel, current_dhstier_path, max_retries=3)
+        
+        # Add small delay before opening next workbook
+        time.sleep(0.5)
+        
+        prior_dhstier_wb = open_workbook_robust_v2(excel, prior_dhstier_path, max_retries=3)
         
         # Log all sheet names in the input workbook for debugging
         logger.info("Sheet names in input workbook:")
