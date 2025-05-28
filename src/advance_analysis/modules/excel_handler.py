@@ -41,6 +41,74 @@ def format_excel_style(worksheet, style_name):
 logger = get_logger(__name__)
 
 
+class ExcelComContext:
+    """Context manager for Excel COM operations to ensure proper cleanup."""
+    
+    def __init__(self):
+        self.excel = None
+        self.workbooks = []
+        
+    def __enter__(self):
+        """Initialize COM and create Excel application."""
+        try:
+            pythoncom.CoInitialize()
+            self.excel = win32com.client.Dispatch("Excel.Application")
+            self.excel.Visible = False
+            self.excel.DisplayAlerts = False
+            logger.debug("Excel COM context initialized")
+            return self
+        except Exception as e:
+            logger.error(f"Failed to initialize Excel COM: {e}")
+            raise
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Clean up Excel COM objects."""
+        logger.debug("Cleaning up Excel COM context...")
+        
+        # Clear clipboard
+        if self.excel:
+            try:
+                self.excel.CutCopyMode = False
+            except:
+                pass
+        
+        # Close all tracked workbooks
+        for wb in self.workbooks:
+            try:
+                wb.Close(SaveChanges=False)
+            except:
+                pass
+            release_com_object(wb)
+        
+        # Quit Excel
+        if self.excel:
+            try:
+                self.excel.Quit()
+            except:
+                pass
+            release_com_object(self.excel)
+        
+        # Force garbage collection
+        import gc
+        gc.collect()
+        time.sleep(0.2)
+        
+        # Uninitialize COM
+        try:
+            pythoncom.CoUninitialize()
+        except:
+            pass
+        
+        logger.debug("Excel COM context cleaned up")
+        return False  # Don't suppress exceptions
+    
+    def open_workbook(self, path, **kwargs):
+        """Open a workbook and track it for cleanup."""
+        wb = self.excel.Workbooks.Open(path, **kwargs)
+        self.workbooks.append(wb)
+        return wb
+
+
 # Error handling wrapper function
 def safe_excel_operation(func):
     """
@@ -636,6 +704,35 @@ def get_column_letter(column_number: int) -> str:
     return column_letter
 
 
+def release_com_object(obj):
+    """
+    Safely release a COM object and clean up references.
+    
+    Args:
+        obj: COM object to release
+    """
+    if obj is not None:
+        try:
+            # Release COM reference
+            pythoncom.CoUninitialize()
+            pythoncom.CoInitialize()
+        except:
+            pass
+        
+        try:
+            # Try to delete the object
+            del obj
+        except:
+            pass
+        
+        # Force garbage collection
+        import gc
+        gc.collect()
+        
+        # Give COM time to clean up
+        time.sleep(0.1)
+
+
 @safe_excel_operation
 def populate_do_tab_4_review_sheet(excel, input_wb, dataframe_path: str) -> None:
     """
@@ -660,58 +757,135 @@ def populate_do_tab_4_review_sheet(excel, input_wb, dataframe_path: str) -> None
             logger.error("DO Tab 4 Review sheet not found in workbook")
             return
         
+        # Ensure the path is absolute and properly formatted
+        dataframe_path = os.path.abspath(dataframe_path)
+        
         # Load the processed data
         if not os.path.exists(dataframe_path):
             logger.error(f"Processed data file not found: {dataframe_path}")
             return
         
-        # Open the dataframe workbook
-        df_wb = excel.Workbooks.Open(dataframe_path)
-        df_sheet = df_wb.Sheets(1)
+        logger.info(f"Opening dataframe from: {dataframe_path}")
         
-        # Get the DO Tab 4 Review sheet
-        target_sheet = input_wb.Sheets("DO Tab 4 Review")
+        # Wait for file to be fully written and released
+        max_attempts = 10
+        attempt = 0
+        df_wb = None
         
-        # Clear existing data (keep headers)
-        target_sheet.UsedRange.ClearContents()
+        while attempt < max_attempts:
+            try:
+                # Try to open the file exclusively to check if it's accessible
+                with open(dataframe_path, 'rb') as test_file:
+                    pass
+                
+                # If we can open it, try with Excel COM
+                df_wb = excel.Workbooks.Open(dataframe_path, ReadOnly=True, Notify=False)
+                logger.info("Successfully opened dataframe workbook")
+                break
+                
+            except Exception as e:
+                attempt += 1
+                if attempt < max_attempts:
+                    logger.warning(f"Attempt {attempt}/{max_attempts} failed to open file: {e}. Retrying...")
+                    import time
+                    time.sleep(0.5)  # Wait 500ms before retry
+                else:
+                    logger.error(f"Failed to open dataframe file after {max_attempts} attempts: {e}")
+                    # Fall back to pandas method
+                    logger.info("Falling back to pandas method...")
+                    import pandas as pd
+                    df = pd.read_excel(dataframe_path, sheet_name=0, engine='openpyxl')
+                    
+                    # Get the DO Tab 4 Review sheet
+                    target_sheet = input_wb.Sheets("DO Tab 4 Review")
+                    
+                    # Clear existing data
+                    target_sheet.UsedRange.ClearContents()
+                    
+                    # Write headers
+                    for col_idx, col_name in enumerate(df.columns, 1):
+                        target_sheet.Cells(1, col_idx).Value = str(col_name)
+                    
+                    # Write data
+                    for row_idx, row in df.iterrows():
+                        for col_idx, value in enumerate(row, 1):
+                            if pd.notna(value):
+                                if isinstance(value, pd.Timestamp):
+                                    target_sheet.Cells(row_idx + 2, col_idx).Value = value.to_pydatetime()
+                                else:
+                                    target_sheet.Cells(row_idx + 2, col_idx).Value = value
+                    
+                    # Apply date formatting
+                    date_columns = [
+                        'Date of Advance', 'Last Activity Date', 'Anticipated Liquidation Date',
+                        'Period of Performance End Date', 'Date of Advance_comp', 
+                        'Last Activity Date_comp', 'Anticipated Liquidation Date_comp',
+                        'Period of Performance End Date_comp'
+                    ]
+                    
+                    for col_idx, col_name in enumerate(df.columns, 1):
+                        if col_name in date_columns:
+                            col_letter = get_column_letter(col_idx)
+                            last_row = len(df) + 1
+                            date_range = target_sheet.Range(f"{col_letter}2:{col_letter}{last_row}")
+                            date_range.NumberFormat = "*m/dd/yyyy"
+                    
+                    logger.info("DO Tab 4 Review sheet populated successfully using pandas fallback")
+                    return
         
-        # Copy all data including headers
-        df_sheet.UsedRange.Copy()
-        target_sheet.Range("A1").PasteSpecial(-4163)  # xlPasteValues
-        
-        # Apply date formatting
-        date_columns = [
-            'Date of Advance', 'Last Activity Date', 'Anticipated Liquidation Date',
-            'Period of Performance End Date', 'Date of Advance_comp', 
-            'Last Activity Date_comp', 'Anticipated Liquidation Date_comp',
-            'Period of Performance End Date_comp'
-        ]
-        
-        # Find date columns and apply formatting
-        header_row = 1
-        for col in range(1, target_sheet.UsedRange.Columns.Count + 1):
-            header_value = target_sheet.Cells(header_row, col).Value
-            if header_value in date_columns:
-                # Apply date format to entire column
-                col_letter = get_column_letter(col)
-                last_row = target_sheet.UsedRange.Rows.Count
-                date_range = target_sheet.Range(f"{col_letter}2:{col_letter}{last_row}")
-                date_range.NumberFormat = "*m/dd/yyyy"
-        
-        # Close the dataframe workbook without saving
-        df_wb.Close(SaveChanges=False)
-        
-        logger.info("DO Tab 4 Review sheet populated successfully")
-        
-        # Log sample of populated data
-        logger.info("Sample of DO Tab 4 Review data (first 5 rows):")
-        for row in range(1, min(6, target_sheet.UsedRange.Rows.Count + 1)):
-            row_data = []
-            for col in range(1, min(10, target_sheet.UsedRange.Columns.Count + 1)):
-                value = target_sheet.Cells(row, col).Value
-                if value is not None:
-                    row_data.append(str(value)[:20])  # Limit string length for logging
-            logger.info(f"Row {row}: {' | '.join(row_data)}")
+        # If we successfully opened with COM, continue with COM method
+        if df_wb:
+            df_sheet = df_wb.Sheets(1)
+            
+            # Get the DO Tab 4 Review sheet
+            target_sheet = input_wb.Sheets("DO Tab 4 Review")
+            
+            # Clear existing data
+            target_sheet.UsedRange.ClearContents()
+            
+            # Copy all data including headers
+            df_sheet.UsedRange.Copy()
+            target_sheet.Range("A1").PasteSpecial(-4163)  # xlPasteValues
+            
+            # Clear clipboard
+            excel.CutCopyMode = False
+            
+            # Apply date formatting
+            date_columns = [
+                'Date of Advance', 'Last Activity Date', 'Anticipated Liquidation Date',
+                'Period of Performance End Date', 'Date of Advance_comp', 
+                'Last Activity Date_comp', 'Anticipated Liquidation Date_comp',
+                'Period of Performance End Date_comp'
+            ]
+            
+            # Find date columns and apply formatting
+            header_row = 1
+            for col in range(1, target_sheet.UsedRange.Columns.Count + 1):
+                header_value = target_sheet.Cells(header_row, col).Value
+                if header_value in date_columns:
+                    # Apply date format to entire column
+                    col_letter = get_column_letter(col)
+                    last_row = target_sheet.UsedRange.Rows.Count
+                    date_range = target_sheet.Range(f"{col_letter}2:{col_letter}{last_row}")
+                    date_range.NumberFormat = "*m/dd/yyyy"
+            
+            # Auto-fit columns for better visibility
+            target_sheet.UsedRange.Columns.AutoFit()
+            
+            # Close the dataframe workbook without saving
+            df_wb.Close(SaveChanges=False)
+            
+            logger.info("DO Tab 4 Review sheet populated successfully using Excel COM")
+            
+            # Log sample of populated data
+            logger.info("Sample of DO Tab 4 Review data (first 3 rows):")
+            for row in range(1, min(4, target_sheet.UsedRange.Rows.Count + 1)):
+                row_data = []
+                for col in range(1, min(6, target_sheet.UsedRange.Columns.Count + 1)):
+                    value = target_sheet.Cells(row, col).Value
+                    if value is not None:
+                        row_data.append(str(value)[:30])  # Limit string length for logging
+                logger.info(f"Row {row}: {' | '.join(row_data)}")
         
     except Exception as e:
         logger.error(f"Error populating DO Tab 4 Review sheet: {str(e)}")
@@ -824,10 +998,24 @@ def process_excel_files(output_path: str, input_path: str, current_dhstier_path:
             logger.warning("Skipping prior year DHSTIER sheet copy due to missing target sheet")
         
         # Populate DO Tab 4 Review sheet with processed data if available
-        if dataframe_path and os.path.exists(dataframe_path):
-            populate_do_tab_4_review_sheet(excel, input_wb, dataframe_path)
+        if dataframe_path:
+            # Ensure absolute path
+            dataframe_path = os.path.abspath(dataframe_path)
+            
+            if os.path.exists(dataframe_path):
+                # Small delay to ensure file is not locked
+                import time
+                time.sleep(0.5)
+                
+                # Log file size to verify it's fully written
+                file_size = os.path.getsize(dataframe_path)
+                logger.info(f"DO Tab 4 Review data file size: {file_size} bytes")
+                
+                populate_do_tab_4_review_sheet(excel, input_wb, dataframe_path)
+            else:
+                logger.warning(f"Processed dataframe file not found: {dataframe_path}")
         else:
-            logger.warning("No processed dataframe provided or file not found, skipping DO Tab 4 Review population")
+            logger.warning("No processed dataframe path provided, skipping DO Tab 4 Review population")
         
         # Save after copying all sheets
         try:
@@ -887,6 +1075,17 @@ def process_excel_files(output_path: str, input_path: str, current_dhstier_path:
         logger.error(f"Error in Excel file processing: {str(e)}", exc_info=True)
         raise
     finally:
+        # Comprehensive cleanup to prevent file locking
+        logger.info("Starting comprehensive cleanup process...")
+        
+        # Clear clipboard to release any references
+        if excel:
+            try:
+                excel.CutCopyMode = False
+                logger.debug("Cleared Excel clipboard")
+            except:
+                pass
+        
         # Save the input workbook if it was modified
         if input_wb:
             try:
@@ -896,27 +1095,58 @@ def process_excel_files(output_path: str, input_path: str, current_dhstier_path:
             except Exception as save_error:
                 logger.error(f"Error saving input workbook: {str(save_error)}")
         
-        # Close workbooks
-        for wb in [output_wb, current_dhstier_wb, prior_dhstier_wb]:
+        # Close workbooks with proper error handling
+        workbooks_to_close = [
+            ("output_wb", output_wb),
+            ("current_dhstier_wb", current_dhstier_wb),
+            ("prior_dhstier_wb", prior_dhstier_wb),
+            ("input_wb", input_wb)
+        ]
+        
+        for wb_name, wb in workbooks_to_close:
             if wb:
                 try:
+                    logger.debug(f"Closing {wb_name}...")
                     wb.Close(SaveChanges=False)
+                    logger.debug(f"{wb_name} closed successfully")
+                except Exception as close_error:
+                    logger.warning(f"Error closing {wb_name}: {close_error}")
+                
+                # Release the COM object
+                try:
+                    release_com_object(wb)
                 except:
                     pass
-        
-        # Close input workbook (already saved above)
-        if input_wb:
+
+        # Quit Excel with retry logic
+        if excel:
             try:
-                input_wb.Close(SaveChanges=False)
+                logger.debug("Quitting Excel application...")
+                excel.DisplayAlerts = False
+                excel.Quit()
+                logger.debug("Excel quit successfully")
+            except Exception as quit_error:
+                logger.warning(f"Error quitting Excel: {quit_error}")
+            
+            # Release Excel COM object
+            try:
+                release_com_object(excel)
             except:
                 pass
 
-        # Quit Excel
-        if excel:
-            excel.Quit()
-
+        # Force garbage collection
+        import gc
+        gc.collect()
+        time.sleep(0.5)  # Give COM time to clean up
+        
         # Uninitialize COM
-        pythoncom.CoUninitialize()
+        try:
+            pythoncom.CoUninitialize()
+            logger.debug("COM uninitialized")
+        except:
+            pass
+        
+        logger.info("Cleanup process completed")
 
     # Ensure file accessibility after processing
     try:

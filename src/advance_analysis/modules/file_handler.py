@@ -76,18 +76,29 @@ def wait_for_file(file_path: str, timeout: int = 60, check_interval: int = 1) ->
         
     start_time = time.time()
     logger.info(f"Waiting for file to become available: {file_path}")
+    logger.debug(f"Timeout: {timeout}s, Check interval: {check_interval}s")
     
+    attempt_count = 0
     while time.time() - start_time < timeout:
+        attempt_count += 1
         try:
             # Try to open the file in read-write mode
-            with open(file_path, 'r+b'):
-                logger.info(f"File is now available: {file_path}")
+            with open(file_path, 'r+b') as f:
+                # Try to read a few bytes to ensure file is truly accessible
+                f.read(1)
+                logger.info(f"File is now available after {attempt_count} attempts: {file_path}")
                 return True  # File is available
         except IOError as e:
-            logger.debug(f"File still locked, retrying in {check_interval} second(s): {e}")
+            elapsed = time.time() - start_time
+            remaining = timeout - elapsed
+            if attempt_count % 10 == 0:  # Log every 10 attempts
+                logger.debug(f"File still locked after {attempt_count} attempts ({elapsed:.1f}s elapsed, {remaining:.1f}s remaining): {e}")
+            time.sleep(check_interval)
+        except Exception as e:
+            logger.warning(f"Unexpected error while checking file availability: {type(e).__name__}: {e}")
             time.sleep(check_interval)
             
-    logger.error(f"Timeout reached while waiting for file: {file_path}")
+    logger.error(f"Timeout reached after {attempt_count} attempts ({timeout}s) while waiting for file: {file_path}")
     return False  # Timeout reached
 
 
@@ -105,38 +116,77 @@ def wait_for_excel_to_release_file(file_path: str, timeout: int = 60) -> bool:
     return wait_for_file(file_path, timeout)
 
 
-def ensure_file_accessibility(file_path: str, timeout: int = 60) -> None:
+def ensure_file_accessibility(file_path: str, timeout: int = 60, retries: int = 3) -> None:
     """
-    Ensure a file is accessible and not empty.
+    Ensure a file is accessible and not empty with retry logic.
     
     Args:
         file_path (str): Path to the file to check.
-        timeout (int): Maximum time to wait in seconds.
+        timeout (int): Maximum time to wait in seconds per retry.
+        retries (int): Number of retry attempts.
     
     Raises:
         TimeoutError: If the file is not accessible within the timeout period.
         FileNotFoundError: If the file does not exist or is empty after the operation.
         OSError: For other OS-related errors during file operations.
     """
-    try:
-        if not os.path.exists(file_path):
-            raise FileNotFoundError(f"File does not exist: {file_path}")
+    logger.info(f"Ensuring file accessibility for: {file_path}")
+    
+    for attempt in range(retries):
+        try:
+            # Check if file exists
+            if not os.path.exists(file_path):
+                if attempt < retries - 1:
+                    logger.warning(f"File does not exist on attempt {attempt + 1}/{retries}: {file_path}")
+                    time.sleep(2)  # Wait before retry
+                    continue
+                else:
+                    raise FileNotFoundError(f"File does not exist after {retries} attempts: {file_path}")
             
-        if not wait_for_excel_to_release_file(file_path, timeout):
-            raise TimeoutError(f"Timeout waiting for Excel to release {file_path}")
-        
-        # Additional check to ensure the file exists and is not empty
-        if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
-            raise FileNotFoundError(f"File {file_path} does not exist or is empty after Excel operation")
-        
-        logger.info(f"File accessibility ensured: {file_path}")
-        
-    except FileNotFoundError as e:
-        logger.error(f"File not found or empty: {e}", exc_info=True)
-        raise
-    except TimeoutError as e:
-        logger.error(f"Timeout error: {e}", exc_info=True)
-        raise
-    except OSError as e:
-        logger.error(f"OS error when ensuring file accessibility: {e}", exc_info=True)
-        raise
+            # Log file size
+            file_size = os.path.getsize(file_path)
+            logger.debug(f"File size: {file_size} bytes")
+            
+            # Wait for file to be released
+            if not wait_for_excel_to_release_file(file_path, timeout):
+                if attempt < retries - 1:
+                    logger.warning(f"Timeout waiting for file release on attempt {attempt + 1}/{retries}")
+                    # Try to clear any lingering locks
+                    import gc
+                    gc.collect()
+                    time.sleep(3)  # Wait before retry
+                    continue
+                else:
+                    raise TimeoutError(f"Timeout waiting for Excel to release {file_path} after {retries} attempts")
+            
+            # Additional check to ensure the file exists and is not empty
+            if not os.path.exists(file_path):
+                raise FileNotFoundError(f"File {file_path} disappeared after Excel operation")
+                
+            final_size = os.path.getsize(file_path)
+            if final_size == 0:
+                raise FileNotFoundError(f"File {file_path} is empty (0 bytes) after Excel operation")
+            
+            logger.info(f"File accessibility ensured: {file_path} (size: {final_size} bytes)")
+            return  # Success
+            
+        except FileNotFoundError as e:
+            if attempt < retries - 1:
+                logger.warning(f"File not found on attempt {attempt + 1}/{retries}: {e}")
+                time.sleep(2)
+            else:
+                logger.error(f"File not found or empty after all retries: {e}", exc_info=True)
+                raise
+        except TimeoutError as e:
+            if attempt < retries - 1:
+                logger.warning(f"Timeout on attempt {attempt + 1}/{retries}: {e}")
+            else:
+                logger.error(f"Timeout error after all retries: {e}", exc_info=True)
+                raise
+        except OSError as e:
+            if attempt < retries - 1:
+                logger.warning(f"OS error on attempt {attempt + 1}/{retries}: {e}")
+                time.sleep(2)
+            else:
+                logger.error(f"OS error when ensuring file accessibility: {e}", exc_info=True)
+                raise

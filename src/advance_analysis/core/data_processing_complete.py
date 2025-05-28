@@ -15,8 +15,59 @@ from ..modules.data_loader import load_excel_file, find_header_row_in_dataframe
 from .advance_analysis_processing import process_advance_analysis
 from .comparative_analysis_processing import process_comparative_analysis
 from .do_advance_analysis_processing import process_do_advance_analysis
+from .data_processing_simple import get_comparative_period
 
 logger = get_logger(__name__)
+
+
+def find_comparative_file(directory: str, component: str, comparative_period: str) -> Optional[str]:
+    """
+    Find the comparative advance analysis file in the specified directory.
+    
+    Args:
+        directory: Directory to search in
+        component: Component code (e.g., "WMD")
+        comparative_period: Comparative period (e.g., "FY24 Q3")
+        
+    Returns:
+        Path to comparative file if found, None otherwise
+    """
+    import glob
+    
+    # Build search pattern
+    # Look for files containing component, comparative period, and "Advance Analysis"
+    patterns = [
+        f"{component}*{comparative_period}*Advance Analysis*.xlsx",
+        f"{component}*{comparative_period.replace(' ', '')}*Advance Analysis*.xlsx",
+        f"{component}*{comparative_period.replace('FY', '')}*Advance Analysis*.xlsx"
+    ]
+    
+    logger.info(f"Searching for comparative file in: {directory}")
+    
+    for pattern in patterns:
+        search_path = os.path.join(directory, pattern)
+        logger.debug(f"Trying pattern: {pattern}")
+        files = glob.glob(search_path)
+        
+        if files:
+            # Return the first match
+            comparative_file = files[0]
+            logger.info(f"Found comparative file: {os.path.basename(comparative_file)}")
+            return comparative_file
+    
+    # If no file found with patterns, try a more general search
+    all_files = glob.glob(os.path.join(directory, "*.xlsx"))
+    for file in all_files:
+        basename = os.path.basename(file)
+        # Check if file contains component, period components, and "Advance Analysis"
+        if (component in basename and 
+            comparative_period.replace(" ", "") in basename.replace(" ", "") and 
+            "Advance Analysis" in basename and
+            "DO" not in basename):  # Exclude files with "DO" to avoid processed files
+            logger.info(f"Found comparative file (general search): {basename}")
+            return file
+    
+    return None
 
 
 def process_complete_advance_analysis(
@@ -80,8 +131,28 @@ def process_complete_advance_analysis(
     logger.info("STEP 2: Processing Prior Year (PY) Data")
     logger.info("=" * 80)
     
-    # Load PY data from sheet "3-PY Q4 Ending Balance"
-    py_df = load_excel_file(advance_file_path, sheet_name="3-PY Q4 Ending Balance")
+    # Calculate comparative period
+    quarter = cy_fy_qtr[-2:]
+    comparative_period = get_comparative_period(fiscal_year, quarter)
+    logger.info(f"Comparative Period: {comparative_period}")
+    
+    # Find comparative file in the same directory as the advance file
+    advance_dir = os.path.dirname(advance_file_path)
+    
+    # Search for comparative file
+    comparative_file_path = find_comparative_file(advance_dir, component, comparative_period)
+    
+    if not comparative_file_path:
+        error_msg = f"Comparative file not found for {component} {comparative_period} in directory: {advance_dir}"
+        logger.error(error_msg)
+        logger.error("Please ensure the comparative period advance analysis file is in the same directory as the current period file.")
+        logger.error(f"Expected file pattern: {component}*{comparative_period}*Advance Analysis*.xlsx")
+        raise FileNotFoundError(error_msg)
+    
+    logger.info(f"Found comparative file: {comparative_file_path}")
+    
+    # Load PY data from comparative file
+    py_df = load_excel_file(comparative_file_path, sheet_name="4-Advance Analysis")
     py_df = process_comparative_analysis(
         df=py_df,
         component=component
@@ -164,31 +235,72 @@ def process_complete_advance_analysis(
         if col in merged_df.columns:
             merged_df[col] = pd.to_datetime(merged_df[col], errors='coerce')
     
-    # Save with date formatting
-    with pd.ExcelWriter(merged_output_path, engine='openpyxl', date_format='mm/dd/yyyy') as writer:
-        merged_df.to_excel(writer, sheet_name='DO Tab 4 Review', index=False)
-        
-        # Get the workbook and worksheet
-        workbook = writer.book
-        worksheet = writer.sheets['DO Tab 4 Review']
-        
-        # Apply date formatting to date columns
+    # Save with date formatting - ensure proper file closure for COM access
+    try:
+        # Use openpyxl directly for better control over file saving
+        from openpyxl import Workbook
+        from openpyxl.utils.dataframe import dataframe_to_rows
         from openpyxl.styles import NamedStyle
+        
+        # Create a new workbook
+        wb = Workbook()
+        ws = wb.active
+        ws.title = 'DO Tab 4 Review'
+        
+        # Write dataframe to worksheet
+        for r in dataframe_to_rows(merged_df, index=False, header=True):
+            ws.append(r)
+        
+        # Apply date formatting
         date_style = NamedStyle(name='date_style')
         date_style.number_format = '*m/dd/yyyy'
         
-        # Find column indices for date columns
-        headers = [cell.value for cell in worksheet[1]]
-        for col_name in date_columns:
-            if col_name in headers:
-                col_idx = headers.index(col_name) + 1
-                col_letter = worksheet.cell(row=1, column=col_idx).column_letter
-                for row in range(2, worksheet.max_row + 1):
-                    cell = worksheet[f"{col_letter}{row}"]
+        # Find and format date columns
+        headers = [cell.value for cell in ws[1]]
+        for col_idx, col_name in enumerate(headers, 1):
+            if col_name in date_columns:
+                for row in range(2, ws.max_row + 1):
+                    cell = ws.cell(row=row, column=col_idx)
                     if cell.value and isinstance(cell.value, datetime):
                         cell.style = date_style
-    
-    logger.info(f"Merged data with validations saved to: {merged_output_path}")
+        
+        # Save the workbook
+        wb.save(merged_output_path)
+        wb.close()
+        
+        logger.info(f"Merged data with validations saved to: {merged_output_path}")
+        
+        # Ensure file is fully written to disk
+        import time
+        time.sleep(0.2)  # Small delay for file system
+        
+        # Verify file exists and is accessible
+        if not os.path.exists(merged_output_path):
+            raise FileNotFoundError(f"Output file was not created: {merged_output_path}")
+            
+        file_size = os.path.getsize(merged_output_path)
+        logger.info(f"Output file size: {file_size} bytes")
+        
+        # Verify file is not locked by trying to open it
+        max_attempts = 5
+        for attempt in range(max_attempts):
+            try:
+                with open(merged_output_path, 'rb') as f:
+                    # Read first few bytes to ensure it's accessible
+                    f.read(100)
+                logger.info("Verified output file is accessible and not locked")
+                break
+            except Exception as e:
+                if attempt < max_attempts - 1:
+                    logger.warning(f"Attempt {attempt + 1}/{max_attempts} - File may be locked: {e}. Retrying...")
+                    time.sleep(0.5)
+                else:
+                    logger.error(f"Output file appears to be locked after {max_attempts} attempts: {e}")
+                    raise
+            
+    except Exception as e:
+        logger.error(f"Error saving merged data: {e}")
+        raise
     
     return cy_df, py_df, merged_df
 

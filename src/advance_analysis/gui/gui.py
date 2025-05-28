@@ -5,6 +5,7 @@ This module provides the GUI functionality for the Advance Analysis Tool,
 including the main input form, file selection, and processing logic.
 """
 import os
+import sys
 import time
 import json
 import threading
@@ -464,6 +465,16 @@ class InputGUI:
         """
         self.master = master
         master.title("Advance Analysis Tool")
+        
+        # Set window size
+        window_width = 850
+        window_height = 650
+        
+        # Center window on screen
+        self._center_window(window_width, window_height)
+        
+        # Set minimum window size
+        master.minsize(700, 550)
 
         # Initialize theme manager
         self.theme_manager = ThemeManager(master)
@@ -524,6 +535,61 @@ class InputGUI:
         # Create status bar at the bottom
         self.status_bar = StatusBar(master)
         self.status_bar.pack(side=tk.BOTTOM, fill=tk.X)
+        
+        # Bring window to front after all widgets are created
+        self._bring_to_front()
+    
+    def _center_window(self, width: int, height: int) -> None:
+        """
+        Center the window on the main display.
+        
+        Args:
+            width: Window width
+            height: Window height
+        """
+        # Update the window to ensure it's properly sized
+        self.master.update_idletasks()
+        
+        # Get screen dimensions
+        screen_width = self.master.winfo_screenwidth()
+        screen_height = self.master.winfo_screenheight()
+        
+        # Calculate position coordinates
+        x = (screen_width - width) // 2
+        y = (screen_height - height) // 2
+        
+        # Set window position and size
+        self.master.geometry(f"{width}x{height}+{x}+{y}")
+        
+        logger.debug(f"Window centered at {x},{y} with size {width}x{height}")
+    
+    def _bring_to_front(self) -> None:
+        """Bring the window to the front of all other windows."""
+        # Platform-specific window focusing
+        if sys.platform == "darwin":  # macOS
+            # On macOS, we need to use different methods
+            self.master.lift()
+            self.master.attributes('-topmost', True)
+            self.master.after(100, lambda: self.master.attributes('-topmost', False))
+            self.master.focus_force()
+        elif sys.platform.startswith("win"):  # Windows
+            # On Windows, bring window to front
+            self.master.lift()
+            self.master.attributes('-topmost', True)
+            self.master.after(100, lambda: self.master.attributes('-topmost', False))
+            self.master.focus_force()
+            # Additional Windows-specific focusing
+            self.master.state('normal')
+        else:  # Linux and other Unix-like systems
+            self.master.lift()
+            self.master.attributes('-topmost', True)
+            self.master.after(100, lambda: self.master.attributes('-topmost', False))
+            self.master.focus_force()
+        
+        # Ensure the window is updated
+        self.master.update()
+        
+        logger.debug(f"Window brought to front on platform: {sys.platform}")
     
     def _create_menu_bar(self) -> None:
         """Create the application menu bar."""
@@ -1120,6 +1186,14 @@ class InputGUI:
                 
                 # Check for cancellation frequently during long operations
                 self._check_cancellation("before data processing")
+                
+                # Log the comparative period that will be used
+                from ..core.data_processing_simple import get_comparative_period
+                fiscal_year = int(cy_fy_qtr[2:4])
+                quarter = cy_fy_qtr[-2:]
+                comparative_period = get_comparative_period(fiscal_year, quarter)
+                logger.info(f"Current Period: {component} {cy_fy_qtr}")
+                logger.info(f"Comparative Period: {component} {comparative_period}")
                 
                 # Create temporary output folder for processing files
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")

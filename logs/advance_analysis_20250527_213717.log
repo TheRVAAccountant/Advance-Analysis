@@ -1,0 +1,5 @@
+2025-05-27 21:37:17 - root - INFO - Logging initialized - Level: INFO, File: /Users/jeroncrooks/CascadeProjects/Advance-Analysis/logs/advance_analysis_20250527_213717.log
+2025-05-27 21:37:17 - advance_analysis.main - INFO - Starting Advance Analysis Tool
+2025-05-27 21:37:17 - advance_analysis.main - INFO - Launching main GUI
+2025-05-27 21:37:17 - advance_analysis.gui.status_bar - INFO - Status: Ready
+2025-05-27 21:39:04 - advance_analysis.main - INFO - Advance Analysis Tool shutting down

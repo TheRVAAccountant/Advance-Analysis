@@ -1,0 +1,12 @@
+2025-05-27 21:09:56 - root - INFO - Logging initialized - Level: INFO, File: /Users/jeroncrooks/CascadeProjects/Advance-Analysis/logs/advance_analysis_20250527_210956.log
+2025-05-27 21:09:56 - advance_analysis.modules.excel_handler - WARNING - Windows COM modules not available - Excel COM automation features will be disabled
+2025-05-27 21:09:56 - root - INFO - Logging initialized - Level: INFO, File: /Users/jeroncrooks/CascadeProjects/Advance-Analysis/logs/advance_analysis_20250527_210956.log
+2025-05-27 21:09:56 - advance_analysis.core.data_processing_complete - INFO - Searching for comparative file in: /Users/jeroncrooks/CascadeProjects/Advance-Analysis/test_data
+2025-05-27 21:09:56 - advance_analysis.core.data_processing_complete - INFO - Found comparative file: WMD FY24 Q3 Advance Analysis Test.xlsx
+2025-05-27 21:09:56 - advance_analysis.core.data_processing_complete - INFO - Searching for comparative file in: /Users/jeroncrooks/CascadeProjects/Advance-Analysis/test_data
+2025-05-27 21:09:56 - advance_analysis.core.data_processing_complete - INFO - Found comparative file: WMD FY24 Q3 Advance Analysis Test.xlsx
+2025-05-27 21:09:56 - advance_analysis.core.data_processing_complete - INFO - Searching for comparative file in: /Users/jeroncrooks/CascadeProjects/Advance-Analysis/test_data
+2025-05-27 21:09:56 - advance_analysis.core.data_processing_complete - INFO - Found comparative file: WMD FY25 Q2 Advance Analysis Test.xlsx
+2025-05-27 21:09:56 - advance_analysis.core.data_processing_complete - INFO - Searching for comparative file in: /Users/jeroncrooks/CascadeProjects/Advance-Analysis/test_data
+2025-05-27 21:09:56 - advance_analysis.core.data_processing_complete - INFO - Searching for comparative file in: /Users/jeroncrooks/CascadeProjects/Advance-Analysis/test_data
+2025-05-27 21:09:56 - advance_analysis.core.data_processing_complete - INFO - Found comparative file: WMD FY24 Q3 Advance Analysis Test.xlsx

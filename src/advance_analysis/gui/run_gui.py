@@ -13,7 +13,17 @@ from . import gui
 def run_gui():
     """Run the main GUI application."""
     root = tk.Tk()
-    app = gui.InputGUI(root)
+    
+    # Hide the window initially to prevent flashing
+    root.withdraw()
+    
+    # Create the application
+    gui.InputGUI(root)
+    
+    # Show the window after it's fully initialized
+    root.deiconify()
+    
+    # Start the main event loop
     root.mainloop()
 
 
