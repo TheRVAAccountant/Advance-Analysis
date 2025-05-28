@@ -1,0 +1,26 @@
+Status 1
+•	Several Obligations with Obligation Dates subsequent to the PoP end date
+There are several reasons for this to include Antecedent Liabilities, Suspense Reduction efforts and correction from quantity based to amount based.  Although the obligation document numbers and dates are within FY24 the accounting information is prior year.
+•	Obligations with abnormals that does not provide an expected date of when the abnormal balances will be resolved
+These are known issues, and this would be better answered by CG-84 and the FINCEN GL Team as to when these will be corrected.
+•	Obligations missing fields such as the period of performance end date, last invoice date received and the PY Q4 Ending Balance fields
+The vast majority missing POP end date are coming from ALMIS and NESSS which do not transmit the POP end date, last invoice date.   
+•	Obligations that are current year obligations with expired period of performances and obligation dates after the PoP end Date
+•	There are several reasons for this to include Antecedent Liabilities, Suspense Reduction efforts and correction from quantity based to amount based.  Although the obligation document numbers and dates state FY24 the POET information is prior year.
+•	Obligations that had no last invoice received date however reported payment activity in the comments
+This is due to migration from FPD/CAS where the date was not brought and ALMIS and NESSS which does not include this data.
+
+Status 3 & Status 4
+•	Several Obligations with Obligation Dates subsequent to the PoP end date
+•	There are several reasons for this to include Antecedent Liabilities, Suspense Reduction efforts and correction from quantity based to amount based.  Although the obligation document numbers and dates are within FY24 the POET information is prior year.
+•	Obligations with abnormal that does not provide an expected date of when the abnormal balances will be resolved
+` These are known issues, and this would be better answered by CG-84 and the FINCEN GL Team as to when these will be corrected.
+•	Obligations missing fields such as the period of performance end date, the PY Q4 Ending Balance fields, last invoice received dates, For Status 3 and 4 – Date De-obligation was initiated fields, Planned De-obligation Dates, and Comments fields
+Period of performance dates are due to migration and our coming from ALMIS and NESSS which do not provide the period of performance end date.  As stated above some of these obligations are carrying current year document numbers and dates but carry prior year accounting data which is why they are not showing on the PY Q4 ending balance.  This is due to antecedent liabilities, suspense reduction efforts, and correction from quantity based to amount based.  Last invoice received dates are majority ALMIS and NESSS where the data is not provided.  We are continuing to address this issue but as you can see, we have quite a backlog of de-obligations required.  This is due to numerous issues including the FSMS transition and migration issue, latency issues and unreliable data, the lack of a validation system for almost two years so we are still playing catch up. 
+
+
+- Additionally, for the Status 1 Obligations I had initially inquired about, it appears to be 28 Obligations and not the 9 I had previously mentioned.
+Yes, these should be listed as a status 3 and not in a status 1 as most of these are prior year travel and should be paid out and any remainder UDO deobligated.
+
+- Would you please take a look at the obligations in the attached file and helps us understand how these are valid Status 3 & 4 obligations?
+Everything with the exception of the 115 that are labeled suspense reduction/CG-83 bot which are validations made in CG-8 (all should be status 3), the remaining validations are done by field and we have about 300K open obligations between PY & CY in all three risk categories so it’s a pretty big task to explain each and every validation in the system.  Out of the remaining listed there are approximately 19 ($475K) in Status 3/4 with comments that mention still needed and being researched and based on those comments should most likely be in a Status 1.  As we know that there will be mistakes made by validators during the validation process, we mitigate these through Open Obligation monthly non-statistical and QTRLY statistical testing which tests validation accuracy and allows us to identify and correct these mistakes.
