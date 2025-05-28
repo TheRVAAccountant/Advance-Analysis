@@ -50,7 +50,7 @@ class StatusValidations:
             columns_to_check = ["TAS", "SGL", "DHS Doc No", "Indicate if advance is to WCF (Y/N)", 
                                 "Advance/Prepayment", "Last Activity Date", "Date of Advance", 
                                 "Age of Advance (days)", "Period of Performance End Date", 
-                                "Status", "Advance/Prepayment_1", "Comments", "Vendor", 
+                                "Status", "Advance/Prepayment.1", "Comments", "Vendor", 
                                 "Advance Type (e.g. Travel, Vendor Prepayment)"]
 
             def null_blank_columns(row):
@@ -462,7 +462,7 @@ class StatusValidations:
             ColumnsToCheck = [
                 "TAS", "SGL", "DHS Doc No", "Indicate if advance is to WCF (Y/N)", "Advance/Prepayment",
                 "Last Activity Date", "Date of Advance", "Age of Advance (days)", "Period of Performance End Date", 
-                "Status", "Advance/Prepayment_1", "Comments", "Vendor", "Advance Type (e.g. Travel, Vendor Prepayment)"
+                "Status", "Advance/Prepayment.1", "Comments", "Vendor", "Advance Type (e.g. Travel, Vendor Prepayment)"
             ]
     
             # Define the contains_any function

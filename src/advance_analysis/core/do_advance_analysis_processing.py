@@ -41,7 +41,7 @@ class DOAdvanceAnalysisProcessor:
             "TAS", "SGL", "DHS Doc No", "Indicate if advance is to WCF (Y/N)", 
             "Advance/Prepayment", "Last Activity Date", "Date of Advance", 
             "Age of Advance (days)", "Period of Performance End Date", "Status", 
-            "Advance/Prepayment_1", "Comments", "Vendor", 
+            "Advance/Prepayment.1", "Comments", "Vendor", 
             "Advance Type (e.g. Travel, Vendor Prepayment)"
         ]
         
@@ -115,7 +115,7 @@ class DOAdvanceAnalysisProcessor:
             'Last Activity Date': 'Last Activity Date_comp',
             'Anticipated Liquidation Date': 'Anticipated Liquidation Date_comp',
             'Status': 'Status_comp',
-            'Advance/Prepayment_1': 'Advance/Prepayment_1_comp'
+            'Advance/Prepayment.1': 'Advance/Prepayment.1_comp'
         }
         
         # Only rename columns that exist
