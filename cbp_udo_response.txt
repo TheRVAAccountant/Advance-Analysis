@@ -1,0 +1,9 @@
+•	Period of Performance end date at the obligation line-item level:  this is a system limitation in both our contract writing system (Procurement for Public Sector (PPS)) and in our financial system (SAP).  
+o	The date the line item is obligated either in PPS or directly in SAP is the period of performance start date; however there is not a period of performance end date at the line-item level.  Currently we pull in the “end date with option years” which pulls from the header level of the obligation not at the specific line-item level.  
+
+•	Status 2:  Per the CRG, Status 2 is for “… obligation is currently under review by a DHS office to determine validity of the obligation. Status 2 obligations can only remain as a status 2 through Q2.”  
+o	Our guidance to program offices has been to only use a Status 2 if there was not sufficient time to review, research and follow up with other parties to determine the proper status.  The template appears to align with this as #6 states:  “Any status 2 obligation must have a date as to when a valid status will be provided.  This date cannot be past year-end.”
+
+•	Status 1:  Depending on the type of obligation, until the program office or warranted Contracting Officer determines the obligation is ready for close out and they have concurrence from the vendor, trading partner, and/or other DHS offices, the obligation line is still valid.  If there is funding remaining on the contract and the fund is not cancelling, CBP, the vendor and/or trading partner have to concur that no pending invoices or adjustments are needed before they can agree it is no longer valid, and they can deobligate.   
+
+•	Status 2 for DCAA Audit:  We will look into making a future system change to prevent a program office from selecting a status 2 if the obligation is under DCAA audit. (per the CRG)  
