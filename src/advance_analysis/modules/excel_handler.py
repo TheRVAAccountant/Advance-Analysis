@@ -27,6 +27,225 @@ from ..utils.logging_config import get_logger
 from ..modules.file_handler import ensure_file_accessibility
 # from ..core.udo_validation import validate_udo_tier_recon
 
+# Enhanced file and COM handling utilities
+def wait_for_file_ready(file_path: str, max_wait: float = 10.0, check_interval: float = 0.5) -> bool:
+    """
+    Wait for file to be accessible and not locked.
+    
+    Args:
+        file_path: Path to the file to check
+        max_wait: Maximum time to wait in seconds
+        check_interval: Time between checks in seconds
+        
+    Returns:
+        True if file is ready, False if timeout reached
+    """
+    import time
+    start_time = time.time()
+    
+    while time.time() - start_time < max_wait:
+        try:
+            # Try to open file exclusively to check if it's locked
+            with open(file_path, 'rb+') as f:
+                f.read(1)
+            logger.debug(f"File {file_path} is ready for access")
+            return True
+        except (IOError, OSError) as e:
+            logger.debug(f"File {file_path} not ready: {e}")
+            time.sleep(check_interval)
+    
+    logger.warning(f"Timeout waiting for file {file_path} to be ready")
+    return False
+
+
+def initialize_excel_com(max_retries: int = 3) -> Any:
+    """
+    Initialize Excel COM with validation and retry logic.
+    
+    Args:
+        max_retries: Maximum number of initialization attempts
+        
+    Returns:
+        Excel COM object
+        
+    Raises:
+        Exception: If initialization fails after all retries
+    """
+    import time
+    
+    for attempt in range(max_retries):
+        try:
+            logger.info(f"Initializing Excel COM (attempt {attempt + 1}/{max_retries})")
+            pythoncom.CoInitialize()
+            excel = win32com.client.Dispatch("Excel.Application")
+            
+            # Validate COM object
+            if excel and hasattr(excel, 'Version'):
+                excel.Visible = False
+                excel.DisplayAlerts = False
+                logger.info(f"Excel COM initialized successfully (Version: {excel.Version})")
+                return excel
+            else:
+                raise Exception("Invalid Excel COM object")
+                
+        except Exception as e:
+            logger.error(f"Failed to initialize Excel COM (attempt {attempt + 1}): {e}")
+            if attempt < max_retries - 1:
+                try:
+                    pythoncom.CoUninitialize()
+                except:
+                    pass
+                time.sleep(1)
+            else:
+                raise Exception(f"Failed to initialize Excel COM after {max_retries} attempts: {e}")
+
+
+def open_workbook_robust(excel: Any, file_path: str, max_retries: int = 3, read_only: bool = False) -> Any:
+    """
+    Open workbook with retry logic and diagnostics.
+    
+    Args:
+        excel: Excel COM application object
+        file_path: Path to the workbook
+        max_retries: Maximum number of open attempts
+        read_only: Whether to open in read-only mode
+        
+    Returns:
+        Workbook COM object
+        
+    Raises:
+        Exception: If workbook cannot be opened after all retries
+    """
+    import time
+    
+    for attempt in range(max_retries):
+        try:
+            logger.info(f"Opening workbook {file_path} (attempt {attempt + 1}/{max_retries})")
+            
+            # Ensure file is ready
+            if not wait_for_file_ready(file_path):
+                raise Exception(f"File not ready after timeout: {file_path}")
+            
+            # Clear any existing references
+            excel.CutCopyMode = False
+            
+            # Open workbook with specific parameters to avoid issues
+            wb = excel.Workbooks.Open(
+                file_path,
+                UpdateLinks=0,  # Don't update external links
+                ReadOnly=read_only,
+                IgnoreReadOnlyRecommended=True,
+                Notify=False,
+                AddToMru=False  # Don't add to recent files
+            )
+            
+            # Validate workbook
+            if wb and hasattr(wb, 'Sheets') and wb.Sheets.Count > 0:
+                logger.info(f"Workbook opened successfully: {file_path} (Sheets: {wb.Sheets.Count})")
+                return wb
+            else:
+                raise Exception("Invalid workbook object")
+                
+        except Exception as e:
+            logger.warning(f"Failed to open workbook (attempt {attempt + 1}): {e}")
+            if attempt < max_retries - 1:
+                time.sleep(2 * (attempt + 1))  # Exponential backoff
+            else:
+                raise Exception(f"Failed to open workbook after {max_retries} attempts: {file_path} - {e}")
+
+
+def release_file_locks(file_path: str) -> None:
+    """
+    Ensure file is released from any locks before COM operations.
+    
+    Args:
+        file_path: Path to the file to release
+    """
+    import gc
+    import time
+    
+    logger.debug(f"Releasing file locks for: {file_path}")
+    
+    # Force garbage collection
+    gc.collect()
+    
+    # Small delay to ensure file system catches up
+    time.sleep(0.5)
+    
+    # Verify file exists and is accessible
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"File not found: {file_path}")
+    
+    # Try to ensure file is not locked
+    try:
+        with open(file_path, 'rb') as f:
+            f.read(1)
+        logger.debug(f"File {file_path} is accessible")
+    except Exception as e:
+        logger.warning(f"File may be locked: {file_path} - {e}")
+
+
+def cleanup_com_objects(excel: Any, workbooks: List[Any]) -> None:
+    """
+    Enhanced cleanup with proper error handling.
+    
+    Args:
+        excel: Excel COM application object
+        workbooks: List of workbook COM objects to close
+    """
+    import time
+    import gc
+    
+    logger.info("Starting enhanced COM cleanup process")
+    
+    # Clear clipboard
+    if excel:
+        try:
+            excel.CutCopyMode = False
+            logger.debug("Cleared Excel clipboard")
+        except Exception as e:
+            logger.debug(f"Could not clear clipboard: {e}")
+    
+    # Close workbooks
+    for i, wb in enumerate(workbooks):
+        if wb:
+            try:
+                wb.Close(SaveChanges=False)
+                logger.debug(f"Closed workbook {i + 1}/{len(workbooks)}")
+            except Exception as e:
+                logger.debug(f"Error closing workbook {i + 1}: {e}")
+            
+            try:
+                release_com_object(wb)
+            except:
+                pass
+    
+    # Quit Excel
+    if excel:
+        try:
+            excel.Quit()
+            logger.debug("Excel application quit successfully")
+        except Exception as e:
+            logger.debug(f"Error quitting Excel: {e}")
+        
+        try:
+            release_com_object(excel)
+        except:
+            pass
+    
+    # Force cleanup
+    gc.collect()
+    time.sleep(0.5)
+    
+    # Uninitialize COM
+    try:
+        pythoncom.CoUninitialize()
+        logger.debug("COM uninitialized")
+    except Exception as e:
+        logger.debug(f"Error uninitializing COM: {e}")
+    
+    logger.info("Enhanced COM cleanup completed")
+
 # Temporary placeholder functions
 def format_currency(value):
     """Format a value as currency."""
@@ -714,13 +933,6 @@ def release_com_object(obj):
     """
     if obj is not None:
         try:
-            # Release COM reference
-            pythoncom.CoUninitialize()
-            pythoncom.CoInitialize()
-        except:
-            pass
-        
-        try:
             # Try to delete the object
             del obj
         except:
@@ -729,9 +941,68 @@ def release_com_object(obj):
         # Force garbage collection
         import gc
         gc.collect()
+
+
+def validate_com_object(obj, object_type: str = "generic") -> bool:
+    """
+    Validate that a COM object is properly initialized and connected.
+    
+    Args:
+        obj: COM object to validate
+        object_type: Type of object (e.g., "Excel", "Workbook", "Sheet")
         
-        # Give COM time to clean up
-        time.sleep(0.1)
+    Returns:
+        True if object is valid, False otherwise
+    """
+    if obj is None:
+        logger.debug(f"COM object {object_type} is None")
+        return False
+    
+    try:
+        # Test basic COM functionality
+        if object_type == "Excel":
+            # Test Excel-specific property
+            version = obj.Version
+            logger.debug(f"Excel COM object validated (Version: {version})")
+            return True
+        elif object_type == "Workbook":
+            # Test workbook-specific property
+            sheet_count = obj.Sheets.Count
+            logger.debug(f"Workbook COM object validated (Sheets: {sheet_count})")
+            return True
+        elif object_type == "Sheet":
+            # Test sheet-specific property
+            name = obj.Name
+            logger.debug(f"Sheet COM object validated (Name: {name})")
+            return True
+        else:
+            # Generic COM test
+            str(obj)
+            logger.debug(f"COM object {object_type} appears valid")
+            return True
+            
+    except Exception as e:
+        logger.debug(f"COM object {object_type} validation failed: {e}")
+        return False
+
+
+def ensure_com_connected(excel) -> bool:
+    """
+    Ensure Excel COM object is still connected and responsive.
+    
+    Args:
+        excel: Excel COM application object
+        
+    Returns:
+        True if connected, False otherwise
+    """
+    try:
+        # Try a simple property access
+        excel.DisplayAlerts = excel.DisplayAlerts
+        return True
+    except Exception as e:
+        logger.warning(f"Excel COM object disconnected: {e}")
+        return False
 
 
 @safe_excel_operation
@@ -768,71 +1039,60 @@ def populate_do_tab_4_review_sheet(excel, input_wb, dataframe_path: str) -> None
         
         logger.info(f"Opening dataframe from: {dataframe_path}")
         
-        # Wait for file to be fully written and released
-        max_attempts = 10
-        attempt = 0
+        # Use robust method to open the dataframe workbook
         df_wb = None
         
-        while attempt < max_attempts:
-            try:
-                # Try to open the file exclusively to check if it's accessible
-                with open(dataframe_path, 'rb') as test_file:
-                    pass
-                
-                # If we can open it, try with Excel COM
-                df_wb = excel.Workbooks.Open(dataframe_path, ReadOnly=True, Notify=False)
-                logger.info("Successfully opened dataframe workbook")
-                break
-                
-            except Exception as e:
-                attempt += 1
-                if attempt < max_attempts:
-                    logger.warning(f"Attempt {attempt}/{max_attempts} failed to open file: {e}. Retrying...")
-                    import time
-                    time.sleep(0.5)  # Wait 500ms before retry
-                else:
-                    logger.error(f"Failed to open dataframe file after {max_attempts} attempts: {e}")
-                    # Fall back to pandas method
-                    logger.info("Falling back to pandas method...")
-                    import pandas as pd
-                    df = pd.read_excel(dataframe_path, sheet_name=0, engine='openpyxl')
-                    
-                    # Get the DO Tab 4 Review sheet
-                    target_sheet = input_wb.Sheets("DO Tab 4 Review")
-                    
-                    # Clear existing data
-                    target_sheet.UsedRange.ClearContents()
-                    
-                    # Write headers
-                    for col_idx, col_name in enumerate(df.columns, 1):
-                        target_sheet.Cells(1, col_idx).Value = str(col_name)
-                    
-                    # Write data
-                    for row_idx, row in df.iterrows():
-                        for col_idx, value in enumerate(row, 1):
-                            if pd.notna(value):
-                                if isinstance(value, pd.Timestamp):
-                                    target_sheet.Cells(row_idx + 2, col_idx).Value = value.to_pydatetime()
-                                else:
-                                    target_sheet.Cells(row_idx + 2, col_idx).Value = value
-                    
-                    # Apply date formatting
-                    date_columns = [
-                        'Date of Advance', 'Last Activity Date', 'Anticipated Liquidation Date',
-                        'Period of Performance End Date', 'Date of Advance_comp', 
-                        'Last Activity Date_comp', 'Anticipated Liquidation Date_comp',
-                        'Period of Performance End Date_comp'
-                    ]
-                    
-                    for col_idx, col_name in enumerate(df.columns, 1):
-                        if col_name in date_columns:
-                            col_letter = get_column_letter(col_idx)
-                            last_row = len(df) + 1
-                            date_range = target_sheet.Range(f"{col_letter}2:{col_letter}{last_row}")
-                            date_range.NumberFormat = "*m/dd/yyyy"
-                    
-                    logger.info("DO Tab 4 Review sheet populated successfully using pandas fallback")
-                    return
+        try:
+            # Ensure file is ready
+            release_file_locks(dataframe_path)
+            
+            # Open with robust method
+            df_wb = open_workbook_robust(excel, dataframe_path, max_retries=5, read_only=True)
+            logger.info("Successfully opened dataframe workbook with robust method")
+            
+        except Exception as e:
+            logger.error(f"Failed to open dataframe file with robust method: {e}")
+            # Fall back to pandas method
+            logger.info("Falling back to pandas method...")
+            import pandas as pd
+            df = pd.read_excel(dataframe_path, sheet_name=0, engine='openpyxl')
+            
+            # Get the DO Tab 4 Review sheet
+            target_sheet = input_wb.Sheets("DO Tab 4 Review")
+            
+            # Clear existing data
+            target_sheet.UsedRange.ClearContents()
+            
+            # Write headers
+            for col_idx, col_name in enumerate(df.columns, 1):
+                target_sheet.Cells(1, col_idx).Value = str(col_name)
+            
+            # Write data
+            for row_idx, row in df.iterrows():
+                for col_idx, value in enumerate(row, 1):
+                    if pd.notna(value):
+                        if isinstance(value, pd.Timestamp):
+                            target_sheet.Cells(row_idx + 2, col_idx).Value = value.to_pydatetime()
+                        else:
+                            target_sheet.Cells(row_idx + 2, col_idx).Value = value
+            
+            # Apply date formatting
+            date_columns = [
+                'Date of Advance', 'Last Activity Date', 'Anticipated Liquidation Date',
+                'Period of Performance End Date', 'Date of Advance_comp', 
+                'Last Activity Date_comp', 'Anticipated Liquidation Date_comp',
+                'Period of Performance End Date_comp'
+            ]
+            
+            for col_idx, col_name in enumerate(df.columns, 1):
+                if col_name in date_columns:
+                    col_letter = get_column_letter(col_idx)
+                    last_row = len(df) + 1
+                    date_range = target_sheet.Range(f"{col_letter}2:{col_letter}{last_row}")
+                    date_range.NumberFormat = "*m/dd/yyyy"
+            
+            logger.info("DO Tab 4 Review sheet populated successfully using pandas fallback")
+            return
         
         # If we successfully opened with COM, continue with COM method
         if df_wb:
@@ -913,9 +1173,6 @@ def process_excel_files(output_path: str, input_path: str, current_dhstier_path:
     """
     logger.info(f"Starting Excel file processing for {component}")
     
-    # Initialize COM in this thread
-    pythoncom.CoInitialize()
-    
     excel = None
     output_wb = None
     input_wb = None
@@ -923,52 +1180,23 @@ def process_excel_files(output_path: str, input_path: str, current_dhstier_path:
     prior_dhstier_wb = None
     
     try:
-        # Create Excel application object
-        excel = win32com.client.Dispatch("Excel.Application")
-        excel.DisplayAlerts = False
-        excel.Visible = False
-
         # Check if files exist before opening
+        logger.info("Validating file paths...")
         for file_path in [output_path, input_path, current_dhstier_path, prior_dhstier_path]:
             if not os.path.exists(file_path):
                 raise FileNotFoundError(f"File not found: {file_path}")
+            # Release any potential locks
+            release_file_locks(file_path)
 
-        # Open workbooks in the same Excel instance with enhanced error handling
-        try:
-            logger.info(f"Opening output workbook: {output_path}")
-            output_wb = excel.Workbooks.Open(output_path)
-            if not output_wb:
-                raise ValueError("Failed to open output workbook")
-        except Exception as e:
-            logger.error(f"Failed to open output workbook {output_path}: {e}")
-            raise ValueError(f"Cannot open output workbook: {e}")
-            
-        try:
-            logger.info(f"Opening input workbook: {input_path}")
-            input_wb = excel.Workbooks.Open(input_path)
-            if not input_wb:
-                raise ValueError("Failed to open input workbook")
-        except Exception as e:
-            logger.error(f"Failed to open input workbook {input_path}: {e}")
-            raise ValueError(f"Cannot open input workbook: {e}")
-            
-        try:
-            logger.info(f"Opening current DHSTIER workbook: {current_dhstier_path}")
-            current_dhstier_wb = excel.Workbooks.Open(current_dhstier_path)
-            if not current_dhstier_wb:
-                raise ValueError("Failed to open current DHSTIER workbook")
-        except Exception as e:
-            logger.error(f"Failed to open current DHSTIER workbook {current_dhstier_path}: {e}")
-            raise ValueError(f"Cannot open current DHSTIER workbook: {e}")
-            
-        try:
-            logger.info(f"Opening prior DHSTIER workbook: {prior_dhstier_path}")
-            prior_dhstier_wb = excel.Workbooks.Open(prior_dhstier_path)
-            if not prior_dhstier_wb:
-                raise ValueError("Failed to open prior DHSTIER workbook")
-        except Exception as e:
-            logger.error(f"Failed to open prior DHSTIER workbook {prior_dhstier_path}: {e}")
-            raise ValueError(f"Cannot open prior DHSTIER workbook: {e}")
+        # Initialize Excel COM with validation
+        excel = initialize_excel_com(max_retries=3)
+        
+        # Open workbooks with robust error handling
+        logger.info("Opening workbooks...")
+        output_wb = open_workbook_robust(excel, output_path, max_retries=3)
+        input_wb = open_workbook_robust(excel, input_path, max_retries=3)
+        current_dhstier_wb = open_workbook_robust(excel, current_dhstier_path, max_retries=3)
+        prior_dhstier_wb = open_workbook_robust(excel, prior_dhstier_path, max_retries=3)
         
         # Log all sheet names in the input workbook for debugging
         logger.info("Sheet names in input workbook:")
@@ -1107,17 +1335,6 @@ def process_excel_files(output_path: str, input_path: str, current_dhstier_path:
         logger.error(f"Error in Excel file processing: {str(e)}", exc_info=True)
         raise
     finally:
-        # Comprehensive cleanup to prevent file locking
-        logger.info("Starting comprehensive cleanup process...")
-        
-        # Clear clipboard to release any references
-        if excel:
-            try:
-                excel.CutCopyMode = False
-                logger.debug("Cleared Excel clipboard")
-            except:
-                pass
-        
         # Save the input workbook if it was modified
         if input_wb:
             try:
@@ -1127,58 +1344,9 @@ def process_excel_files(output_path: str, input_path: str, current_dhstier_path:
             except Exception as save_error:
                 logger.error(f"Error saving input workbook: {str(save_error)}")
         
-        # Close workbooks with proper error handling
-        workbooks_to_close = [
-            ("output_wb", output_wb),
-            ("current_dhstier_wb", current_dhstier_wb),
-            ("prior_dhstier_wb", prior_dhstier_wb),
-            ("input_wb", input_wb)
-        ]
-        
-        for wb_name, wb in workbooks_to_close:
-            if wb:
-                try:
-                    logger.debug(f"Closing {wb_name}...")
-                    wb.Close(SaveChanges=False)
-                    logger.debug(f"{wb_name} closed successfully")
-                except Exception as close_error:
-                    logger.warning(f"Error closing {wb_name}: {close_error}")
-                
-                # Release the COM object
-                try:
-                    release_com_object(wb)
-                except:
-                    pass
-
-        # Quit Excel with retry logic
-        if excel:
-            try:
-                logger.debug("Quitting Excel application...")
-                excel.DisplayAlerts = False
-                excel.Quit()
-                logger.debug("Excel quit successfully")
-            except Exception as quit_error:
-                logger.warning(f"Error quitting Excel: {quit_error}")
-            
-            # Release Excel COM object
-            try:
-                release_com_object(excel)
-            except:
-                pass
-
-        # Force garbage collection
-        import gc
-        gc.collect()
-        time.sleep(0.5)  # Give COM time to clean up
-        
-        # Uninitialize COM
-        try:
-            pythoncom.CoUninitialize()
-            logger.debug("COM uninitialized")
-        except:
-            pass
-        
-        logger.info("Cleanup process completed")
+        # Use enhanced cleanup process
+        workbooks = [output_wb, current_dhstier_wb, prior_dhstier_wb, input_wb]
+        cleanup_com_objects(excel, workbooks)
 
     # Ensure file accessibility after processing
     try:
