@@ -6,6 +6,7 @@ including formatting, copying sheets, and manipulating data.
 """
 import os
 import logging
+import time
 from typing import Optional, Any, Dict, List, Tuple
 import re
 
@@ -932,11 +933,42 @@ def process_excel_files(output_path: str, input_path: str, current_dhstier_path:
             if not os.path.exists(file_path):
                 raise FileNotFoundError(f"File not found: {file_path}")
 
-        # Open workbooks in the same Excel instance
-        output_wb = excel.Workbooks.Open(output_path)
-        input_wb = excel.Workbooks.Open(input_path)
-        current_dhstier_wb = excel.Workbooks.Open(current_dhstier_path)
-        prior_dhstier_wb = excel.Workbooks.Open(prior_dhstier_path)
+        # Open workbooks in the same Excel instance with enhanced error handling
+        try:
+            logger.info(f"Opening output workbook: {output_path}")
+            output_wb = excel.Workbooks.Open(output_path)
+            if not output_wb:
+                raise ValueError("Failed to open output workbook")
+        except Exception as e:
+            logger.error(f"Failed to open output workbook {output_path}: {e}")
+            raise ValueError(f"Cannot open output workbook: {e}")
+            
+        try:
+            logger.info(f"Opening input workbook: {input_path}")
+            input_wb = excel.Workbooks.Open(input_path)
+            if not input_wb:
+                raise ValueError("Failed to open input workbook")
+        except Exception as e:
+            logger.error(f"Failed to open input workbook {input_path}: {e}")
+            raise ValueError(f"Cannot open input workbook: {e}")
+            
+        try:
+            logger.info(f"Opening current DHSTIER workbook: {current_dhstier_path}")
+            current_dhstier_wb = excel.Workbooks.Open(current_dhstier_path)
+            if not current_dhstier_wb:
+                raise ValueError("Failed to open current DHSTIER workbook")
+        except Exception as e:
+            logger.error(f"Failed to open current DHSTIER workbook {current_dhstier_path}: {e}")
+            raise ValueError(f"Cannot open current DHSTIER workbook: {e}")
+            
+        try:
+            logger.info(f"Opening prior DHSTIER workbook: {prior_dhstier_path}")
+            prior_dhstier_wb = excel.Workbooks.Open(prior_dhstier_path)
+            if not prior_dhstier_wb:
+                raise ValueError("Failed to open prior DHSTIER workbook")
+        except Exception as e:
+            logger.error(f"Failed to open prior DHSTIER workbook {prior_dhstier_path}: {e}")
+            raise ValueError(f"Cannot open prior DHSTIER workbook: {e}")
         
         # Log all sheet names in the input workbook for debugging
         logger.info("Sheet names in input workbook:")
