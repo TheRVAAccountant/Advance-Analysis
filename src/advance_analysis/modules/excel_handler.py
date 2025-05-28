@@ -16,11 +16,20 @@ import pandas as pd
 try:
     import pythoncom
     import win32com.client
+    from win32com.client import constants
     WINDOWS_COM_AVAILABLE = True
 except ImportError:
     WINDOWS_COM_AVAILABLE = False
     logger = logging.getLogger(__name__)
     logger.warning("Windows COM modules not available - Excel COM automation features will be disabled")
+
+# Import the new Excel processor if available
+try:
+    from .excel_processor import ExcelProcessor, safe_excel_operation as safe_excel_op
+    EXCEL_PROCESSOR_AVAILABLE = True
+except ImportError:
+    EXCEL_PROCESSOR_AVAILABLE = False
+    safe_excel_op = lambda f: f  # No-op decorator if processor not available
 
 from ..utils.logging_config import get_logger
 # from ..utils.helpers import format_currency, format_excel_style
@@ -1005,6 +1014,89 @@ def create_pivot_table(wb, password: str) -> str:
         raise
 
 
+def apply_date_formatting(sheet: Any) -> None:
+    """
+    Apply date formatting to date columns in a sheet.
+    
+    Args:
+        sheet: Worksheet COM object
+    """
+    date_columns = [
+        'Date of Advance', 'Last Activity Date', 'Anticipated Liquidation Date',
+        'Period of Performance End Date', 'Date of Advance_comp', 
+        'Last Activity Date_comp', 'Anticipated Liquidation Date_comp',
+        'Period of Performance End Date_comp'
+    ]
+    
+    try:
+        # Find header row (assume row 1)
+        header_row = 1
+        used_range = sheet.UsedRange
+        
+        if not used_range:
+            return
+            
+        # Check each column header
+        for col in range(1, used_range.Columns.Count + 1):
+            try:
+                header_value = sheet.Cells(header_row, col).Value
+                if header_value in date_columns:
+                    # Apply date format to entire column
+                    col_letter = get_column_letter(col)
+                    last_row = used_range.Rows.Count
+                    date_range = sheet.Range(f"{col_letter}2:{col_letter}{last_row}")
+                    date_range.NumberFormat = "m/d/yyyy"
+                    logger.debug(f"Applied date formatting to column {col_letter}")
+            except:
+                pass
+                
+    except Exception as e:
+        logger.warning(f"Error applying date formatting: {e}")
+
+
+def populate_do_tab_4_review_sheet_pandas(input_wb: Any, dataframe_path: str) -> None:
+    """
+    Populate DO Tab 4 Review sheet using pandas as fallback.
+    
+    Args:
+        input_wb: Input workbook COM object
+        dataframe_path: Path to the dataframe Excel file
+    """
+    try:
+        import pandas as pd
+        
+        # Read the dataframe
+        df = pd.read_excel(dataframe_path, sheet_name=0, engine='openpyxl')
+        
+        # Get the DO Tab 4 Review sheet
+        target_sheet = input_wb.Sheets("DO Tab 4 Review")
+        
+        # Clear existing data
+        target_sheet.UsedRange.ClearContents()
+        
+        # Write headers
+        for col_idx, col_name in enumerate(df.columns, 1):
+            target_sheet.Cells(1, col_idx).Value = str(col_name)
+        
+        # Write data
+        for row_idx, row in df.iterrows():
+            for col_idx, value in enumerate(row, 1):
+                if pd.notna(value):
+                    if isinstance(value, pd.Timestamp):
+                        target_sheet.Cells(row_idx + 2, col_idx).Value = value.to_pydatetime()
+                    else:
+                        target_sheet.Cells(row_idx + 2, col_idx).Value = value
+        
+        # Apply date formatting
+        apply_date_formatting(target_sheet)
+        
+        logger.info("DO Tab 4 Review sheet populated successfully using pandas")
+        
+    except Exception as e:
+        logger.error(f"Error in pandas fallback: {e}")
+        raise
+
+
 def get_column_letter(column_number: int) -> str:
     """
     Convert a column number to a column letter (A, B, C, ..., Z, AA, AB, ...).
@@ -1287,6 +1379,60 @@ def prepare_file_for_com_access(file_path: str) -> None:
 
 
 @safe_excel_operation
+def populate_do_tab_4_review_sheet_v2(processor: 'ExcelProcessor', input_wb: Any, dataframe_path: str) -> None:
+    """
+    Populate DO Tab 4 Review sheet using ExcelProcessor with best practices.
+    
+    Args:
+        processor: ExcelProcessor instance
+        input_wb: Input workbook COM object
+        dataframe_path: Path to the dataframe Excel file
+    """
+    logger.info("Populating DO Tab 4 Review sheet with ExcelProcessor")
+    
+    if not os.path.exists(dataframe_path):
+        logger.error(f"Dataframe file not found: {dataframe_path}")
+        return
+    
+    try:
+        # Open dataframe workbook
+        df_wb = processor.open_workbook(dataframe_path, read_only=True)
+        
+        if df_wb:
+            df_sheet = df_wb.Sheets(1)
+            target_sheet = input_wb.Sheets("DO Tab 4 Review")
+            
+            # Clear existing data
+            target_sheet.UsedRange.ClearContents()
+            
+            # Get all values from source sheet
+            source_values = get_used_range_values(df_sheet)
+            
+            if source_values:
+                # Write values to target sheet
+                rows = len(source_values)
+                cols = len(source_values[0]) if source_values else 0
+                
+                # Write data in chunks for better performance
+                for row_idx, row_data in enumerate(source_values, 1):
+                    for col_idx, value in enumerate(row_data, 1):
+                        target_sheet.Cells(row_idx, col_idx).Value = value
+                
+                # Apply date formatting
+                apply_date_formatting(target_sheet)
+                
+                # Auto-fit columns
+                target_sheet.UsedRange.Columns.AutoFit()
+                
+                logger.info(f"DO Tab 4 Review sheet populated with {rows} rows and {cols} columns")
+            
+    except Exception as e:
+        logger.error(f"Error populating DO Tab 4 Review sheet: {e}")
+        # Fall back to pandas method
+        logger.info("Falling back to pandas method...")
+        populate_do_tab_4_review_sheet_pandas(input_wb, dataframe_path)
+
+
 def populate_do_tab_4_review_sheet(excel, input_wb, dataframe_path: str) -> None:
     """
     Populate the DO Tab 4 Review sheet with processed data.
@@ -1439,7 +1585,108 @@ def populate_do_tab_4_review_sheet(excel, input_wb, dataframe_path: str) -> None
 
 
 @safe_excel_operation
+def process_excel_files_v2(output_path: str, input_path: str, current_dhstier_path: str, prior_dhstier_path: str, component: str, password: str, dataframe_path: str = None) -> None:
+    """
+    Process Excel files using the new ExcelProcessor with best practices.
+    
+    This is the recommended approach following Excel COM best practices.
+    """
+    if not EXCEL_PROCESSOR_AVAILABLE:
+        logger.warning("ExcelProcessor not available, falling back to legacy method")
+        return process_excel_files_legacy(output_path, input_path, current_dhstier_path, prior_dhstier_path, component, password, dataframe_path)
+    
+    logger.info(f"Starting Excel file processing with ExcelProcessor for {component}")
+    
+    # Use ExcelProcessor context manager for proper lifecycle management
+    with ExcelProcessor() as processor:
+        try:
+            # Open all workbooks
+            output_wb = processor.open_workbook(output_path)
+            input_wb = processor.open_workbook(input_path)
+            current_dhstier_wb = processor.open_workbook(current_dhstier_path)
+            prior_dhstier_wb = processor.open_workbook(prior_dhstier_path)
+            
+            # Log sheet names for debugging
+            logger.info("Sheet names in input workbook:")
+            for sheet in input_wb.Sheets:
+                logger.info(f"  - {sheet.Name}")
+            
+            # Find target sheet for insertion
+            target_sheet_name = "6-ADVANCE TO TIER Recon Summary"
+            target_sheet = processor.find_sheet(input_wb, target_sheet_name)
+            
+            if not target_sheet:
+                logger.warning(f"Target sheet '{target_sheet_name}' not found")
+                target_sheet = input_wb.Sheets(input_wb.Sheets.Count)  # Use last sheet
+            
+            # Copy DO Tab 4 Review sheet
+            logger.info("Copying 'DO Tab 4 Review' sheet")
+            source_sheet = processor.find_sheet(output_wb, "DO Tab 4 Review")
+            if source_sheet:
+                processor.copy_sheet(source_sheet, input_wb, after_sheet=target_sheet)
+                target_sheet = input_wb.Sheets("DO Tab 4 Review")
+            
+            # Find and copy DHSTIER sheets
+            logger.info("Finding and copying DHSTIER sheets")
+            
+            # Current year
+            current_sheet = find_sheet_with_component_total(current_dhstier_wb, component)
+            if current_sheet:
+                sheet = current_dhstier_wb.Sheets(current_sheet)
+                processor.copy_sheet(sheet, input_wb, "DO CY TB", after_sheet=target_sheet)
+                target_sheet = input_wb.Sheets("DO CY TB")
+            
+            # Prior year
+            prior_sheet = find_sheet_with_component_total(prior_dhstier_wb, component)
+            if prior_sheet:
+                sheet = prior_dhstier_wb.Sheets(prior_sheet)
+                processor.copy_sheet(sheet, input_wb, "DO PY TB", after_sheet=target_sheet)
+            
+            # Process other operations (pivot tables, tickmarks, etc.)
+            if password:
+                # Use protected sheet operations
+                logger.info("Processing protected sheets")
+                for sheet in input_wb.Sheets:
+                    with processor.protected_sheet_operation(sheet, password):
+                        # Perform operations on unprotected sheet
+                        pass
+            
+            # Populate DO Tab 4 Review if dataframe path provided
+            if dataframe_path:
+                logger.info("Populating DO Tab 4 Review sheet")
+                populate_do_tab_4_review_sheet_v2(processor, input_wb, dataframe_path)
+            
+            # Save the workbook
+            processor.save_workbook(input_wb)
+            
+            logger.info("Excel file processing completed successfully")
+            
+        except Exception as e:
+            logger.error(f"Error in Excel file processing: {e}")
+            raise
+
+
+@safe_excel_operation
 def process_excel_files(output_path: str, input_path: str, current_dhstier_path: str, prior_dhstier_path: str, component: str, password: str, dataframe_path: str = None) -> None:
+    """
+    Legacy process Excel files function.
+    
+    This function is maintained for backward compatibility but should be replaced
+    with process_excel_files_v2 which uses the ExcelProcessor with best practices.
+    """
+    # Try to use the new version first
+    if EXCEL_PROCESSOR_AVAILABLE:
+        try:
+            return process_excel_files_v2(output_path, input_path, current_dhstier_path, prior_dhstier_path, component, password, dataframe_path)
+        except Exception as e:
+            logger.warning(f"ExcelProcessor method failed, falling back to legacy: {e}")
+    
+    # Continue with existing implementation
+    return process_excel_files_legacy(output_path, input_path, current_dhstier_path, prior_dhstier_path, component, password, dataframe_path)
+
+
+@safe_excel_operation
+def process_excel_files_legacy(output_path: str, input_path: str, current_dhstier_path: str, prior_dhstier_path: str, component: str, password: str, dataframe_path: str = None) -> None:
     """
     Process Excel files by copying sheets, creating pivot table, modifying sheets, and ensuring file accessibility.
     

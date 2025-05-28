@@ -4,7 +4,8 @@
       "Bash(rg:*)",
       "Bash(grep:*)",
       "Bash(python test_excel_error_fixes.py:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(find:*)"
     ],
     "deny": []
   }
