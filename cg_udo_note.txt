@@ -7,7 +7,7 @@ Status 1 - The were a total of 19,906 Status 1 Obligations (4,876 being with Fed
 - 1,627 had obligation dates that exceeded the end of the PoP.
 - 5,070 had comments that provided invoice activity that differed from the Last Activity Date Field and was more current. Per the component, this is related to the Data available in the Component Financial Hub from NESSS and ALMIS.
 - 20 Obligations were under DCAA Audit
-- 1,162Obligations were Valid Status 1 Obligations
+- 1,162 Obligations were Valid Status 1 Obligations
 - 1,738 Obligations have SNOW tickets and should remain status 1 until resolved
 - 27 obligations that were erroneously categorized as Status 1 however should have been Status 3 per the component. See attached email.
 - 988 Obligations that contained comments that were indicative that the obligation was a valid Status 1 Obligation due to issues with FSMS or not having received any Validation Comments yet
