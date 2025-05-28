@@ -1,0 +1,7 @@
+2025-05-27 21:51:39 - root - INFO - Logging initialized - Level: INFO, File: /Users/jeroncrooks/CascadeProjects/Advance-Analysis/logs/advance_analysis_20250527_215139.log
+2025-05-27 21:51:39 - src.advance_analysis.modules.excel_handler - WARNING - Windows COM modules not available - Excel COM automation features will be disabled
+2025-05-27 21:51:39 - root - INFO - Logging initialized - Level: INFO, File: /Users/jeroncrooks/CascadeProjects/Advance-Analysis/logs/advance_analysis_20250527_215139.log
+2025-05-27 21:51:39 - __main__ - INFO - Created CY test file: /Users/jeroncrooks/CascadeProjects/Advance-Analysis/test_data/WMD FY25 Q2 Advance Analysis.xlsx
+2025-05-27 21:51:39 - __main__ - INFO - Created PY test file: /Users/jeroncrooks/CascadeProjects/Advance-Analysis/test_data/WMD FY24 Q2 Advance Analysis.xlsx
+2025-05-27 21:51:39 - __main__ - INFO - Created CY DHSTIER file: /Users/jeroncrooks/CascadeProjects/Advance-Analysis/test_data/WMD_FY25_Q2_DHSTIER.xlsx
+2025-05-27 21:51:39 - __main__ - INFO - Created PY DHSTIER file: /Users/jeroncrooks/CascadeProjects/Advance-Analysis/test_data/WMD_FY24_Q2_DHSTIER.xlsx

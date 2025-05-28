@@ -1,0 +1,60 @@
+2025-05-27 21:47:37 - root - INFO - Logging initialized - Level: INFO, File: /Users/jeroncrooks/CascadeProjects/Advance-Analysis/logs/advance_analysis_20250527_214737.log
+2025-05-27 21:47:37 - advance_analysis.modules.excel_handler - WARNING - Windows COM modules not available - Excel COM automation features will be disabled
+2025-05-27 21:47:37 - root - INFO - Logging initialized - Level: INFO, File: /Users/jeroncrooks/CascadeProjects/Advance-Analysis/logs/advance_analysis_20250527_214737.log
+2025-05-27 21:47:37 - advance_analysis.core.data_processing_complete - INFO - Starting complete advance analysis processing for WMD FY25 Q2
+2025-05-27 21:47:37 - advance_analysis.core.data_processing_complete - INFO - Fiscal Year: 2025
+2025-05-27 21:47:37 - advance_analysis.core.data_processing_complete - INFO - Current Reporting Date: 03/31/2025
+2025-05-27 21:47:37 - advance_analysis.core.data_processing_complete - INFO - Fiscal Year Start: 10/01/2024
+2025-05-27 21:47:37 - advance_analysis.core.data_processing_complete - INFO - Fiscal Year End: 09/30/2025
+2025-05-27 21:47:37 - advance_analysis.core.data_processing_complete - INFO - ================================================================================
+2025-05-27 21:47:37 - advance_analysis.core.data_processing_complete - INFO - STEP 1: Processing Current Year (CY) Data
+2025-05-27 21:47:37 - advance_analysis.core.data_processing_complete - INFO - ================================================================================
+2025-05-27 21:47:37 - advance_analysis.modules.data_loader - INFO - Loading file: /Users/jeroncrooks/CascadeProjects/Advance-Analysis/test_data/WMD FY25 Q2 Advance Analysis Test.xlsx
+2025-05-27 21:47:37 - advance_analysis.modules.data_loader - INFO - Sheet names in file: ['1-Instructions', '2-Certification', '3-PY Q4 Ending Balance', '4-Advance Analysis', '5-FY18 Scorecard Metrics', '6-ADVANCE TO TIER Recon SUMMARY', 'Version Control', 'DO USE Only']
+2025-05-27 21:47:37 - advance_analysis.modules.data_loader - INFO - Searching for header row with term 'TAS' in column A
+2025-05-27 21:47:37 - advance_analysis.modules.data_loader - INFO - Found header row at index 9 (row 10 in Excel)
+2025-05-27 21:47:37 - advance_analysis.modules.data_loader - INFO - Headers found: ['TAS', 'SGL', 'DHS Doc No', 'Indicate if advance is to WCF (Y/N)', 'Advance/Prepayment', 'Date of Advance', 'Age of Advance (days)', 'Last Activity Date', 'Anticipated Liquidation Date', 'Period of Performance End Date']...
+2025-05-27 21:47:37 - advance_analysis.modules.data_loader - INFO - Total columns identified: 16
+2025-05-27 21:47:37 - advance_analysis.modules.data_loader - INFO - Using intelligent header detection: skiprows=9, usecols up to column 15
+2025-05-27 21:47:37 - advance_analysis.core.advance_analysis_processing - INFO - Initialized AdvanceAnalysisProcessor for WMD
+2025-05-27 21:47:37 - advance_analysis.core.advance_analysis_processing - INFO - Current Reporting Date: 03/31/2025
+2025-05-27 21:47:37 - advance_analysis.core.advance_analysis_processing - INFO - Fiscal Year Start Date: 10/01/2024
+2025-05-27 21:47:37 - advance_analysis.core.advance_analysis_processing - INFO - Starting advance data processing
+2025-05-27 21:47:37 - advance_analysis.core.advance_analysis_processing - INFO - Initial DataFrame shape: (4, 16)
+2025-05-27 21:47:37 - advance_analysis.core.advance_analysis_processing - INFO - Initial columns: ['TAS', 'SGL', 'DHS Doc No', 'Indicate if advance is to WCF (Y/N)', 'Advance/Prepayment', 'Date of Advance', 'Age of Advance (days)', 'Last Activity Date', 'Anticipated Liquidation Date', 'Period of Performance End Date', 'Status', 'Advance/Prepayment_1', 'Comments', 'Vendor', 'Trading Partner ID', 'Advance Type (e.g. Travel, Vendor Prepayment)']
+2025-05-27 21:47:37 - advance_analysis.core.advance_analysis_processing - INFO - Validating and cleaning data
+2025-05-27 21:47:37 - advance_analysis.core.advance_analysis_processing - INFO - All required columns present. Total columns: 16
+2025-05-27 21:47:37 - advance_analysis.core.advance_analysis_processing - INFO - Transforming date columns
+2025-05-27 21:47:37 - advance_analysis.core.advance_analysis_processing - INFO - Date of Advance: All 4 values successfully converted to dates
+2025-05-27 21:47:37 - advance_analysis.core.advance_analysis_processing - INFO - Last Activity Date: All 4 values successfully converted to dates
+2025-05-27 21:47:37 - advance_analysis.core.advance_analysis_processing - INFO - Anticipated Liquidation Date: All 4 values successfully converted to dates
+2025-05-27 21:47:37 - advance_analysis.core.advance_analysis_processing - INFO - Period of Performance End Date: All 4 values successfully converted to dates
+2025-05-27 21:47:37 - advance_analysis.core.advance_analysis_processing - INFO - Setting column types
+2025-05-27 21:47:37 - advance_analysis.core.advance_analysis_processing - INFO - Removing extra columns
+2025-05-27 21:47:37 - advance_analysis.core.advance_analysis_processing - INFO - No extra columns to remove
+2025-05-27 21:47:37 - advance_analysis.core.advance_analysis_processing - INFO - Filtering valid rows (non-null TAS)
+2025-05-27 21:47:37 - advance_analysis.core.advance_analysis_processing - INFO - Filtered out 0 rows with null TAS
+2025-05-27 21:47:37 - advance_analysis.core.advance_analysis_processing - INFO - Remaining rows: 4
+2025-05-27 21:47:37 - advance_analysis.core.advance_analysis_processing - INFO - Adding DO Concatenate column
+2025-05-27 21:47:37 - advance_analysis.core.advance_analysis_processing - INFO - Adding PoP Expired? column
+2025-05-27 21:47:37 - advance_analysis.core.advance_analysis_processing - INFO - PoP Expired statistics:
+PoP Expired?
+N    3
+Y    1
+Name: count, dtype: int64
+2025-05-27 21:47:37 - advance_analysis.core.advance_analysis_processing - INFO - Adding Days Since PoP Expired column
+2025-05-27 21:47:37 - advance_analysis.core.advance_analysis_processing - INFO - Adding Invoiced Within the Last 12 Months column
+2025-05-27 21:47:37 - advance_analysis.core.advance_analysis_processing - INFO - Invoice activity statistics:
+Invoiced Within the Last 12 Months
+True    4
+Name: count, dtype: int64
+2025-05-27 21:47:37 - advance_analysis.core.advance_analysis_processing - INFO - Adding Active/Inactive Advance column
+2025-05-27 21:47:37 - advance_analysis.core.advance_analysis_processing - INFO - Active/Inactive advance statistics:
+Active/Inactive Advance
+Active Advance — Invoice Received in Last 12 Months    4
+Name: count, dtype: int64
+2025-05-27 21:47:37 - advance_analysis.core.advance_analysis_processing - INFO - Adding Abnormal Balance column
+2025-05-27 21:47:37 - advance_analysis.core.advance_analysis_processing - INFO - Abnormal balance statistics:
+Abnormal Balance
+Advance Balance Not Provided    4
+Name: count, dtype: int64
