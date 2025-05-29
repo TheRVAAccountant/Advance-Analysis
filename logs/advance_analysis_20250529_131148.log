@@ -1,0 +1,15 @@
+2025-05-29 13:11:48 - root - INFO - Logging initialized - Level: INFO, File: /Users/jeroncrooks/CascadeProjects/Advance-Analysis/logs/advance_analysis_20250529_131148.log
+2025-05-29 13:11:48 - src.advance_analysis.modules.excel_handler - WARNING - Windows COM modules not available - Excel COM automation features will be disabled
+2025-05-29 13:11:48 - src.advance_analysis.core.advance_analysis_merged - INFO - Initialized AdvanceAnalysisProcessor for TEST
+2025-05-29 13:11:48 - src.advance_analysis.core.advance_analysis_merged - INFO - Fiscal Year Start Date: 10/01/2024
+2025-05-29 13:11:48 - src.advance_analysis.core.advance_analysis_merged - INFO - Fiscal Year End Date: 09/30/2025
+2025-05-29 13:11:48 - src.advance_analysis.core.advance_analysis_merged - INFO - Merging CY and PY dataframes on DO Concatenate
+2025-05-29 13:11:48 - src.advance_analysis.core.advance_analysis_merged - INFO - PY columns already have _comp suffix, skipping rename
+2025-05-29 13:11:48 - src.advance_analysis.core.advance_analysis_merged - INFO - Merged DataFrame shape: (2, 8)
+2025-05-29 13:11:48 - src.advance_analysis.core.advance_analysis_merged - INFO - Sample of merged data (first 5 rows):
+2025-05-29 13:11:48 - src.advance_analysis.core.advance_analysis_merged - INFO - 
+  DO Concatenate Status  Advance/Prepayment Status_comp
+0            DO1      1                 100           1
+1            DO2      2                 200         NaN
+2025-05-29 13:11:48 - src.advance_analysis.core.advance_analysis_merged - INFO - Merge statistics: 1 rows matched with PY data out of 2 total rows
+2025-05-29 13:11:48 - src.advance_analysis.core.advance_analysis_merged - INFO - Match rate: 50.0%

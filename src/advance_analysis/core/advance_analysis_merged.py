@@ -109,24 +109,16 @@ class AdvanceAnalysisProcessor:
         """Merge current year and prior year dataframes."""
         logger.info("Merging CY and PY dataframes on DO Concatenate")
         
-        # Rename PY columns to avoid conflicts
-        py_columns_to_rename = {
-            'Date of Advance': 'Date of Advance_comp',
-            'Last Activity Date': 'Last Activity Date_comp',
-            'Anticipated Liquidation Date': 'Anticipated Liquidation Date_comp',
-            'Status': 'Status_comp',
-            'Advance/Prepayment.1': 'Advance/Prepayment.1_comp'
-        }
-        
-        # Only rename columns that exist
-        rename_dict = {col: new_name for col, new_name in py_columns_to_rename.items() 
-                      if col in py_df.columns}
-        py_df = py_df.rename(columns=rename_dict)
-        
+        # The PY dataframe should already have columns with _comp suffix from comparative_analysis_processing
         # Select only the columns we need from PY
-        py_cols_to_keep = ['DO Concatenate'] + list(rename_dict.values())
-        py_cols_to_keep = [col for col in py_cols_to_keep if col in py_df.columns]
+        py_cols_with_comp = ['Date of Advance_comp', 'Last Activity Date_comp', 
+                            'Anticipated Liquidation Date_comp', 'Status_comp', 
+                            'Advance/Prepayment.1_comp']
+        py_cols_to_keep = ['DO Concatenate'] + [col for col in py_cols_with_comp if col in py_df.columns]
         py_df_subset = py_df[py_cols_to_keep]
+        
+        # Log which columns we're keeping from PY
+        logger.info(f"Keeping {len(py_cols_to_keep)} columns from PY data: {py_cols_to_keep}")
         
         # Perform left join
         df = pd.merge(cy_df, py_df_subset, on='DO Concatenate', how='left')
