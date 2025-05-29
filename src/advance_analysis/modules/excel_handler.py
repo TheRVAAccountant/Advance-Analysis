@@ -36,6 +36,23 @@ from ..utils.logging_config import get_logger
 from ..modules.file_handler import ensure_file_accessibility
 # from ..core.udo_validation import validate_udo_tier_recon
 
+# Import cross-platform utilities
+try:
+    from .excel_handler_crossplatform import find_sheet_with_component_total
+except ImportError:
+    # Define a fallback function if crossplatform module is not available
+    def find_sheet_with_component_total(workbook, component: str) -> Optional[str]:
+        """Fallback implementation for finding sheet with component total."""
+        try:
+            # For COM objects, iterate through sheets
+            for i in range(1, workbook.Sheets.Count + 1):
+                sheet_name = workbook.Sheets(i).Name
+                if component.upper() in sheet_name.upper() and 'TOTAL' in sheet_name.upper():
+                    return sheet_name
+            return None
+        except Exception:
+            return None
+
 # Enhanced file and COM handling utilities
 def wait_for_file_ready(file_path: str, max_wait: float = 10.0, check_interval: float = 0.5) -> bool:
     """
@@ -515,10 +532,10 @@ def _apply_excel_formatting(worksheet) -> None:
     header_style.border = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
 
     currency_style = NamedStyle(name="currency_style")
-    currency_style.number_format = '#,##0.00_);[Red](#,##0.00)'
+    currency_style.number_format = '$#,##0.00_);[Red]($#,##0.00)'
 
     date_style = NamedStyle(name="date_style")
-    date_style.number_format = 'mm/dd/yyyy'
+    date_style.number_format = 'm/d/yy'
 
     age_style = NamedStyle(name="age_style")
     age_style.number_format = '_(* #,##0_);_(* (#,##0);_(* "-"??_);_(@_)'
@@ -533,12 +550,14 @@ def _apply_excel_formatting(worksheet) -> None:
     # Get column indices and apply specific formats
     column_indices = {cell.value: cell.column_letter for cell in worksheet[1]}
 
-    currency_columns = ["PY Q4 Ending Balance UDO", "Current FY Quarter-End  balance UDO", "Current FY Quarter-End  balance UDO_comp"]
+    currency_columns = ["PY Q4 Ending Balance UDO", "Current FY Quarter-End  balance UDO", "Current FY Quarter-End  balance UDO_comp",
+                        "Advance/Prepayment", "Advance/Prepayment.1", "Advance/Prepayment.1_comp"]
     date_columns = ['Date of Obligation', 'Date of the Last Invoice Received', 'For Status 3 and 4 -Date deobligation was initiated', 
                     'For Status 3 and 4 - Date debligation is planned', 'Period of Performance End Date', 'Date Component Last Contacted Vendor for Bill',
                     'Date Component Last Contacted Vendor for Bill_comp', 'For Status 3 and 4 -Date deobligation was initiated_comp', 
                     'For Status 3 and 4 - Date debligation is planned_comp', 'Date of Obligation_comp', 
-                    'Reporting Date', 'FY Start Date', 'FY End Date']
+                    'Reporting Date', 'FY Start Date', 'FY End Date',
+                    'Last Activity Date', 'Date of Advance', 'Anticipated Liquidation Date']
     age_columns = ['Age of Obligation in Days2', 'UDO Age in Days', 'De-Ob Date Change in Days']
     wrap_columns = ['Active / Inactive Obligation (No Invoice in Over 1 Year)', 'Null or Blank Columns', 'Prior Status Agrees?', 'DO Comment']
 

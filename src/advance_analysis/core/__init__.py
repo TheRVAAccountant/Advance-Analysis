@@ -6,9 +6,10 @@ and business logic for analyzing DHS advance payments.
 """
 
 from .cy_advance_analysis import CYAdvanceAnalysis
-from .status_validations import StatusValidations
+from .advance_analysis_merged import StatusValidations, AdvanceAnalysisProcessor
 
 __all__ = [
     "CYAdvanceAnalysis",
-    "StatusValidations"
+    "StatusValidations",
+    "AdvanceAnalysisProcessor"
 ]

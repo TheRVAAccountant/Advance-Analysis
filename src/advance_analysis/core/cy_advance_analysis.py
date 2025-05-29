@@ -5,7 +5,7 @@ from typing import Union
 import logging
 import tkinter as tk
 from datetime import datetime
-from .status_validations import StatusValidations
+from .advance_analysis_merged import StatusValidations
 
 class CYAdvanceAnalysis:
     def __init__(self, logger):
@@ -335,8 +335,8 @@ class CYAdvanceAnalysis:
             merged_df.drop(columns=['PY_DO Concatenate'], inplace=True)
     
             # Add the new status validation columns using the imported functions
-            merged_df = self.status_validations.add_advances_requiring_explanations(merged_df)
             merged_df = self.status_validations.add_null_or_blank_columns(merged_df)
+            merged_df = self.status_validations.add_advances_requiring_explanations(merged_df)
             merged_df = self.status_validations.add_advance_date_after_pop_expiration(merged_df)
             merged_df = self.status_validations.add_status_changed(merged_df)
             merged_df = self.status_validations.add_anticipated_liquidation_date_test(merged_df, fy_start_date, fy_end_date)

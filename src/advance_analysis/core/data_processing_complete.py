@@ -14,7 +14,7 @@ from ..utils.logging_config import get_logger
 from ..modules.data_loader import load_excel_file, find_header_row_in_dataframe
 from .advance_analysis_processing import process_advance_analysis
 from .comparative_analysis_processing import process_comparative_analysis
-from .do_advance_analysis_processing import process_do_advance_analysis
+from .advance_analysis_merged import process_advance_analysis_merged as process_do_advance_analysis
 from .data_processing_simple import get_comparative_period
 
 logger = get_logger(__name__)
