@@ -148,12 +148,20 @@ class CYAdvanceAnalysis:
         df['Advance/Prepayment'] = df['Advance/Prepayment'].apply(self.format_balance)
 
         # 1. DO Concatenate
-        self.logger.info("Adding DO Concatenate column...")
-        df['DO Concatenate'] = df.apply(lambda row: ''.join([
-            str(row['TAS']), 
-            str(row['DHS Doc No']), 
-            str(row['Advance/Prepayment']).replace(" ", "")
-        ]), axis=1)
+        self.logger.info(f"Adding DO Concatenate column for component: {component_name}")
+        if component_name == "CG":
+            # For CG component, use only TAS and DHS Doc No
+            df['DO Concatenate'] = df.apply(lambda row: ''.join([
+                str(row['TAS']), 
+                str(row['DHS Doc No'])
+            ]), axis=1)
+        else:
+            # For other components, include Advance/Prepayment
+            df['DO Concatenate'] = df.apply(lambda row: ''.join([
+                str(row['TAS']), 
+                str(row['DHS Doc No']), 
+                str(row['Advance/Prepayment']).replace(" ", "")
+            ]), axis=1)
         
         # 2. PoP Expired?
         self.logger.info("Adding PoP Expired? column...")
@@ -312,11 +320,20 @@ class CYAdvanceAnalysis:
             prior_df['Advance/Prepayment_1'] = prior_df['Advance/Prepayment_1'].apply(self.format_balance)
     
             # Add 'DO Concatenate' field to prior_df
-            prior_df['DO Concatenate'] = prior_df.apply(lambda row: ''.join([
-                str(row['TAS']), 
-                str(row['DHS Doc No']), 
-                str(row['Advance/Prepayment_1']).replace(" ", "")
-            ]), axis=1)
+            self.logger.info(f"Adding DO Concatenate column to prior data for component: {component_name}")
+            if component_name == "CG":
+                # For CG component, use only TAS and DHS Doc No
+                prior_df['DO Concatenate'] = prior_df.apply(lambda row: ''.join([
+                    str(row['TAS']), 
+                    str(row['DHS Doc No'])
+                ]), axis=1)
+            else:
+                # For other components, include Advance/Prepayment_1
+                prior_df['DO Concatenate'] = prior_df.apply(lambda row: ''.join([
+                    str(row['TAS']), 
+                    str(row['DHS Doc No']), 
+                    str(row['Advance/Prepayment_1']).replace(" ", "")
+                ]), axis=1)
     
             # Select only the needed columns from prior_df for the merge
             prior_df = prior_df[['DO Concatenate', 'Date of Advance', 'Last Activity Date', 

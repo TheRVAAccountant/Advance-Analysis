@@ -73,28 +73,31 @@ class AdvanceAnalysisProcessor:
         # Step 4: Add Advance Date After Expiration of PoP
         df = self.add_advance_date_after_pop_expiration(df)
         
-        # Step 5: Add Status Changed column
+        # Step 5: Add Comparative Period Status column (shows prior year status)
+        df = self._add_comparative_period_status(df)
+        
+        # Step 6: Add Status Changed column
         df = self._add_status_changed(df)
         
-        # Step 6: Add Anticipated Liquidation Date Test
+        # Step 7: Add Anticipated Liquidation Date Test
         df = self.add_anticipated_liquidation_date_test(df, self.fiscal_year_start_date, self.fiscal_year_end_date)
         
-        # Step 7: Add Anticipated Liquidation Date Delayed
+        # Step 8: Add Anticipated Liquidation Date Delayed
         df = self._add_anticipated_liquidation_date_delayed(df)
         
-        # Step 8: Add Valid Status 1
+        # Step 9: Add Valid Status 1
         df = self.add_valid_status_1(df)
         
-        # Step 9: Add Valid Status 2
+        # Step 10: Add Valid Status 2
         df = self.add_valid_status_2(df)
         
-        # Step 10: Add DO Status 1 Validation
+        # Step 11: Add DO Status 1 Validation
         df = self.add_do_status_1_validation(df)
         
-        # Step 11: Add DO Status 2 Validation
+        # Step 12: Add DO Status 2 Validation
         df = self.add_do_status_2_validations(df)
         
-        # Step 12: Add DO Comment column
+        # Step 13: Add DO Comment column
         df = self._add_do_comment(df)
         
         logger.info(f"Processing complete. Final DataFrame shape: {df.shape}")
@@ -252,6 +255,21 @@ class AdvanceAnalysisProcessor:
 
         return df
 
+    def _add_comparative_period_status(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Add Comparative Period Status column to show the prior year status value."""
+        logger.info("Adding Comparative Period Status column")
+        
+        # Create the column from Status_comp, handling missing values
+        df['Comparative Period Status'] = df['Status_comp'].apply(
+            lambda x: f"Status {int(x)}" if pd.notnull(x) else "No Prior Year Data"
+        )
+        
+        # Log statistics
+        comp_status_stats = df['Comparative Period Status'].value_counts()
+        logger.info(f"Comparative Period Status distribution:\n{comp_status_stats}")
+        
+        return df
+    
     def _add_status_changed(self, df: pd.DataFrame) -> pd.DataFrame:
         """Add Status Changed column with PY column name mapping."""
         logger.info("Adding Status Changed column")
