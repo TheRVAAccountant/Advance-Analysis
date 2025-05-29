@@ -866,3 +866,5 @@ AttributeError: '<win32com.gen_py.Microsoft Excel 16.0 Object Library._Workbook 
 2025-05-29 13:35:47 - advance_analysis.gui.gui - INFO - Success: Data processing completed successfully!
 
 Execution time: 21.34 seconds
+2025-05-29 13:36:37 - advance_analysis.gui.gui - INFO - Opened file: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\outputs\CBP FY25 Q2 Advance Analysis 20250529_133528\CBP FY25 Q2 Advance Analysis - DO.xlsx
+2025-05-29 13:43:09 - advance_analysis.main - INFO - Advance Analysis Tool shutting down
