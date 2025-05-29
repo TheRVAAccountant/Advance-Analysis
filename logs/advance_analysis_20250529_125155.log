@@ -1,0 +1,323 @@
+2025-05-29 12:51:55 - root - INFO - Logging initialized - Level: INFO, File: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\logs\advance_analysis_20250529_125155.log
+2025-05-29 12:51:55 - advance_analysis.main - INFO - Starting Advance Analysis Tool
+2025-05-29 12:51:55 - advance_analysis.main - INFO - Launching main GUI
+2025-05-29 12:51:56 - advance_analysis.gui.file_selection_widget - INFO - Added to recent files (advance_analysis): C:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\inputs\WMD FY25 Q2 Advance Analysis 27 May 2025  Final.xlsx
+2025-05-29 12:51:56 - advance_analysis.gui.gui - INFO - Loaded recent advance analysis file: C:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\inputs\WMD FY25 Q2 Advance Analysis 27 May 2025  Final.xlsx
+2025-05-29 12:51:56 - advance_analysis.gui.file_selection_widget - INFO - Added to recent files (current_dhstier): C:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\inputs\WMD FY25 Q2 TrialBalance20250410_024311PM.xlsx
+2025-05-29 12:51:56 - advance_analysis.gui.gui - INFO - Loaded recent current DHSTIER file: C:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\inputs\WMD FY25 Q2 TrialBalance20250410_024311PM.xlsx
+2025-05-29 12:51:56 - advance_analysis.gui.file_selection_widget - INFO - Added to recent files (prior_dhstier): C:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\inputs\WMD FY24 Q4 TrialBalance20241011_080140AM.xlsx
+2025-05-29 12:51:56 - advance_analysis.gui.gui - INFO - Loaded recent prior DHSTIER file: C:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\inputs\WMD FY24 Q4 TrialBalance20241011_080140AM.xlsx
+2025-05-29 12:51:56 - advance_analysis.gui.status_bar - INFO - Status: Ready
+2025-05-29 12:52:14 - advance_analysis.gui.file_selection_widget - INFO - Added to recent files (advance_analysis): C:/Users/Jeron.Crooks/VSCode/Advance Analysis/src/inputs/CBP FY25 Q2 Advance Analysis v1.xlsx
+2025-05-29 12:52:14 - advance_analysis.gui.file_selection_widget - INFO - Selected file: C:/Users/Jeron.Crooks/VSCode/Advance Analysis/src/inputs/CBP FY25 Q2 Advance Analysis v1.xlsx
+2025-05-29 12:52:28 - advance_analysis.gui.file_selection_widget - INFO - Added to recent files (current_dhstier): C:/Users/Jeron.Crooks/VSCode/Advance Analysis/src/inputs/CG FY25 Q2 TrialBalance20250410_024158PM.xlsx
+2025-05-29 12:52:28 - advance_analysis.gui.file_selection_widget - INFO - Selected file: C:/Users/Jeron.Crooks/VSCode/Advance Analysis/src/inputs/CG FY25 Q2 TrialBalance20250410_024158PM.xlsx
+2025-05-29 12:52:36 - advance_analysis.gui.file_selection_widget - INFO - Added to recent files (current_dhstier): C:/Users/Jeron.Crooks/VSCode/Advance Analysis/src/inputs/CBP FY25 Q2 TrialBalance20250414_121015PM.xlsx
+2025-05-29 12:52:36 - advance_analysis.gui.file_selection_widget - INFO - Selected file: C:/Users/Jeron.Crooks/VSCode/Advance Analysis/src/inputs/CBP FY25 Q2 TrialBalance20250414_121015PM.xlsx
+2025-05-29 13:01:59 - advance_analysis.gui.file_selection_widget - INFO - Added to recent files (prior_dhstier): C:/Users/Jeron.Crooks/VSCode/Advance Analysis/src/inputs/CBP FY24 Q3 TrialBalance20240716_072623PM.xlsx
+2025-05-29 13:01:59 - advance_analysis.gui.file_selection_widget - INFO - Selected file: C:/Users/Jeron.Crooks/VSCode/Advance Analysis/src/inputs/CBP FY24 Q3 TrialBalance20240716_072623PM.xlsx
+2025-05-29 13:02:24 - advance_analysis.gui.file_selection_widget - INFO - Added to recent files (prior_dhstier): C:/Users/Jeron.Crooks/VSCode/Advance Analysis/src/inputs/CBP FY24 Q4 TrialBalance20241011_093558AM.xlsx
+2025-05-29 13:02:24 - advance_analysis.gui.file_selection_widget - INFO - Selected file: C:/Users/Jeron.Crooks/VSCode/Advance Analysis/src/inputs/CBP FY24 Q4 TrialBalance20241011_093558AM.xlsx
+2025-05-29 13:04:25 - advance_analysis.gui.status_bar - INFO - Status: Processing data...
+2025-05-29 13:04:25 - advance_analysis.gui.gui - INFO - Starting data processing for component: CBP, period: FY25 Q2
+2025-05-29 13:04:25 - advance_analysis.gui.gui - INFO - Loading Excel file: C:/Users/Jeron.Crooks/VSCode/Advance Analysis/src/inputs/CBP FY25 Q2 Advance Analysis v1.xlsx
+2025-05-29 13:04:25 - advance_analysis.modules.data_loader - INFO - Loading file: C:/Users/Jeron.Crooks/VSCode/Advance Analysis/src/inputs/CBP FY25 Q2 Advance Analysis v1.xlsx
+2025-05-29 13:04:26 - advance_analysis.modules.data_loader - INFO - Sheet names in file: ['1-Instructions', '2-Certification', '3-PY Q4 Ending Balance', '4-Advance Analysis', '5-FY18 Scorecard Metrics', '6-ADVANCE TO TIER Recon SUMMARY', 'Version Control', 'DO USE Only']
+2025-05-29 13:04:26 - advance_analysis.modules.data_loader - INFO - Searching for header row with term 'TAS' in column A
+2025-05-29 13:04:26 - advance_analysis.modules.data_loader - INFO - Found header row at index 9 (row 10 in Excel)
+2025-05-29 13:04:26 - advance_analysis.modules.data_loader - INFO - Headers found: ['TAS', 'SGL', 'DHS Doc No', 'Indicate if advance is to WCF (Y/N)', 'Advance/Prepayment', 'Date of Advance', 'Age of Advance (days)', 'Last Activity Date', 'Anticipated Liquidation Date', 'Period of Performance End Date']...
+2025-05-29 13:04:26 - advance_analysis.modules.data_loader - INFO - Total columns identified: 16
+2025-05-29 13:04:26 - advance_analysis.modules.data_loader - INFO - Using intelligent header detection: skiprows=9, usecols up to column 15
+2025-05-29 13:04:27 - advance_analysis.gui.gui - INFO - Excel file loaded successfully
+2025-05-29 13:04:27 - advance_analysis.gui.gui - INFO - Processing data with complete analysis
+2025-05-29 13:04:27 - advance_analysis.gui.gui - INFO - Current Period: CBP FY25 Q2
+2025-05-29 13:04:27 - advance_analysis.gui.gui - INFO - Comparative Period: CBP FY24 Q3
+2025-05-29 13:04:27 - advance_analysis.core.data_processing_complete - INFO - Starting complete advance analysis processing for CBP FY25 Q2
+2025-05-29 13:04:27 - advance_analysis.core.data_processing_complete - INFO - Fiscal Year: 2025
+2025-05-29 13:04:27 - advance_analysis.core.data_processing_complete - INFO - Current Reporting Date: 03/31/2025
+2025-05-29 13:04:27 - advance_analysis.core.data_processing_complete - INFO - Fiscal Year Start: 10/01/2024
+2025-05-29 13:04:27 - advance_analysis.core.data_processing_complete - INFO - Fiscal Year End: 09/30/2025
+2025-05-29 13:04:27 - advance_analysis.core.data_processing_complete - INFO - ================================================================================
+2025-05-29 13:04:27 - advance_analysis.core.data_processing_complete - INFO - STEP 1: Processing Current Year (CY) Data
+2025-05-29 13:04:27 - advance_analysis.core.data_processing_complete - INFO - ================================================================================
+2025-05-29 13:04:27 - advance_analysis.modules.data_loader - INFO - Loading file: C:/Users/Jeron.Crooks/VSCode/Advance Analysis/src/inputs/CBP FY25 Q2 Advance Analysis v1.xlsx
+2025-05-29 13:04:27 - advance_analysis.modules.data_loader - INFO - Sheet names in file: ['1-Instructions', '2-Certification', '3-PY Q4 Ending Balance', '4-Advance Analysis', '5-FY18 Scorecard Metrics', '6-ADVANCE TO TIER Recon SUMMARY', 'Version Control', 'DO USE Only']
+2025-05-29 13:04:27 - advance_analysis.modules.data_loader - INFO - Searching for header row with term 'TAS' in column A
+2025-05-29 13:04:27 - advance_analysis.modules.data_loader - INFO - Found header row at index 9 (row 10 in Excel)
+2025-05-29 13:04:27 - advance_analysis.modules.data_loader - INFO - Headers found: ['TAS', 'SGL', 'DHS Doc No', 'Indicate if advance is to WCF (Y/N)', 'Advance/Prepayment', 'Date of Advance', 'Age of Advance (days)', 'Last Activity Date', 'Anticipated Liquidation Date', 'Period of Performance End Date']...
+2025-05-29 13:04:27 - advance_analysis.modules.data_loader - INFO - Total columns identified: 16
+2025-05-29 13:04:27 - advance_analysis.modules.data_loader - INFO - Using intelligent header detection: skiprows=9, usecols up to column 15
+2025-05-29 13:04:28 - advance_analysis.core.advance_analysis_processing - INFO - Initialized AdvanceAnalysisProcessor for CBP
+2025-05-29 13:04:28 - advance_analysis.core.advance_analysis_processing - INFO - Current Reporting Date: 03/31/2025
+2025-05-29 13:04:28 - advance_analysis.core.advance_analysis_processing - INFO - Fiscal Year Start Date: 10/01/2024
+2025-05-29 13:04:28 - advance_analysis.core.advance_analysis_processing - INFO - Starting advance data processing
+2025-05-29 13:04:28 - advance_analysis.core.advance_analysis_processing - INFO - Initial DataFrame shape: (94, 16)
+2025-05-29 13:04:28 - advance_analysis.core.advance_analysis_processing - INFO - Initial columns: ['TAS', 'SGL', 'DHS Doc No', 'Indicate if advance is to WCF (Y/N)', 'Advance/Prepayment', 'Date of Advance', 'Age of Advance (days)', 'Last Activity Date', 'Anticipated Liquidation Date', 'Period of Performance End Date', 'Status', 'Advance/Prepayment.1', 'Comments', 'Vendor', ' Trading Partner ID', 'Advance Type (e.g. Travel, Vendor Prepayment)']
+2025-05-29 13:04:28 - advance_analysis.core.advance_analysis_processing - INFO - Validating and cleaning data
+2025-05-29 13:04:28 - advance_analysis.core.advance_analysis_processing - INFO - All required columns present. Total columns: 16
+2025-05-29 13:04:28 - advance_analysis.core.advance_analysis_processing - INFO - Transforming date columns
+2025-05-29 13:04:28 - advance_analysis.core.advance_analysis_processing - INFO - Date of Advance: All 94 values successfully converted to dates
+2025-05-29 13:04:28 - advance_analysis.core.advance_analysis_processing - INFO - Last Activity Date: All 94 values successfully converted to dates
+2025-05-29 13:04:28 - advance_analysis.core.advance_analysis_processing - WARNING - Anticipated Liquidation Date: 86 out of 94 values could not be converted to dates
+2025-05-29 13:04:28 - advance_analysis.core.advance_analysis_processing - INFO - Period of Performance End Date: All 94 values successfully converted to dates
+2025-05-29 13:04:28 - advance_analysis.core.advance_analysis_processing - INFO - Setting column types
+2025-05-29 13:04:28 - advance_analysis.core.advance_analysis_processing - INFO - Removing extra columns
+2025-05-29 13:04:28 - advance_analysis.core.advance_analysis_processing - INFO - No extra columns to remove
+2025-05-29 13:04:28 - advance_analysis.core.advance_analysis_processing - INFO - Filtering valid rows (non-null TAS)
+2025-05-29 13:04:28 - advance_analysis.core.advance_analysis_processing - INFO - Filtered out 0 rows with null TAS
+2025-05-29 13:04:28 - advance_analysis.core.advance_analysis_processing - INFO - Remaining rows: 94
+2025-05-29 13:04:28 - advance_analysis.core.advance_analysis_processing - INFO - Adding DO Concatenate column
+2025-05-29 13:04:28 - advance_analysis.core.advance_analysis_processing - INFO - Adding PoP Expired? column
+2025-05-29 13:04:28 - advance_analysis.core.advance_analysis_processing - INFO - PoP Expired statistics:
+PoP Expired?
+N    88
+Y     6
+Name: count, dtype: int64
+2025-05-29 13:04:28 - advance_analysis.core.advance_analysis_processing - INFO - Adding Days Since PoP Expired column
+2025-05-29 13:04:28 - advance_analysis.core.advance_analysis_processing - INFO - Adding Invoiced Within the Last 12 Months column
+2025-05-29 13:04:28 - advance_analysis.core.advance_analysis_processing - INFO - Invoice activity statistics:
+Invoiced Within the Last 12 Months
+True     74
+False    20
+Name: count, dtype: int64
+2025-05-29 13:04:28 - advance_analysis.core.advance_analysis_processing - INFO - Adding Active/Inactive Advance column
+2025-05-29 13:04:28 - advance_analysis.core.advance_analysis_processing - INFO - Active/Inactive advance statistics:
+Active/Inactive Advance
+Active Advance — Invoice Received in Last 12 Months             74
+Inactive Advance — No Invoice Activity Within Last 12 Months    20
+Name: count, dtype: int64
+2025-05-29 13:04:28 - advance_analysis.core.advance_analysis_processing - INFO - Adding Abnormal Balance column
+2025-05-29 13:04:28 - advance_analysis.core.advance_analysis_processing - INFO - Abnormal balance statistics:
+Abnormal Balance
+N    94
+Name: count, dtype: int64
+2025-05-29 13:04:28 - advance_analysis.core.advance_analysis_processing - INFO - Adding CY Advance? column
+2025-05-29 13:04:28 - advance_analysis.core.advance_analysis_processing - INFO - Current year advance statistics:
+CY Advance?
+N    94
+Name: count, dtype: int64
+2025-05-29 13:04:28 - advance_analysis.core.advance_analysis_processing - INFO - Processing complete. Final DataFrame shape: (94, 23)
+2025-05-29 13:04:28 - advance_analysis.core.advance_analysis_processing - INFO - Final columns: ['TAS', 'SGL', 'DHS Doc No', 'Indicate if advance is to WCF (Y/N)', 'Advance/Prepayment', 'Date of Advance', 'Age of Advance (days)', 'Last Activity Date', 'Anticipated Liquidation Date', 'Period of Performance End Date', 'Status', 'Advance/Prepayment.1', 'Comments', 'Vendor', ' Trading Partner ID', 'Advance Type (e.g. Travel, Vendor Prepayment)', 'DO Concatenate', 'PoP Expired?', 'Days Since PoP Expired', 'Invoiced Within the Last 12 Months', 'Active/Inactive Advance', 'Abnormal Balance', 'CY Advance?']
+2025-05-29 13:04:28 - advance_analysis.core.data_processing_complete - INFO - CY processing complete. Shape: (94, 23)
+2025-05-29 13:04:28 - advance_analysis.core.data_processing_complete - INFO - CY columns: ['TAS', 'SGL', 'DHS Doc No', 'Indicate if advance is to WCF (Y/N)', 'Advance/Prepayment', 'Date of Advance', 'Age of Advance (days)', 'Last Activity Date', 'Anticipated Liquidation Date', 'Period of Performance End Date', 'Status', 'Advance/Prepayment.1', 'Comments', 'Vendor', ' Trading Partner ID', 'Advance Type (e.g. Travel, Vendor Prepayment)', 'DO Concatenate', 'PoP Expired?', 'Days Since PoP Expired', 'Invoiced Within the Last 12 Months', 'Active/Inactive Advance', 'Abnormal Balance', 'CY Advance?']
+2025-05-29 13:04:28 - advance_analysis.core.data_processing_complete - INFO - CY data processed internally - Excel export skipped
+2025-05-29 13:04:28 - advance_analysis.core.data_processing_complete - INFO - ================================================================================
+2025-05-29 13:04:28 - advance_analysis.core.data_processing_complete - INFO - STEP 2: Processing Prior Year (PY) Data
+2025-05-29 13:04:28 - advance_analysis.core.data_processing_complete - INFO - ================================================================================
+2025-05-29 13:04:28 - advance_analysis.core.data_processing_complete - INFO - Comparative Period: FY24 Q3
+2025-05-29 13:04:28 - advance_analysis.core.data_processing_complete - INFO - Searching for comparative file in: C:/Users/Jeron.Crooks/VSCode/Advance Analysis/src/inputs
+2025-05-29 13:04:28 - advance_analysis.core.data_processing_complete - INFO - Found comparative file: CBP FY24 Q3 Advance Analysis v3.xlsx
+2025-05-29 13:04:28 - advance_analysis.core.data_processing_complete - INFO - Found comparative file: C:/Users/Jeron.Crooks/VSCode/Advance Analysis/src/inputs\CBP FY24 Q3 Advance Analysis v3.xlsx
+2025-05-29 13:04:28 - advance_analysis.modules.data_loader - INFO - Loading file: C:/Users/Jeron.Crooks/VSCode/Advance Analysis/src/inputs\CBP FY24 Q3 Advance Analysis v3.xlsx
+2025-05-29 13:04:28 - advance_analysis.modules.data_loader - INFO - Sheet names in file: ['1-Instructions', '2-Certification', '3-PY Q4 Ending Balance', '4-Advance Analysis', '5-FY18 Scorecard Metrics', '6-ADVANCE TO TIER Recon SUMMARY', 'Version Control', 'DO USE Only']
+2025-05-29 13:04:28 - advance_analysis.modules.data_loader - INFO - Searching for header row with term 'TAS' in column A
+2025-05-29 13:04:29 - advance_analysis.modules.data_loader - INFO - Found header row at index 9 (row 10 in Excel)
+2025-05-29 13:04:29 - advance_analysis.modules.data_loader - INFO - Headers found: ['TAS', 'SGL', 'DHS Doc No', 'Indicate if advance is to WCF (Y/N)', 'Advance/Prepayment', 'Date of Advance', 'Age of Advance (days)', 'Last Activity Date', 'Anticipated Liquidation Date', 'Period of Performance End Date']...
+2025-05-29 13:04:29 - advance_analysis.modules.data_loader - INFO - Total columns identified: 16
+2025-05-29 13:04:29 - advance_analysis.modules.data_loader - INFO - Using intelligent header detection: skiprows=9, usecols up to column 15
+2025-05-29 13:04:31 - advance_analysis.core.comparative_analysis_processing - INFO - Initialized ComparativeAnalysisProcessor for CBP
+2025-05-29 13:04:31 - advance_analysis.core.comparative_analysis_processing - INFO - Starting comparative data processing
+2025-05-29 13:04:31 - advance_analysis.core.comparative_analysis_processing - INFO - Initial DataFrame shape: (87, 16)
+2025-05-29 13:04:31 - advance_analysis.core.comparative_analysis_processing - INFO - Initial columns: ['TAS', 'SGL', 'DHS Doc No', 'Indicate if advance is to WCF (Y/N)', 'Advance/Prepayment', 'Date of Advance', 'Age of Advance (days)', 'Last Activity Date', 'Anticipated Liquidation Date', 'Period of Performance End Date', 'Status', 'Advance/Prepayment.1', 'Comments', 'Vendor', ' Trading Partner ID', 'Advance Type (e.g. Travel, Vendor Prepayment)']
+2025-05-29 13:04:31 - advance_analysis.core.comparative_analysis_processing - INFO - Validating and cleaning comparative data
+2025-05-29 13:04:31 - advance_analysis.core.comparative_analysis_processing - INFO - Found 'Advance/Prepayment' column, will use it for DO Concatenate
+2025-05-29 13:04:31 - advance_analysis.core.comparative_analysis_processing - INFO - All required columns present. Total columns: 16
+2025-05-29 13:04:31 - advance_analysis.core.comparative_analysis_processing - INFO - Transforming date columns in comparative data
+2025-05-29 13:04:31 - advance_analysis.core.comparative_analysis_processing - WARNING - Anticipated Liquidation Date: 71 values could not be converted to dates
+2025-05-29 13:04:31 - advance_analysis.core.comparative_analysis_processing - INFO - Setting column types for comparative data
+2025-05-29 13:04:31 - advance_analysis.core.comparative_analysis_processing - INFO - Removing extra columns from comparative data
+2025-05-29 13:04:31 - advance_analysis.core.comparative_analysis_processing - INFO - No extra columns to remove
+2025-05-29 13:04:31 - advance_analysis.core.comparative_analysis_processing - INFO - Adding DO Concatenate column to comparative data
+2025-05-29 13:04:31 - advance_analysis.core.comparative_analysis_processing - INFO - Filtering valid rows (non-null TAS) in comparative data
+2025-05-29 13:04:31 - advance_analysis.core.comparative_analysis_processing - INFO - Filtered out 0 rows with null TAS
+2025-05-29 13:04:31 - advance_analysis.core.comparative_analysis_processing - INFO - Remaining rows: 87
+2025-05-29 13:04:31 - advance_analysis.core.comparative_analysis_processing - INFO - Renaming columns to avoid conflicts with current year data
+2025-05-29 13:04:31 - advance_analysis.core.comparative_analysis_processing - INFO - Renaming 9 columns with _comp suffix
+2025-05-29 13:04:31 - advance_analysis.core.comparative_analysis_processing - INFO - Processing complete. Final DataFrame shape: (87, 17)
+2025-05-29 13:04:31 - advance_analysis.core.comparative_analysis_processing - INFO - Final columns: ['TAS', 'SGL', 'DHS Doc No', 'Indicate if advance is to WCF (Y/N)', 'Advance/Prepayment', 'Date of Advance_comp', 'Age of Advance (days)_comp', 'Last Activity Date_comp', 'Anticipated Liquidation Date_comp', 'Period of Performance End Date_comp', 'Status_comp', 'Advance/Prepayment.1', 'Comments_comp', 'Vendor_comp', ' Trading Partner ID', 'Advance Type (e.g. Travel, Vendor Prepayment)_comp', 'DO Concatenate']
+2025-05-29 13:04:31 - advance_analysis.core.data_processing_complete - INFO - PY processing complete. Shape: (87, 17)
+2025-05-29 13:04:31 - advance_analysis.core.data_processing_complete - INFO - PY columns: ['TAS', 'SGL', 'DHS Doc No', 'Indicate if advance is to WCF (Y/N)', 'Advance/Prepayment', 'Date of Advance_comp', 'Age of Advance (days)_comp', 'Last Activity Date_comp', 'Anticipated Liquidation Date_comp', 'Period of Performance End Date_comp', 'Status_comp', 'Advance/Prepayment.1', 'Comments_comp', 'Vendor_comp', ' Trading Partner ID', 'Advance Type (e.g. Travel, Vendor Prepayment)_comp', 'DO Concatenate']
+2025-05-29 13:04:31 - advance_analysis.core.data_processing_complete - INFO - PY data processed internally - Excel export skipped
+2025-05-29 13:04:31 - advance_analysis.core.data_processing_complete - INFO - ================================================================================
+2025-05-29 13:04:31 - advance_analysis.core.data_processing_complete - INFO - STEP 3: Merging CY and PY Data with StatusValidations
+2025-05-29 13:04:31 - advance_analysis.core.data_processing_complete - INFO - ================================================================================
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_merged - INFO - Initialized AdvanceAnalysisProcessor for CBP
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_merged - INFO - Fiscal Year Start Date: 10/01/2024
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_merged - INFO - Fiscal Year End Date: 09/30/2025
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_merged - INFO - Starting DO advance analysis processing
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_merged - INFO - CY DataFrame shape: (94, 23)
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_merged - INFO - PY DataFrame shape: (87, 17)
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_merged - INFO - Merging CY and PY dataframes on DO Concatenate
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_merged - INFO - Merged DataFrame shape: (94, 24)
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_merged - INFO - Sample of merged data (first 5 rows):
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_merged - INFO - 
+                       DO Concatenate Status  Advance/Prepayment
+0             70005301700004034370.31      2              370.31
+1   702/60532JV#CI315B122024149460.21      1           149460.21
+2  703/40530JV#CI315B1220242130310.14      1          2130310.14
+3   703/50532JV#CI315B122024775501.16      1           775501.16
+4     7030530JV#CI315B122024374414.56      1           374414.56
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_merged - INFO - Adding 'Null or Blank Columns' column
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_merged - INFO - Successfully added 'Null or Blank Columns' column
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_merged - INFO - Adding 'Advances Requiring Explanations?' column
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_merged - INFO - Successfully added 'Advances Requiring Explanations?' column
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_merged - INFO - Adding 'Advance Date After Expiration of PoP' column
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_merged - INFO - Successfully added 'Advance Date After Expiration of PoP' column
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_merged - INFO - Adding Comparative Period Status column
+2025-05-29 13:04:31 - advance_analysis.gui.gui - ERROR - Error in complete data processing: 'Status_comp'
+Traceback (most recent call last):
+  File "C:\Users\Jeron.Crooks\AppData\Local\anaconda3\Lib\site-packages\pandas\core\indexes\base.py", line 3805, in get_loc
+    return self._engine.get_loc(casted_key)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "index.pyx", line 167, in pandas._libs.index.IndexEngine.get_loc
+  File "index.pyx", line 196, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas\\_libs\\hashtable_class_helper.pxi", line 7081, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas\\_libs\\hashtable_class_helper.pxi", line 7089, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 'Status_comp'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\advance_analysis\gui\gui.py", line 1205, in _process_data_thread
+    cy_df, py_df, merged_df = process_complete_advance_analysis(
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\advance_analysis\core\data_processing_complete.py", line 170, in process_complete_advance_analysis
+    merged_df = process_do_advance_analysis(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\advance_analysis\core\advance_analysis_merged.py", line 789, in process_advance_analysis_merged
+    return processor.merge_and_process_data(cy_df, py_df)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\advance_analysis\core\advance_analysis_merged.py", line 77, in merge_and_process_data
+    df = self._add_comparative_period_status(df)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "c:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\advance_analysis\core\advance_analysis_merged.py", line 263, in _add_comparative_period_status
+    df['Comparative Period Status'] = df['Status_comp'].apply(
+                                      ~~^^^^^^^^^^^^^^^
+  File "C:\Users\Jeron.Crooks\AppData\Local\anaconda3\Lib\site-packages\pandas\core\frame.py", line 4102, in __getitem__
+    indexer = self.columns.get_loc(key)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Jeron.Crooks\AppData\Local\anaconda3\Lib\site-packages\pandas\core\indexes\base.py", line 3812, in get_loc
+    raise KeyError(key) from err
+KeyError: 'Status_comp'
+2025-05-29 13:04:31 - advance_analysis.gui.gui - INFO - Falling back to simple processing
+2025-05-29 13:04:31 - advance_analysis.core.data_processing_simple - INFO - Processing data for CBP FY25 Q2
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_processing - INFO - Initialized AdvanceAnalysisProcessor for CBP
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_processing - INFO - Current Reporting Date: 03/31/2025
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_processing - INFO - Fiscal Year Start Date: 10/01/2024
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_processing - INFO - Starting advance data processing
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_processing - INFO - Initial DataFrame shape: (94, 16)
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_processing - INFO - Initial columns: ['TAS', 'SGL', 'DHS Doc No', 'Indicate if advance is to WCF (Y/N)', 'Advance/Prepayment', 'Date of Advance', 'Age of Advance (days)', 'Last Activity Date', 'Anticipated Liquidation Date', 'Period of Performance End Date', 'Status', 'Advance/Prepayment.1', 'Comments', 'Vendor', ' Trading Partner ID', 'Advance Type (e.g. Travel, Vendor Prepayment)']
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_processing - INFO - Validating and cleaning data
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_processing - INFO - All required columns present. Total columns: 16
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_processing - INFO - Transforming date columns
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_processing - INFO - Date of Advance: All 94 values successfully converted to dates
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_processing - INFO - Last Activity Date: All 94 values successfully converted to dates
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_processing - WARNING - Anticipated Liquidation Date: 86 out of 94 values could not be converted to dates
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_processing - INFO - Period of Performance End Date: All 94 values successfully converted to dates
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_processing - INFO - Setting column types
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_processing - INFO - Removing extra columns
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_processing - INFO - No extra columns to remove
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_processing - INFO - Filtering valid rows (non-null TAS)
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_processing - INFO - Filtered out 0 rows with null TAS
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_processing - INFO - Remaining rows: 94
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_processing - INFO - Adding DO Concatenate column
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_processing - INFO - Adding PoP Expired? column
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_processing - INFO - PoP Expired statistics:
+PoP Expired?
+N    88
+Y     6
+Name: count, dtype: int64
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_processing - INFO - Adding Days Since PoP Expired column
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_processing - INFO - Adding Invoiced Within the Last 12 Months column
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_processing - INFO - Invoice activity statistics:
+Invoiced Within the Last 12 Months
+True     74
+False    20
+Name: count, dtype: int64
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_processing - INFO - Adding Active/Inactive Advance column
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_processing - INFO - Active/Inactive advance statistics:
+Active/Inactive Advance
+Active Advance — Invoice Received in Last 12 Months             74
+Inactive Advance — No Invoice Activity Within Last 12 Months    20
+Name: count, dtype: int64
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_processing - INFO - Adding Abnormal Balance column
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_processing - INFO - Abnormal balance statistics:
+Abnormal Balance
+N    94
+Name: count, dtype: int64
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_processing - INFO - Adding CY Advance? column
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_processing - INFO - Current year advance statistics:
+CY Advance?
+N    94
+Name: count, dtype: int64
+2025-05-29 13:04:31 - advance_analysis.core.advance_analysis_processing - INFO - Processing complete. Final DataFrame shape: (94, 23)
+2025-05-29 13:04:32 - advance_analysis.core.advance_analysis_processing - INFO - Final columns: ['TAS', 'SGL', 'DHS Doc No', 'Indicate if advance is to WCF (Y/N)', 'Advance/Prepayment', 'Date of Advance', 'Age of Advance (days)', 'Last Activity Date', 'Anticipated Liquidation Date', 'Period of Performance End Date', 'Status', 'Advance/Prepayment.1', 'Comments', 'Vendor', ' Trading Partner ID', 'Advance Type (e.g. Travel, Vendor Prepayment)', 'DO Concatenate', 'PoP Expired?', 'Days Since PoP Expired', 'Invoiced Within the Last 12 Months', 'Active/Inactive Advance', 'Abnormal Balance', 'CY Advance?']
+2025-05-29 13:04:32 - advance_analysis.core.data_processing_simple - INFO - Advanced analysis processing completed successfully
+2025-05-29 13:04:32 - advance_analysis.gui.gui - INFO - Created output folder: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\outputs\CBP FY25 Q2 Advance Analysis 20250529_130432
+2025-05-29 13:04:32 - advance_analysis.modules.file_handler - INFO - File copied from C:/Users/Jeron.Crooks/VSCode/Advance Analysis/src/inputs/CBP FY25 Q2 Advance Analysis v1.xlsx to c:\Users\Jeron.Crooks\VSCode\Advance Analysis\outputs\CBP FY25 Q2 Advance Analysis 20250529_130432\CBP FY25 Q2 Advance Analysis - DO.xlsx
+2025-05-29 13:04:32 - advance_analysis.gui.gui - INFO - Input file copied and renamed: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\outputs\CBP FY25 Q2 Advance Analysis 20250529_130432\CBP FY25 Q2 Advance Analysis - DO.xlsx
+2025-05-29 13:04:32 - advance_analysis.gui.gui - INFO - Saving processed data to: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\outputs\CBP FY25 Q2 Advance Analysis 20250529_130432\CBP FY25 Q2 Advance Analysis Review.xlsx
+2025-05-29 13:04:32 - advance_analysis.gui.gui - INFO - Processed data saved successfully
+2025-05-29 13:04:32 - advance_analysis.gui.gui - INFO - Formatting Excel file
+2025-05-29 13:04:32 - advance_analysis.modules.excel_handler - INFO - Starting to format Excel file: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\outputs\CBP FY25 Q2 Advance Analysis 20250529_130432\CBP FY25 Q2 Advance Analysis Review.xlsx
+2025-05-29 13:04:33 - advance_analysis.modules.excel_handler - INFO - Excel file formatted successfully: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\outputs\CBP FY25 Q2 Advance Analysis 20250529_130432\CBP FY25 Q2 Advance Analysis Review.xlsx
+2025-05-29 13:04:33 - advance_analysis.gui.gui - INFO - Excel file formatted successfully
+2025-05-29 13:04:33 - advance_analysis.gui.gui - INFO - Processing Excel files using advanced method
+2025-05-29 13:04:33 - advance_analysis.modules.excel_handler - INFO - Starting Excel file processing with ExcelProcessor for CBP
+2025-05-29 13:04:42 - advance_analysis.modules.excel_processor - INFO - Excel processor initialized (Version: 16.0)
+2025-05-29 13:04:42 - advance_analysis.modules.excel_processor - INFO - Opening workbook: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\outputs\CBP FY25 Q2 Advance Analysis 20250529_130432\CBP FY25 Q2 Advance Analysis Review.xlsx
+2025-05-29 13:04:43 - advance_analysis.modules.excel_processor - INFO - Workbook opened successfully: CBP FY25 Q2 Advance Analysis Review.xlsx (1 sheets)
+2025-05-29 13:04:43 - advance_analysis.modules.excel_processor - INFO - Opening workbook: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\outputs\CBP FY25 Q2 Advance Analysis 20250529_130432\CBP FY25 Q2 Advance Analysis - DO.xlsx
+2025-05-29 13:04:47 - advance_analysis.modules.excel_processor - INFO - Workbook opened successfully: CBP FY25 Q2 Advance Analysis - DO.xlsx (8 sheets)
+2025-05-29 13:04:47 - advance_analysis.modules.excel_processor - INFO - Opening workbook: C:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\inputs\CBP FY25 Q2 TrialBalance20250414_121015PM.xlsx
+2025-05-29 13:04:48 - advance_analysis.modules.excel_processor - INFO - Workbook opened successfully: CBP FY25 Q2 TrialBalance20250414_121015PM.xlsx (112 sheets)
+2025-05-29 13:04:48 - advance_analysis.modules.excel_processor - INFO - Opening workbook: C:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\inputs\CBP FY24 Q4 TrialBalance20241011_093558AM.xlsx
+2025-05-29 13:04:49 - advance_analysis.modules.excel_processor - INFO - Workbook opened successfully: CBP FY24 Q4 TrialBalance20241011_093558AM.xlsx (113 sheets)
+2025-05-29 13:04:49 - advance_analysis.modules.excel_handler - INFO - Sheet names in input workbook:
+2025-05-29 13:04:49 - advance_analysis.modules.excel_handler - INFO -   - 1-Instructions
+2025-05-29 13:04:49 - advance_analysis.modules.excel_handler - INFO -   - 2-Certification
+2025-05-29 13:04:49 - advance_analysis.modules.excel_handler - INFO -   - 3-PY Q4 Ending Balance
+2025-05-29 13:04:49 - advance_analysis.modules.excel_handler - INFO -   - 4-Advance Analysis
+2025-05-29 13:04:49 - advance_analysis.modules.excel_handler - INFO -   - 5-FY18 Scorecard Metrics
+2025-05-29 13:04:49 - advance_analysis.modules.excel_handler - INFO -   - 6-ADVANCE TO TIER Recon SUMMARY
+2025-05-29 13:04:49 - advance_analysis.modules.excel_handler - INFO -   - Version Control
+2025-05-29 13:04:49 - advance_analysis.modules.excel_handler - INFO -   - DO USE Only
+2025-05-29 13:04:49 - advance_analysis.modules.excel_handler - INFO - Copying 'DO Tab 4 Review' sheet
+2025-05-29 13:04:50 - advance_analysis.modules.excel_processor - INFO - Sheet copied successfully: DO Tab 4 Review
+2025-05-29 13:04:50 - advance_analysis.modules.excel_handler - INFO - Finding and copying DHSTIER sheets
+2025-05-29 13:04:50 - advance_analysis.modules.excel_handler_crossplatform - ERROR - Error finding sheet with component total: '<win32com.gen_py.Microsoft Excel 16.0 Object Library._Workbook instance at 0x1756014433856>' object has no attribute 'sheetnames'
+Traceback (most recent call last):
+  File "c:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\advance_analysis\modules\excel_handler_crossplatform.py", line 54, in find_sheet_with_component_total
+    for sheet_name in workbook.sheetnames:
+                      ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Jeron.Crooks\AppData\Local\anaconda3\Lib\site-packages\win32com\client\__init__.py", line 618, in __getattr__
+    return getattr(d, attr)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Users\Jeron.Crooks\AppData\Local\anaconda3\Lib\site-packages\win32com\client\__init__.py", line 557, in __getattr__
+    raise AttributeError(f"'{repr(self)}' object has no attribute '{attr}'")
+AttributeError: '<win32com.gen_py.Microsoft Excel 16.0 Object Library._Workbook instance at 0x1756014433856>' object has no attribute 'sheetnames'
+2025-05-29 13:04:50 - advance_analysis.modules.excel_handler_crossplatform - ERROR - Error finding sheet with component total: '<win32com.gen_py.Microsoft Excel 16.0 Object Library._Workbook instance at 0x1756014436736>' object has no attribute 'sheetnames'
+Traceback (most recent call last):
+  File "c:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\advance_analysis\modules\excel_handler_crossplatform.py", line 54, in find_sheet_with_component_total
+    for sheet_name in workbook.sheetnames:
+                      ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Jeron.Crooks\AppData\Local\anaconda3\Lib\site-packages\win32com\client\__init__.py", line 618, in __getattr__
+    return getattr(d, attr)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Users\Jeron.Crooks\AppData\Local\anaconda3\Lib\site-packages\win32com\client\__init__.py", line 557, in __getattr__
+    raise AttributeError(f"'{repr(self)}' object has no attribute '{attr}'")
+AttributeError: '<win32com.gen_py.Microsoft Excel 16.0 Object Library._Workbook instance at 0x1756014436736>' object has no attribute 'sheetnames'
+2025-05-29 13:04:50 - advance_analysis.modules.excel_handler - INFO - Processing protected sheets
+2025-05-29 13:04:50 - advance_analysis.modules.excel_processor - WARNING - Could not unprotect sheet '5-FY18 Scorecard Metrics'
+2025-05-29 13:04:53 - advance_analysis.modules.excel_processor - INFO - Workbook saved: CBP FY25 Q2 Advance Analysis - DO.xlsx
+2025-05-29 13:04:53 - advance_analysis.modules.excel_handler - INFO - Excel file processing completed successfully
+2025-05-29 13:04:53 - advance_analysis.modules.excel_processor - INFO - Excel processor cleanup completed
+2025-05-29 13:04:53 - advance_analysis.gui.gui - INFO - Excel files processed successfully using advanced method
+2025-05-29 13:04:53 - advance_analysis.gui.gui - INFO - Processing completed. Execution time: 27.96 seconds
+2025-05-29 13:04:53 - advance_analysis.gui.status_bar - INFO - Status: Processing completed successfully!
+2025-05-29 13:04:53 - advance_analysis.gui.gui - INFO - Success: Data processing completed successfully!
+
+Execution time: 27.96 seconds
+2025-05-29 13:05:05 - advance_analysis.gui.gui - INFO - Opened file: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\outputs\CBP FY25 Q2 Advance Analysis 20250529_130432\CBP FY25 Q2 Advance Analysis - DO.xlsx
+2025-05-29 13:05:33 - advance_analysis.gui.gui - INFO - Opened file: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\outputs\CBP FY25 Q2 Advance Analysis 20250529_130432\CBP FY25 Q2 Advance Analysis Review.xlsx
+2025-05-29 13:06:48 - advance_analysis.main - INFO - Advance Analysis Tool shutting down
