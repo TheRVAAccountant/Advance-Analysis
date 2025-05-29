@@ -418,3 +418,4 @@ Traceback (most recent call last):
     raise ValueError("Required sheets not found")
 ValueError: Required sheets not found
 2025-05-29 08:08:56 - advance_analysis.gui.gui - ERROR - Error occurred: Error in Excel file processing: Required sheets not found
+2025-05-29 08:10:18 - advance_analysis.main - INFO - Advance Analysis Tool shutting down
