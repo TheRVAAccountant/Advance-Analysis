@@ -557,7 +557,8 @@ def _apply_excel_formatting(worksheet) -> None:
                     'Date Component Last Contacted Vendor for Bill_comp', 'For Status 3 and 4 -Date deobligation was initiated_comp', 
                     'For Status 3 and 4 - Date debligation is planned_comp', 'Date of Obligation_comp', 
                     'Reporting Date', 'FY Start Date', 'FY End Date',
-                    'Last Activity Date', 'Date of Advance', 'Anticipated Liquidation Date']
+                    'Last Activity Date', 'Date of Advance', 'Anticipated Liquidation Date',
+                    'Date of Advance_comp', 'Last Activity Date_comp', 'Anticipated Liquidation Date_comp']
     age_columns = ['Age of Obligation in Days2', 'UDO Age in Days', 'De-Ob Date Change in Days']
     wrap_columns = ['Active / Inactive Obligation (No Invoice in Over 1 Year)', 'Null or Blank Columns', 'Prior Status Agrees?', 'DO Comment']
 
@@ -1064,7 +1065,7 @@ def apply_date_formatting(sheet: Any) -> None:
                     col_letter = get_column_letter(col)
                     last_row = used_range.Rows.Count
                     date_range = sheet.Range(f"{col_letter}2:{col_letter}{last_row}")
-                    date_range.NumberFormat = "m/d/yyyy"
+                    date_range.NumberFormat = "m/d/yy"
                     logger.debug(f"Applied date formatting to column {col_letter}")
             except:
                 pass

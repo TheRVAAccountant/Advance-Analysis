@@ -491,6 +491,15 @@ class AdvanceAnalysisProcessor:
         """
         try:
             self.logger.info("Adding 'DO Status 1 Validation' column")
+            
+            # Helper function to format PoP status
+            def format_pop_status(pop_expired):
+                if pop_expired == "Y":
+                    return "Period of Performance Expired"
+                elif pop_expired == "N":
+                    return "Within Period of Performance"
+                else:
+                    return f"Period of Performance Status: {pop_expired}"
         
             # Check if all required columns exist in the DataFrame
             required_columns = ['Status', 'Valid Status 1', 'Advances Requiring Explanations?', 'Null or Blank Columns',
@@ -548,19 +557,19 @@ class AdvanceAnalysisProcessor:
     
                     # If explanation is required and any follow-up condition is met
                     if explanation_required == "Explanation Required" and follow_up_required:
-                        return f"Follow-up Required — Status 1 — " + " — ".join(conditions) + f" — {active_inactive_advance} — Period of Performance Expired?: {pop_expired}"
+                        return f"Follow-up Required — Status 1 — " + " — ".join(conditions) + f" — {active_inactive_advance} — {format_pop_status(pop_expired)}"
     
                     # ====================
                     # Valid Case Conditions
                     # ====================
                     # Case 1: Valid Status with non-expired PoP
                     if valid_status_1 == "Y" and active_inactive_advance == "Active Advance — Invoice Received in Last 12 Months" and pop_expired == "N":
-                        return f"Valid — Status 1 — {active_inactive_advance} — Period of Performance Expired?: {pop_expired}"
+                        return f"Valid — Status 1 — {active_inactive_advance} — {format_pop_status(pop_expired)}"
     
                     # Case 2: Valid Status with expired PoP and non-empty/null Null or Blank Columns
                     if valid_status_1 == "Y" and active_inactive_advance == "Active Advance — Invoice Received in Last 12 Months" and \
                        pop_expired == "Y" and null_or_blank_columns not in [None, '', 'NaN']:
-                        return f"Valid — Status 1 — {active_inactive_advance} — Period of Performance Expired?: {pop_expired}; Explanation Reasonable"
+                        return f"Valid — Status 1 — {active_inactive_advance} — {format_pop_status(pop_expired)}; Explanation Reasonable"
     
                     # ====================
                     # Attention Required Conditions
@@ -568,7 +577,7 @@ class AdvanceAnalysisProcessor:
                     attention_required_conditions = [
                         (valid_status_1 == "N" and null_or_blank_columns not in [None, '', 'NaN'], f"The {null_or_blank_columns} Field(s) are not Populated"),
                         (abnormal_balance == "Y" and "Comments" not in null_or_blank_columns, "Abnormal Balance with Missing Comments"),
-                        (pop_expired == "Y" and anticipated_liquidation_test == "OK", f"Period of Performance Expired?: {pop_expired}")
+                        (pop_expired == "Y" and anticipated_liquidation_test == "OK", "Period of Performance Expired")
                     ]
     
                     # Apply the attention-required conditions
@@ -585,7 +594,7 @@ class AdvanceAnalysisProcessor:
                     # Default: Valid if no other conditions met
                     # ====================
                     if not follow_up_required and not attention_required:
-                        return f"Valid Status 1 — {active_inactive_advance} — Period of Performance Expired?: {pop_expired}"
+                        return f"Valid Status 1 — {active_inactive_advance} — {format_pop_status(pop_expired)}"
     
                 except Exception as e:
                     self.logger.error(f"Error processing row for DO Status 1 Validation: {e}", exc_info=True)
@@ -620,6 +629,15 @@ class AdvanceAnalysisProcessor:
                 "Status", "Advance/Prepayment.1", "Comments", "Vendor", "Advance Type (e.g. Travel, Vendor Prepayment)"
             ]
     
+            # Helper function to format PoP status
+            def format_pop_status(pop_expired):
+                if pop_expired == "Y":
+                    return "Period of Performance Expired"
+                elif pop_expired == "N":
+                    return "Within Period of Performance"
+                else:
+                    return f"Period of Performance Status: {pop_expired}"
+            
             # Define the contains_any function
             def contains_any(text: str, substrings: list) -> bool:
                 return any(substring in text for substring in substrings if substring)
@@ -679,19 +697,19 @@ class AdvanceAnalysisProcessor:
     
                     # If explanation is required and any follow-up condition is met
                     if Advances_Requiring_Explanations == "Explanation Required" and follow_up_required:
-                        return f"Follow-up Required — Status {Status} — " + " — ".join(conditions) + f" — {Active_Inactive_Advance} — Period of Performance Expired?: {PoP_Expired}"
+                        return f"Follow-up Required — Status {Status} — " + " — ".join(conditions) + f" — {Active_Inactive_Advance} — {format_pop_status(PoP_Expired)}"
     
                     # ====================
                     # Valid Case Conditions
                     # ====================
                     # Case 1: Valid Status 2 with non-expired PoP
                     if Valid_Status_2 == "Valid – Status 2" and Active_Inactive_Advance == "Active Advance — Invoice Received in Last 12 Months" and PoP_Expired == "N":
-                        return f"Valid — Status {Status} — {Active_Inactive_Advance} — Period of Performance Expired?: {PoP_Expired} — Anticipated Liquidation Date is Reasonable; Explanation Reasonable"
+                        return f"Valid — Status {Status} — {Active_Inactive_Advance} — {format_pop_status(PoP_Expired)} — Anticipated Liquidation Date is Reasonable; Explanation Reasonable"
     
                     # Case 2: Valid Status 2 with expired PoP and non-empty/null Null or Blank Columns
                     if Valid_Status_2 == "Valid – Status 2" and Active_Inactive_Advance == "Active Advance — Invoice Received in Last 12 Months" and \
                        PoP_Expired == "Y" and Null_or_Blank_Columns not in [None, '', 'NaN']:
-                        return f"Valid — Status {Status} — {Active_Inactive_Advance} — Period of Performance Expired?: {PoP_Expired} — Anticipated Liquidation Date is Reasonable; Explanation Reasonable"
+                        return f"Valid — Status {Status} — {Active_Inactive_Advance} — {format_pop_status(PoP_Expired)} — Anticipated Liquidation Date is Reasonable; Explanation Reasonable"
     
                     # ====================
                     # Attention Required Conditions
@@ -711,13 +729,13 @@ class AdvanceAnalysisProcessor:
                     
                     # Return if any attention-required conditions are met
                     if attention_required:
-                        return f"Attention Required — Status 2 — {Active_Inactive_Advance} — Period of Performance Expired?: {PoP_Expired}; Anticipated Liquidation Date is Reasonable"
+                        return f"Attention Required — Status 2 — {Active_Inactive_Advance} — {format_pop_status(PoP_Expired)}; Anticipated Liquidation Date is Reasonable"
     
                     # ====================
                     # Default: Valid if no other conditions met
                     # ====================
                     if not follow_up_required and not attention_required:
-                        return f"Valid Status {Status} — {Active_Inactive_Advance} — Period of Performance Expired?: {PoP_Expired} — Anticipated Liquidation Date is Reasonable"
+                        return f"Valid Status {Status} — {Active_Inactive_Advance} — {format_pop_status(PoP_Expired)} — Anticipated Liquidation Date is Reasonable"
     
                 except Exception as e:
                     self.logger.error(f"Error processing row in 'DO Status 2 Validations': {e}", exc_info=True)
