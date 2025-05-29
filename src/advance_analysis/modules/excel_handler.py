@@ -1905,11 +1905,13 @@ def process_excel_files(output_path: str, input_path: str, current_dhstier_path:
     # Try to use the new version first
     if EXCEL_PROCESSOR_AVAILABLE:
         try:
+            logger.info("Using ExcelProcessor (v2) for Excel COM operations")
             return process_excel_files_v2(output_path, input_path, current_dhstier_path, prior_dhstier_path, component, password, dataframe_path)
         except Exception as e:
             logger.warning(f"ExcelProcessor method failed, falling back to legacy: {e}")
     
     # Continue with existing implementation
+    logger.info("Using legacy Excel COM operations")
     return process_excel_files_legacy(output_path, input_path, current_dhstier_path, prior_dhstier_path, component, password, dataframe_path)
 
 
