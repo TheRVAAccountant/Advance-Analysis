@@ -1,4 +1,4 @@
-2025-05-29 13:55:10 - root - INFO - Logging initialized - Level: INFO, File: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\logs\advance_analysis_20250529_135510.log
+@2025-05-29 13:55:10 - root - INFO - Logging initialized - Level: INFO, File: c:\Users\Jeron.Crooks\VSCode\Advance Analysis\logs\advance_analysis_20250529_135510.log
 2025-05-29 13:55:10 - advance_analysis.main - INFO - Starting Advance Analysis Tool
 2025-05-29 13:55:10 - advance_analysis.main - INFO - Launching main GUI
 2025-05-29 13:55:11 - advance_analysis.gui.file_selection_widget - INFO - Added to recent files (advance_analysis): C:\Users\Jeron.Crooks\VSCode\Advance Analysis\src\inputs\CBP FY25 Q2 Advance Analysis v1.xlsx

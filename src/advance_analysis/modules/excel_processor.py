@@ -423,6 +423,12 @@ class ExcelProcessor:
             Copied sheet COM object or None
         """
         try:
+            logger.info(f"Copying sheet '{source_sheet.Name}'...")
+            logger.debug(f"  Source workbook: {source_sheet.Parent.Name}")
+            logger.debug(f"  Target workbook: {target_workbook.Name}")
+            logger.debug(f"  New name: {new_name if new_name else 'Keep original'}")
+            logger.debug(f"  Insert after: {after_sheet.Name if after_sheet else 'End of workbook'}")
+            
             # Copy the sheet
             if after_sheet:
                 source_sheet.Copy(After=after_sheet)
@@ -432,20 +438,25 @@ class ExcelProcessor:
             
             # Get the copied sheet (it's the active one after copy)
             copied_sheet = target_workbook.ActiveSheet
+            logger.debug(f"Sheet copied. Current name: {copied_sheet.Name}")
             
             # Rename if needed
             if new_name:
                 try:
+                    original_name = copied_sheet.Name
                     copied_sheet.Name = new_name
-                except:
+                    logger.info(f"Sheet renamed from '{original_name}' to '{new_name}'")
+                except Exception as rename_error:
                     # Name might already exist or be invalid
-                    logger.warning(f"Could not rename sheet to '{new_name}'")
+                    logger.warning(f"Could not rename sheet to '{new_name}': {str(rename_error)}")
             
             logger.info(f"Sheet copied successfully: {copied_sheet.Name}")
             return copied_sheet
             
         except Exception as e:
             logger.error(f"Error copying sheet: {e}")
+            logger.error(f"Source sheet name: {source_sheet.Name if source_sheet else 'None'}")
+            logger.error(f"Target workbook: {target_workbook.Name if target_workbook else 'None'}")
             return None
     
     def calculate_workbook(self, workbook: Any, force_full: bool = False):

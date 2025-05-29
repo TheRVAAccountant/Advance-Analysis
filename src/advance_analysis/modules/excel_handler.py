@@ -834,21 +834,26 @@ def create_tickmark_legend_and_compare_values(wb, password: str) -> None:
         advances_cell = None
         
         # Search column B (column index 2) for "Advances"
+        logger.debug("Starting search for 'Advances' in column B...")
         for row in range(1, 100):  # Search first 100 rows
             cell_value = cert_sheet.Cells(row, 2).Value
-            if cell_value and "Advances" in str(cell_value):
-                advances_cell = cert_sheet.Cells(row, 2)
-                logger.info(f"Found 'Advances' in cell B{row}: '{cell_value}'")
-                break
+            if cell_value:
+                logger.debug(f"Row {row}: {cell_value}")
+                if "Advances" in str(cell_value):
+                    advances_cell = cert_sheet.Cells(row, 2)
+                    logger.info(f"Found 'Advances' in cell B{row}: '{cell_value}'")
+                    break
         
         if not advances_cell:
             logger.error("'Advances' not found in Column B of Certification sheet")
+            logger.debug("Searched 100 rows in column B without finding 'Advances'")
             return
 
         # The value is in the row immediately below the "Advances" cell
         cert_value_cell = cert_sheet.Cells(advances_cell.Row + 1, advances_cell.Column)
         logger.info(f"Using value from cell {cert_value_cell.Address} (row below 'Advances')")
         cert_value = cert_value_cell.Value
+        logger.debug(f"Raw certification value: {cert_value} (type: {type(cert_value)})")
         formatted_cert_value = format_currency(cert_value)
         
         logger.info(f"Certification value found in cell {cert_value_cell.Address}: {formatted_cert_value}")
@@ -892,19 +897,35 @@ def create_tickmark_legend_and_compare_values(wb, password: str) -> None:
         # The sum cell should be in column I, one row below the header
         sum_cell = py_q4_sheet.Cells(header_row + 1, 9)  # Column I is 9
         logger.info(f"Sum cell located at {sum_cell.Address}")
+        
+        # Log surrounding cells in the pivot table area
+        logger.debug("Pivot table area contents:")
+        for row_offset in range(-1, 3):
+            row_data = []
+            for col_offset in range(-1, 3):
+                cell = py_q4_sheet.Cells(header_row + row_offset, 8 + col_offset)
+                row_data.append(f"{cell.Address}: {cell.Value}")
+            logger.debug(f"  {' | '.join(row_data)}")
 
         py_q4_value = sum_cell.Value
+        logger.debug(f"Raw PY Q4 value: {py_q4_value} (type: {type(py_q4_value)})")
         formatted_py_q4_value = format_currency(py_q4_value)
         logger.info(f"PY Q4 value found: {formatted_py_q4_value}")
 
         # Type conversion and comparison
         try:
-            cert_value = float(cert_value) if cert_value is not None else None
-            py_q4_value = float(py_q4_value) if py_q4_value is not None else None
+            cert_value_float = float(cert_value) if cert_value is not None else None
+            py_q4_value_float = float(py_q4_value) if py_q4_value is not None else None
+            logger.debug(f"Converted values - Cert: {cert_value_float}, PY Q4: {py_q4_value_float}")
+            
+            cert_value = cert_value_float
+            py_q4_value = py_q4_value_float
             formatted_cert_value = format_currency(cert_value)
             formatted_py_q4_value = format_currency(py_q4_value)
         except (ValueError, TypeError) as e:
             logger.error(f"Value conversion error: {e}")
+            logger.debug(f"cert_value type: {type(cert_value)}, value: {cert_value}")
+            logger.debug(f"py_q4_value type: {type(py_q4_value)}, value: {py_q4_value}")
             return
 
         if cert_value is None or py_q4_value is None:
@@ -912,41 +933,62 @@ def create_tickmark_legend_and_compare_values(wb, password: str) -> None:
             return
 
         logger.info(f"Comparing values: Cert value ({formatted_cert_value}) vs PY Q4 value ({formatted_py_q4_value})")
+        
+        difference = abs(cert_value - py_q4_value)
+        logger.debug(f"Absolute difference: {difference}")
 
-        if abs(cert_value - py_q4_value) < 0.01:  # Using a small threshold for float comparison
-            logger.info("Values match within threshold. Adding checkmarks.")
+        if difference < 0.01:  # Using a small threshold for float comparison
+            logger.info("Values match within threshold (0.01). Adding checkmarks.")
             # Add 'h' in Wingdings on Certification sheet
             tick_cell = cert_sheet.Cells(cert_value_cell.Row, cert_value_cell.Column + 1)
+            logger.debug(f"Adding 'h' tickmark to Certification sheet at {tick_cell.Address}")
             tick_cell.Font.Name = "Wingdings"
             tick_cell.Font.Size = 10
             tick_cell.Value = "h"
+            logger.debug(f"Cert tickmark added: Font={tick_cell.Font.Name}, Size={tick_cell.Font.Size}, Value={tick_cell.Value}")
 
             # Add 'm' in Wingdings on PY Q4 Ending Balance sheet
             py_q4_tick_cell = py_q4_sheet.Cells(header_row + 1, 10)  # Column J is 10
+            logger.debug(f"Adding 'm' tickmark to PY Q4 sheet at {py_q4_tick_cell.Address}")
             py_q4_tick_cell.Font.Name = "Wingdings"
             py_q4_tick_cell.Font.Size = 10
             py_q4_tick_cell.Font.Color = 0  # Black
             py_q4_tick_cell.Value = "m"
+            logger.debug(f"PY Q4 tickmark added: Font={py_q4_tick_cell.Font.Name}, Size={py_q4_tick_cell.Font.Size}, Value={py_q4_tick_cell.Value}")
             
             logger.info("Tickmarks added successfully.")
         else:
             logger.info("Values do not match. Adding 'X' marks.")
+            logger.info(f"Difference of {difference} exceeds threshold of 0.01")
+            
             # Add 'X' in bold Calibri on Certification sheet
             cert_x_cell = cert_sheet.Cells(cert_value_cell.Row, cert_value_cell.Column + 1)
+            logger.debug(f"Adding 'X' mark to Certification sheet at {cert_x_cell.Address}")
             cert_x_cell.Font.Name = "Calibri"
             cert_x_cell.Font.Size = 11
             cert_x_cell.Font.Bold = True
             cert_x_cell.Value = "X"
+            logger.debug(f"Cert X mark added: Font={cert_x_cell.Font.Name}, Size={cert_x_cell.Font.Size}, Bold={cert_x_cell.Font.Bold}, Value={cert_x_cell.Value}")
 
             # Add 'X' in bold Calibri on PY Q4 Ending Balance sheet
             py_q4_x_cell = sum_cell.Offset(0, 1)
+            logger.debug(f"Adding 'X' mark to PY Q4 sheet at {py_q4_x_cell.Address}")
             py_q4_x_cell.Font.Name = "Calibri"
             py_q4_x_cell.Font.Size = 11
             py_q4_x_cell.Font.Bold = True
             py_q4_x_cell.Value = "X"
+            logger.debug(f"PY Q4 X mark added: Font={py_q4_x_cell.Font.Name}, Size={py_q4_x_cell.Font.Size}, Bold={py_q4_x_cell.Font.Bold}, Value={py_q4_x_cell.Value}")
 
             logger.warning(f"Values do not match. Cert: {formatted_cert_value}, PY Q4: {formatted_py_q4_value}. 'X' marks added.")
 
+        logger.info("=== Tickmark Process Summary ===")
+        logger.info(f"Tickmark legend created in: {cert_sheet.Name}")
+        logger.info(f"Certification value: {formatted_cert_value}")
+        logger.info(f"PY Q4 Ending Balance value: {formatted_py_q4_value}")
+        logger.info(f"Values {'match' if difference < 0.01 else 'do not match'}")
+        logger.info(f"Tickmarks added: {'✓ (checkmarks)' if difference < 0.01 else 'X (mismatch indicators)'}")
+        logger.info("=================================")
+        
     except Exception as e:
         logger.error(f"Error in create_tickmark_legend_and_compare_values: {str(e)}", exc_info=True)
 
@@ -1076,12 +1118,21 @@ def create_pivot_table(wb, password: str) -> str:
                 xl_database = 1
                 logger.info("Using manual constant for xlDatabase")
             
+            logger.debug(f"Creating pivot cache with SourceType={xl_database}")
+            logger.debug(f"Data range for pivot cache: {data_range.Address}")
+            logger.debug(f"Data range dimensions: {data_range.Rows.Count} rows x {data_range.Columns.Count} columns")
+            
             pivot_cache = wb.PivotCaches().Create(SourceType=xl_database, SourceData=data_range)
             logger.info("Pivot cache created successfully")
+            logger.debug(f"Pivot cache count: {wb.PivotCaches().Count}")
             
             # Create pivot table
-            pivot_table = pivot_cache.CreatePivotTable(TableDestination=target_sheet.Cells(header_row, 9), TableName="PYQ4BalancePivot")
+            destination_cell = target_sheet.Cells(header_row, 9)
+            logger.debug(f"Pivot table destination: {destination_cell.Address} (row={header_row}, col=9)")
+            
+            pivot_table = pivot_cache.CreatePivotTable(TableDestination=destination_cell, TableName="PYQ4BalancePivot")
             logger.info("Pivot table created successfully")
+            logger.debug(f"Pivot table name: {pivot_table.Name}")
             
             # Add Advance/Prepayment field to values
             logger.info(f"Adding '{advance_col_name}' field to pivot table values...")
@@ -1096,7 +1147,9 @@ def create_pivot_table(wb, password: str) -> str:
                 logger.warning(f"Could not list pivot fields: {str(list_error)}")
             
             # Try to get the field
+            logger.info(f"Getting pivot field for column: {advance_col_name}")
             advance_field = pivot_table.PivotFields(advance_col_name)
+            logger.info(f"Successfully retrieved pivot field: {advance_field.Name}")
             
             # Attempt to set the Function property, with fallback options
             try:
@@ -1115,11 +1168,14 @@ def create_pivot_table(wb, password: str) -> str:
                 except AttributeError:
                     logger.info("Using manual constants for pivot field")
                 
+                logger.debug(f"Setting field orientation to xlDataField ({xl_data_field})")
                 advance_field.Orientation = xl_data_field
+                logger.debug(f"Setting field function to xlSum ({xl_sum})")
                 advance_field.Function = xl_sum
                 logger.info("Successfully set pivot field orientation and function")
             except Exception as e:
                 logger.warning(f"Error setting field properties directly: {str(e)}")
+                logger.info("Attempting alternative method using AddDataField...")
                 try:
                     # Alternative method: Add the field and then set properties
                     pivot_table.AddDataField(advance_field, f"Sum of {advance_col_name}", xl_sum)
@@ -1743,6 +1799,13 @@ def process_excel_files_v2(output_path: str, input_path: str, current_dhstier_pa
         return process_excel_files_legacy(output_path, input_path, current_dhstier_path, prior_dhstier_path, component, password, dataframe_path)
     
     logger.info(f"Starting Excel file processing with ExcelProcessor for {component}")
+    logger.info("Processing steps:")
+    logger.info("  1. Open all workbooks")
+    logger.info("  2. Copy DO Tab 4 Review sheet")
+    logger.info("  3. Copy DHSTIER sheets")
+    logger.info("  4. Create pivot table in PY Q4 Ending Balance")
+    logger.info("  5. Create tickmark legend and compare values")
+    logger.info("  6. Apply formatting and save")
     
     # Use ExcelProcessor context manager for proper lifecycle management
     with ExcelProcessor() as processor:
@@ -1777,26 +1840,44 @@ def process_excel_files_v2(output_path: str, input_path: str, current_dhstier_pa
             logger.info("Finding and copying DHSTIER sheets")
             
             # Current year
-            current_sheet = find_sheet_with_component_total(current_dhstier_wb, component)
-            if current_sheet:
-                sheet = current_dhstier_wb.Sheets(current_sheet)
+            try:
+                logger.info(f"Looking for current year DHSTIER sheet for component: {component}")
+                current_sheet_name = find_sheet_name(current_dhstier_wb, component)
+                logger.info(f"Found current year sheet: {current_sheet_name}")
+                sheet = current_dhstier_wb.Sheets(current_sheet_name)
                 processor.copy_sheet(sheet, input_wb, "DO CY TB", after_sheet=target_sheet)
                 target_sheet = input_wb.Sheets("DO CY TB")
+                logger.info("Current year DHSTIER sheet copied successfully as 'DO CY TB'")
+            except Exception as e:
+                logger.error(f"Error copying current year DHSTIER sheet: {str(e)}")
             
             # Prior year
-            prior_sheet = find_sheet_with_component_total(prior_dhstier_wb, component)
-            if prior_sheet:
-                sheet = prior_dhstier_wb.Sheets(prior_sheet)
+            try:
+                logger.info(f"Looking for prior year DHSTIER sheet for component: {component}")
+                prior_sheet_name = find_sheet_name(prior_dhstier_wb, component)
+                logger.info(f"Found prior year sheet: {prior_sheet_name}")
+                sheet = prior_dhstier_wb.Sheets(prior_sheet_name)
                 processor.copy_sheet(sheet, input_wb, "DO PY TB", after_sheet=target_sheet)
+                logger.info("Prior year DHSTIER sheet copied successfully as 'DO PY TB'")
+            except Exception as e:
+                logger.error(f"Error copying prior year DHSTIER sheet: {str(e)}")
             
-            # Process other operations (pivot tables, tickmarks, etc.)
-            if password:
-                # Use protected sheet operations
-                logger.info("Processing protected sheets")
-                for sheet in input_wb.Sheets:
-                    with processor.protected_sheet_operation(sheet, password):
-                        # Perform operations on unprotected sheet
-                        pass
+            # Create pivot table
+            logger.info("Step 4: Creating pivot table in PY Q4 Ending Balance sheet...")
+            try:
+                sum_cell_address = create_pivot_table(input_wb, password)
+                logger.info(f"Pivot table created. Sum cell address: {sum_cell_address}")
+            except Exception as e:
+                logger.error(f"Error creating pivot table: {str(e)}")
+                sum_cell_address = None
+            
+            # Create tickmark legend and compare values
+            logger.info("Step 5: Creating tickmark legend and comparing values...")
+            try:
+                create_tickmark_legend_and_compare_values(input_wb, password)
+                logger.info("Tickmark legend and validation marks created successfully")
+            except Exception as e:
+                logger.error(f"Error creating tickmarks: {str(e)}")
             
             # Populate DO Tab 4 Review if dataframe path provided
             if dataframe_path:
@@ -1983,8 +2064,9 @@ def process_excel_files_legacy(output_path: str, input_path: str, current_dhstie
             logger.warning(f"Could not save after copying sheets: {str(e)}")
 
         # Create pivot table and get sum_cell_address
+        logger.info("Step 4: Creating pivot table in PY Q4 Ending Balance sheet...")
         sum_cell_address = create_pivot_table(input_wb, password)
-        logger.info(f"Sum cell address: {sum_cell_address}")
+        logger.info(f"Pivot table created. Sum cell address: {sum_cell_address}")
         
         # Save after pivot table creation
         try:
@@ -1994,8 +2076,13 @@ def process_excel_files_legacy(output_path: str, input_path: str, current_dhstie
             logger.warning(f"Could not save after pivot table creation: {str(e)}")
 
         # Create tickmark legend and compare values
-        logger.info("Creating tickmark legend and comparing values")
+        logger.info("Step 5: Creating tickmark legend and comparing values...")
+        logger.info("  - Creating tickmark legend in Certification sheet")
+        logger.info("  - Finding 'Advances' value in Certification sheet")
+        logger.info("  - Comparing with PY Q4 Ending Balance value")
+        logger.info("  - Adding tickmarks based on comparison")
         create_tickmark_legend_and_compare_values(input_wb, password)
+        logger.info("Tickmark legend and validation marks created successfully")
         
         # Save after tickmark creation
         try:
