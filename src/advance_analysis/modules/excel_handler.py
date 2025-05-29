@@ -23,6 +23,62 @@ except ImportError:
     logger = logging.getLogger(__name__)
     logger.warning("Windows COM modules not available - Excel COM automation features will be disabled")
 
+# Define Excel constants manually as fallback
+class ExcelConstants:
+    # Pivot Table constants
+    xlDatabase = 1
+    xlDataField = 4
+    xlSum = -4157
+    
+    # Find/Replace constants
+    xlValues = -4163
+    xlWhole = 1
+    
+    # Direction constants
+    xlToLeft = -4159
+    xlUp = -4162
+    
+    # Border constants
+    xlContinuous = 1
+    xlThick = 4
+    
+    # Alignment constants
+    xlCenter = -4108
+    xlLeft = -4131
+    
+    # Calculation constants
+    xlCalculationManual = -4135
+    xlCalculationAutomatic = -4105
+
+# Use manual constants as fallback
+if WINDOWS_COM_AVAILABLE:
+    xl_constants = constants
+else:
+    xl_constants = ExcelConstants()
+
+
+def get_excel_constant(constant_name: str, default_value: int) -> int:
+    """
+    Get an Excel constant value with fallback to default.
+    
+    Args:
+        constant_name: Name of the constant (e.g., 'xlSum')
+        default_value: Default value to use if constant not available
+        
+    Returns:
+        The constant value
+    """
+    if WINDOWS_COM_AVAILABLE:
+        try:
+            # Try to get from win32com.client.constants
+            if hasattr(win32com.client, 'constants') and hasattr(win32com.client.constants, constant_name):
+                return getattr(win32com.client.constants, constant_name)
+        except:
+            pass
+    
+    # Use default value
+    return default_value
+
 # Import the new Excel processor if available
 try:
     from .excel_processor import ExcelProcessor, safe_excel_operation as safe_excel_op
@@ -84,6 +140,28 @@ def wait_for_file_ready(file_path: str, max_wait: float = 10.0, check_interval: 
     return False
 
 
+def ensure_excel_constants(excel_app) -> None:
+    """
+    Ensure Excel constants are properly loaded by forcing early binding.
+    
+    Args:
+        excel_app: Excel application COM object
+    """
+    global xl_constants
+    try:
+        # Force early binding to ensure constants are available
+        if WINDOWS_COM_AVAILABLE:
+            import win32com.client.gencache
+            win32com.client.gencache.EnsureModule('{00020813-0000-0000-C000-000000000046}', 0, 1, 9)
+            logger.info("Excel constants loaded via early binding")
+            # Re-import constants after ensuring module
+            from win32com.client import constants as xl_constants
+    except Exception as e:
+        logger.warning(f"Could not ensure early binding: {e}")
+        # Fall back to manual constants
+        xl_constants = ExcelConstants()
+        logger.info("Using manual Excel constants as fallback")
+
 def initialize_excel_com(max_retries: int = 3) -> Any:
     """
     Initialize Excel COM with validation and retry logic.
@@ -104,6 +182,9 @@ def initialize_excel_com(max_retries: int = 3) -> Any:
             logger.info(f"Initializing Excel COM (attempt {attempt + 1}/{max_retries})")
             pythoncom.CoInitialize()
             excel = win32com.client.Dispatch("Excel.Application")
+            
+            # Ensure constants are loaded
+            ensure_excel_constants(excel)
             
             # Validate COM object
             if excel and hasattr(excel, 'Version'):
@@ -733,10 +814,15 @@ def create_tickmark_legend_and_compare_values(wb, password: str) -> None:
         
         # Apply formatting to the range
         range_to_format = cert_sheet.Range("G2:H10")
-        range_to_format.Borders.LineStyle = win32com.client.constants.xlContinuous
-        range_to_format.Borders.Weight = win32com.client.constants.xlThick
-        range_to_format.HorizontalAlignment = win32com.client.constants.xlCenter
-        range_to_format.VerticalAlignment = win32com.client.constants.xlCenter
+        # Get constants with fallback
+        xl_continuous = 1 if not WINDOWS_COM_AVAILABLE else getattr(win32com.client.constants, 'xlContinuous', 1)
+        xl_thick = 4 if not WINDOWS_COM_AVAILABLE else getattr(win32com.client.constants, 'xlThick', 4)
+        xl_center = -4108 if not WINDOWS_COM_AVAILABLE else getattr(win32com.client.constants, 'xlCenter', -4108)
+        
+        range_to_format.Borders.LineStyle = xl_continuous
+        range_to_format.Borders.Weight = xl_thick
+        range_to_format.HorizontalAlignment = xl_center
+        range_to_format.VerticalAlignment = xl_center
 
         # Auto-fit column H
         cert_sheet.Columns("H").AutoFit()
@@ -790,7 +876,11 @@ def create_tickmark_legend_and_compare_values(wb, password: str) -> None:
         py_q4_sheet.Unprotect(Password=password)
 
         # Find the "TAS" cell in column A
-        tas_cell = py_q4_sheet.Cells.Find("TAS", After=py_q4_sheet.Cells(1, 1), LookIn=win32com.client.constants.xlValues, LookAt=win32com.client.constants.xlWhole)
+        # Get constants with fallback
+        xl_values = -4163 if not WINDOWS_COM_AVAILABLE else getattr(win32com.client.constants, 'xlValues', -4163)
+        xl_whole = 1 if not WINDOWS_COM_AVAILABLE else getattr(win32com.client.constants, 'xlWhole', 1)
+        
+        tas_cell = py_q4_sheet.Cells.Find("TAS", After=py_q4_sheet.Cells(1, 1), LookIn=xl_values, LookAt=xl_whole)
         if not tas_cell:
             logger.error("TAS cell not found in column A")
             return
@@ -890,7 +980,11 @@ def create_pivot_table(wb, password: str) -> str:
         target_sheet.Unprotect(Password=password)
         
         # Find the "TAS" cell in column A
-        tas_cell = target_sheet.Cells.Find("TAS", After=target_sheet.Cells(1, 1), LookIn=win32com.client.constants.xlValues, LookAt=win32com.client.constants.xlWhole)
+        # Get constants with fallback
+        xl_values = -4163 if not WINDOWS_COM_AVAILABLE else getattr(win32com.client.constants, 'xlValues', -4163)
+        xl_whole = 1 if not WINDOWS_COM_AVAILABLE else getattr(win32com.client.constants, 'xlWhole', 1)
+        
+        tas_cell = target_sheet.Cells.Find("TAS", After=target_sheet.Cells(1, 1), LookIn=xl_values, LookAt=xl_whole)
         if not tas_cell:
             raise ValueError("TAS cell not found in column A")
         
@@ -899,7 +993,10 @@ def create_pivot_table(wb, password: str) -> str:
         header_row = tas_cell.Row
         
         # Find the last column
-        last_column = target_sheet.Cells(header_row, target_sheet.Columns.Count).End(win32com.client.constants.xlToLeft).Column
+        # Get constants with fallback
+        xl_to_left = -4159 if not WINDOWS_COM_AVAILABLE else getattr(win32com.client.constants, 'xlToLeft', -4159)
+        
+        last_column = target_sheet.Cells(header_row, target_sheet.Columns.Count).End(xl_to_left).Column
         logger.info(f"Last populated column in header row: {get_column_letter(last_column)}")
         
         # Log all header row values for debugging
@@ -913,7 +1010,10 @@ def create_pivot_table(wb, password: str) -> str:
         logger.info(f"Total columns with headers: {len(header_values)}")
         
         # Find the last row
-        last_row = max(target_sheet.Cells(target_sheet.Rows.Count, col).End(win32com.client.constants.xlUp).Row 
+        # Get constants with fallback
+        xl_up = -4162 if not WINDOWS_COM_AVAILABLE else getattr(win32com.client.constants, 'xlUp', -4162)
+        
+        last_row = max(target_sheet.Cells(target_sheet.Rows.Count, col).End(xl_up).Row 
                        for col in range(1, last_column + 1))
         logger.info(f"Last populated row after header row: {last_row}")
         
@@ -964,7 +1064,19 @@ def create_pivot_table(wb, password: str) -> str:
             logger.info(f"Pivot table destination: Cell I{header_row} (column 9)")
             
             # Create pivot cache
-            pivot_cache = wb.PivotCaches().Create(SourceType=win32com.client.constants.xlDatabase, SourceData=data_range)
+            # Use the appropriate constants
+            try:
+                # Try to use win32com constants first
+                if WINDOWS_COM_AVAILABLE and hasattr(win32com.client, 'constants'):
+                    xl_database = win32com.client.constants.xlDatabase
+                else:
+                    xl_database = 1
+            except AttributeError:
+                # Fall back to manual constant
+                xl_database = 1
+                logger.info("Using manual constant for xlDatabase")
+            
+            pivot_cache = wb.PivotCaches().Create(SourceType=xl_database, SourceData=data_range)
             logger.info("Pivot cache created successfully")
             
             # Create pivot table
@@ -988,14 +1100,29 @@ def create_pivot_table(wb, password: str) -> str:
             
             # Attempt to set the Function property, with fallback options
             try:
-                advance_field.Orientation = win32com.client.constants.xlDataField
-                advance_field.Function = win32com.client.constants.xlSum
+                # Get constants with fallback
+                xl_data_field = 4  # xlDataField
+                xl_sum = -4157     # xlSum
+                
+                try:
+                    if WINDOWS_COM_AVAILABLE and hasattr(win32com.client, 'constants'):
+                        if hasattr(win32com.client, 'constants'):
+                            xl_data_field = win32com.client.constants.xlDataField
+                            xl_sum = win32com.client.constants.xlSum
+                        else:
+                            xl_data_field = 4
+                            xl_sum = -4157
+                except AttributeError:
+                    logger.info("Using manual constants for pivot field")
+                
+                advance_field.Orientation = xl_data_field
+                advance_field.Function = xl_sum
                 logger.info("Successfully set pivot field orientation and function")
             except Exception as e:
                 logger.warning(f"Error setting field properties directly: {str(e)}")
                 try:
                     # Alternative method: Add the field and then set properties
-                    pivot_table.AddDataField(advance_field, f"Sum of {advance_col_name}", win32com.client.constants.xlSum)
+                    pivot_table.AddDataField(advance_field, f"Sum of {advance_col_name}", xl_sum)
                     logger.info("Successfully added data field using AddDataField method")
                 except Exception as e2:
                     logger.error(f"Failed to add field using alternative method: {str(e2)}")
@@ -2078,8 +2205,8 @@ def modify_obligation_analysis_sheet(wb, password: str, component: str) -> Tuple
         
         # Find the "TAS" cell in column A
         tas_cell = target_sheet.Cells.Find("TAS", After=target_sheet.Cells(1, 1), 
-                                          LookIn=win32com.client.constants.xlValues, 
-                                          LookAt=win32com.client.constants.xlWhole)
+                                          LookIn=-4163,  # xlValues
+                                          LookAt=1)       # xlWhole
         if not tas_cell:
             raise ValueError("TAS cell not found in column A")
         
@@ -2088,7 +2215,10 @@ def modify_obligation_analysis_sheet(wb, password: str, component: str) -> Tuple
         header_row = tas_cell.Row
         
         # Find the last column
-        last_column = target_sheet.Cells(header_row, target_sheet.Columns.Count).End(win32com.client.constants.xlToLeft).Column
+        # Get constants with fallback
+        xl_to_left = -4159 if not WINDOWS_COM_AVAILABLE else getattr(win32com.client.constants, 'xlToLeft', -4159)
+        
+        last_column = target_sheet.Cells(header_row, target_sheet.Columns.Count).End(xl_to_left).Column
         logger.info(f"Last populated column in header row: {get_column_letter(last_column)}")
         
         # Log all header row values for debugging
@@ -2145,9 +2275,9 @@ def modify_obligation_analysis_sheet(wb, password: str, component: str) -> Tuple
                 cell.Font.Bold = True
                 cell.Font.Name = "Calibri"
                 cell.Font.Size = 11
-                cell.HorizontalAlignment = win32com.client.constants.xlCenter
-                cell.VerticalAlignment = win32com.client.constants.xlCenter
-                cell.Borders.Weight = win32com.client.constants.xlThick
+                cell.HorizontalAlignment = -4108  # xlCenter
+                cell.VerticalAlignment = -4108     # xlCenter
+                cell.Borders.Weight = 4            # xlThick
                 cell.WrapText = True
 
                 # Set specific column widths for the first 4 new columns
@@ -2163,7 +2293,10 @@ def modify_obligation_analysis_sheet(wb, password: str, component: str) -> Tuple
                 target_sheet.Columns(col).ColumnWidth = 10  # Smaller width for blank headers
 
         # Find the last row
-        last_row = target_sheet.Cells(target_sheet.Rows.Count, 1).End(win32com.client.constants.xlUp).Row
+        # Get constants with fallback
+        xl_up = -4162 if not WINDOWS_COM_AVAILABLE else getattr(win32com.client.constants, 'xlUp', -4162)
+        
+        last_row = target_sheet.Cells(target_sheet.Rows.Count, 1).End(xl_up).Row
         logger.info(f"Last populated row: {last_row}")
 
         # Apply formatting to data rows for the first 4 new columns
@@ -2326,7 +2459,7 @@ def modify_obligation_analysis_sheet(wb, password: str, component: str) -> Tuple
             cell.Font.Color = 255  # Red
             cell.Font.Bold = True
             cell.Font.Name = "Calibri"
-            cell.HorizontalAlignment = win32com.client.constants.xlLeft
+            cell.HorizontalAlignment = -4131  # xlLeft
 
         # Add second "Sum of UDO Balance" column formula
         logger.info("Adding second Sum of UDO Balance column formula")
@@ -2463,8 +2596,8 @@ def compare_table(cert_sheet, obl_sheet, table_name: str, last_column: int, head
 
         # Find the instance of table_name in Certification sheet
         first_instance = cert_sheet.Cells.Find(table_name, 
-                                              LookIn=win32com.client.constants.xlValues, 
-                                              LookAt=win32com.client.constants.xlWhole)
+                                              LookIn=-4163,  # xlValues
+                                              LookAt=1)       # xlWhole
         if not first_instance:
             raise ValueError(f"'{table_name}' not found in Certification sheet")
 
@@ -2479,7 +2612,7 @@ def compare_table(cert_sheet, obl_sheet, table_name: str, last_column: int, head
         logger.info(f"'{table_name}' found in Certification sheet at {table_cell.Address}")
 
         # Find last populated column in the same row
-        last_col = cert_sheet.Cells(table_cell.Row, cert_sheet.Columns.Count).End(win32com.client.constants.xlToLeft).Column
+        last_col = cert_sheet.Cells(table_cell.Row, cert_sheet.Columns.Count).End(-4159).Column  # xlToLeft
         last_col_cell = cert_sheet.Cells(table_cell.Row, last_col)
         logger.info(f"Last populated column in Certification sheet at {last_col_cell.Address}")
 
@@ -2526,7 +2659,7 @@ def compare_table(cert_sheet, obl_sheet, table_name: str, last_column: int, head
                 cert_tickmark_cell.Font.Name = "Wingdings"
                 cert_tickmark_cell.Font.Color = 0  # Black
                 cert_tickmark_cell.Font.Size = 10
-                cert_tickmark_cell.HorizontalAlignment = win32com.client.constants.xlLeft
+                cert_tickmark_cell.HorizontalAlignment = -4131  # xlLeft
                 cert_tickmark_cell.Value = "h"
                 logger.info(f"Added 'h' tickmark to Certification sheet at {cert_tickmark_cell.Address}")
 
@@ -2535,7 +2668,7 @@ def compare_table(cert_sheet, obl_sheet, table_name: str, last_column: int, head
                 obl_tickmark_cell.Font.Name = "Wingdings"
                 obl_tickmark_cell.Font.Color = 0  # Black
                 obl_tickmark_cell.Font.Size = 10
-                obl_tickmark_cell.HorizontalAlignment = win32com.client.constants.xlLeft
+                obl_tickmark_cell.HorizontalAlignment = -4131  # xlLeft
                 obl_tickmark_cell.Value = "m"
                 logger.info(f"Added 'm' tickmark to Obligation Analysis sheet at {obl_tickmark_cell.Address}")
             else:
@@ -2596,7 +2729,7 @@ def compare_table(cert_sheet, obl_sheet, table_name: str, last_column: int, head
                 cert_tickmark_cell.Font.Name = "Wingdings"
                 cert_tickmark_cell.Font.Color = 0  # Black
                 cert_tickmark_cell.Font.Size = 10
-                cert_tickmark_cell.HorizontalAlignment = win32com.client.constants.xlLeft
+                cert_tickmark_cell.HorizontalAlignment = -4131  # xlLeft
                 cert_tickmark_cell.Value = "h"
                 logger.info(f"Added 'h' tickmark to Certification sheet at {cert_tickmark_cell.Address}")
 
@@ -2605,7 +2738,7 @@ def compare_table(cert_sheet, obl_sheet, table_name: str, last_column: int, head
                 obl_tickmark_cell.Font.Name = "Wingdings"
                 obl_tickmark_cell.Font.Color = 0  # Black
                 obl_tickmark_cell.Font.Size = 10
-                obl_tickmark_cell.HorizontalAlignment = win32com.client.constants.xlLeft
+                obl_tickmark_cell.HorizontalAlignment = -4131  # xlLeft
                 obl_tickmark_cell.Value = "m"
                 logger.info(f"Added 'h' tickmark to Obligation Analysis sheet at {obl_tickmark_cell.Address}")
             else:
@@ -2616,7 +2749,7 @@ def compare_table(cert_sheet, obl_sheet, table_name: str, last_column: int, head
                 cert_x_cell.Font.Color = 0  # Black
                 cert_x_cell.Font.Size = 10
                 cert_x_cell.Font.Bold = True
-                cert_x_cell.HorizontalAlignment = win32com.client.constants.xlLeft
+                cert_x_cell.HorizontalAlignment = -4131  # xlLeft
                 cert_x_cell.Value = "X"
                 logger.info(f"Added 'X' to Certification sheet at {cert_x_cell.Address}")
 
@@ -2626,7 +2759,7 @@ def compare_table(cert_sheet, obl_sheet, table_name: str, last_column: int, head
                 obl_x_cell.Font.Color = 0  # Black
                 obl_x_cell.Font.Size = 10
                 obl_x_cell.Font.Bold = True
-                obl_x_cell.HorizontalAlignment = win32com.client.constants.xlLeft
+                obl_x_cell.HorizontalAlignment = -4131  # xlLeft
                 obl_x_cell.Value = "X"
                 logger.info(f"Added 'X' to Obligation Analysis sheet at {obl_x_cell.Address}")
 
