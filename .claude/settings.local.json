@@ -8,5 +8,6 @@
       "Bash(find:*)"
     ],
     "deny": []
-  }
+  },
+  "enableAllProjectMcpServers": false
 }

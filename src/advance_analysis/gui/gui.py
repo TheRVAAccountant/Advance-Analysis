@@ -1211,14 +1211,13 @@ class InputGUI:
                     output_folder=str(temp_output_folder)
                 )
                 
-                # Use the CY dataframe for the basic output (backward compatibility)
-                processed_df = cy_df
+                # Use the merged dataframe (DO Tab 4 Review data) for the output
+                processed_df = merged_df
                 
-                # Store the path to the merged dataframe for DO Tab 4 Review
-                self.do_tab_4_review_path = str(temp_output_folder / "DO_Tab_4_Review_Data.xlsx")
+                # We no longer need the temporary DO_Tab_4_Review_Data.xlsx file
+                self.do_tab_4_review_path = None
                 
                 logger.info("Complete data processing successful")
-                logger.info(f"DO Tab 4 Review data saved to: {self.do_tab_4_review_path}")
                 
             except Exception as e:
                 logger.error(f"Error in complete data processing: {str(e)}", exc_info=True)
@@ -1273,7 +1272,7 @@ class InputGUI:
             # Save the processed data to the processed output file
             try:
                 logger.info(f"Saving processed data to: {processed_output_file_path}")
-                processed_df.to_excel(processed_output_file_path, index=False, engine='openpyxl', sheet_name="Advance Analysis Review")
+                processed_df.to_excel(processed_output_file_path, index=False, engine='openpyxl', sheet_name="DO Tab 4 Review")
                 created_files.append(processed_output_file_path)
                 logger.info("Processed data saved successfully")
             except Exception as e:

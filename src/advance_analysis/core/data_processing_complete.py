@@ -121,10 +121,8 @@ def process_complete_advance_analysis(
     logger.info(f"CY processing complete. Shape: {cy_df.shape}")
     logger.info(f"CY columns: {list(cy_df.columns)}")
     
-    # Save CY data
-    cy_output_path = os.path.join(output_folder, "CY_Advance_Analysis.xlsx")
-    cy_df.to_excel(cy_output_path, index=False)
-    logger.info(f"CY data saved to: {cy_output_path}")
+    # CY data processed - no longer saving to Excel file
+    logger.info("CY data processed internally - Excel export skipped")
     
     # Step 2: Load and process prior year data
     logger.info("=" * 80)
@@ -161,10 +159,8 @@ def process_complete_advance_analysis(
     logger.info(f"PY processing complete. Shape: {py_df.shape}")
     logger.info(f"PY columns: {list(py_df.columns)}")
     
-    # Save PY data
-    py_output_path = os.path.join(output_folder, "PY_Advance_Analysis.xlsx")
-    py_df.to_excel(py_output_path, index=False)
-    logger.info(f"PY data saved to: {py_output_path}")
+    # PY data processed - no longer saving to Excel file
+    logger.info("PY data processed internally - Excel export skipped")
     
     # Step 3: Merge and apply DO advance analysis validations
     logger.info("=" * 80)
@@ -220,10 +216,11 @@ def process_complete_advance_analysis(
         valid2_stats = merged_df['Valid Status 2'].value_counts()
         logger.info(f"Valid Status 2:\n{valid2_stats}")
     
-    # Save merged data with all validations
-    merged_output_path = os.path.join(output_folder, "DO_Tab_4_Review_Data.xlsx")
+    # No longer saving the merged data to a temporary file
+    # The merged data will be saved directly to the Review file in the GUI
+    logger.info("Merged data processing complete - will be saved to Review file")
     
-    # Format date columns before saving
+    # Format date columns in the merged dataframe
     date_columns = [
         'Date of Advance', 'Last Activity Date', 'Anticipated Liquidation Date',
         'Period of Performance End Date', 'Date of Advance_comp', 
@@ -234,73 +231,6 @@ def process_complete_advance_analysis(
     for col in date_columns:
         if col in merged_df.columns:
             merged_df[col] = pd.to_datetime(merged_df[col], errors='coerce')
-    
-    # Save with date formatting - ensure proper file closure for COM access
-    try:
-        # Use openpyxl directly for better control over file saving
-        from openpyxl import Workbook
-        from openpyxl.utils.dataframe import dataframe_to_rows
-        from openpyxl.styles import NamedStyle
-        
-        # Create a new workbook
-        wb = Workbook()
-        ws = wb.active
-        ws.title = 'DO Tab 4 Review'
-        
-        # Write dataframe to worksheet
-        for r in dataframe_to_rows(merged_df, index=False, header=True):
-            ws.append(r)
-        
-        # Apply date formatting
-        date_style = NamedStyle(name='date_style')
-        date_style.number_format = '*m/dd/yyyy'
-        
-        # Find and format date columns
-        headers = [cell.value for cell in ws[1]]
-        for col_idx, col_name in enumerate(headers, 1):
-            if col_name in date_columns:
-                for row in range(2, ws.max_row + 1):
-                    cell = ws.cell(row=row, column=col_idx)
-                    if cell.value and isinstance(cell.value, datetime):
-                        cell.style = date_style
-        
-        # Save the workbook
-        wb.save(merged_output_path)
-        wb.close()
-        
-        logger.info(f"Merged data with validations saved to: {merged_output_path}")
-        
-        # Ensure file is fully written to disk
-        import time
-        time.sleep(0.2)  # Small delay for file system
-        
-        # Verify file exists and is accessible
-        if not os.path.exists(merged_output_path):
-            raise FileNotFoundError(f"Output file was not created: {merged_output_path}")
-            
-        file_size = os.path.getsize(merged_output_path)
-        logger.info(f"Output file size: {file_size} bytes")
-        
-        # Verify file is not locked by trying to open it
-        max_attempts = 5
-        for attempt in range(max_attempts):
-            try:
-                with open(merged_output_path, 'rb') as f:
-                    # Read first few bytes to ensure it's accessible
-                    f.read(100)
-                logger.info("Verified output file is accessible and not locked")
-                break
-            except Exception as e:
-                if attempt < max_attempts - 1:
-                    logger.warning(f"Attempt {attempt + 1}/{max_attempts} - File may be locked: {e}. Retrying...")
-                    time.sleep(0.5)
-                else:
-                    logger.error(f"Output file appears to be locked after {max_attempts} attempts: {e}")
-                    raise
-            
-    except Exception as e:
-        logger.error(f"Error saving merged data: {e}")
-        raise
     
     return cy_df, py_df, merged_df
 
